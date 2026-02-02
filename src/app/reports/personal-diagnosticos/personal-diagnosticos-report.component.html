@@ -1,0 +1,257 @@
+<section class="space-y-8">
+  <header class="space-y-2">
+    <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Inteligencia operativa</p>
+    <h1 class="text-3xl font-semibold text-slate-900">Personal por diagnóstico</h1>
+    <p class="text-sm text-slate-500 max-w-3xl">
+      Identifica las fichas psicológicas emitidas por diagnóstico, grado y unidad militar para personal militar y dependientes activos.
+    </p>
+  </header>
+
+  @if (error()) {
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <span>{{ error() }}</span>
+      </div>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="buscar()" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha desde</span>
+        <input type="date" formControlName="fechaDesde" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" />
+      </label>
+      
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha hasta</span>
+        <input type="date" formControlName="fechaHasta" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" />
+      </label>
+      
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diagnóstico CIE-10</span>
+        <app-cie10-lookup
+          formControlName="diagnosticoId"
+          [helperText]="'Escribe al menos 3 caracteres para buscar en el catálogo'"
+          (selectionChange)="onDiagnosticoSelectionChange($event)"
+          placeholder="Buscar diagnóstico..."
+        />
+        <p class="text-xs text-slate-400 mt-1">Escribe al menos 3 caracteres para buscar en el catálogo</p>
+      </label>
+      
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cédula</span>
+        <input type="text" maxlength="20" formControlName="cedula" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
+               placeholder="Ej. 0912345678" />
+      </label>
+      
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Grado</span>
+        <input type="text" maxlength="60" formControlName="grado" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
+               placeholder="Ej. TCNL." />
+      </label>
+      
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Unidad militar</span>
+        <input type="text" maxlength="120" formControlName="unidadMilitar" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
+               placeholder="Ej. Hospital Militar Quito" />
+      </label>
+    </div>
+
+    <div class="flex flex-wrap gap-3 pt-2">
+                  <button type="submit" [disabled]="loading()" 
+                    class="rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white transition-all 
+                     hover:bg-slate-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
+        @if (loading()) {
+          <span class="flex items-center gap-2">
+            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Consultando...
+          </span>
+        } @else {
+          <span class="flex items-center gap-2">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Aplicar filtros
+          </span>
+        }
+      </button>
+                  <button type="button" (click)="limpiar()" [disabled]="loading()" 
+                    class="rounded-lg border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 transition-all 
+                     hover:bg-slate-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
+        <span class="flex items-center gap-2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Limpiar
+        </span>
+      </button>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <div class="space-y-3">
+      @for (_ of [0, 1, 2]; track $index) {
+        <div class="h-32 animate-pulse rounded-2xl bg-slate-100"></div>
+      }
+    </div>
+  } @else {
+    <section class="space-y-6">
+      @if (busquedaEjecutada() && sinResultados()) {
+        <div class="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
+          <div class="mx-auto max-w-md">
+            <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="mt-4 text-sm font-medium text-slate-900">No se encontraron fichas con los criterios seleccionados</p>
+            <p class="mt-1 text-xs text-slate-500">Intenta ajustando los filtros de búsqueda</p>
+          </div>
+        </div>
+      } @else {
+        @if (filtrosResumen().length) {
+          <div class="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+            <span class="font-semibold text-slate-700">Filtros aplicados:</span>
+            @for (filtro of filtrosResumen(); track filtro.etiqueta) {
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
+                <span class="font-semibold text-slate-700">{{ filtro.etiqueta }}:</span> {{ filtro.valor }}
+                <button type="button" (click)="removerFiltro(filtro)" 
+                        class="ml-1 text-slate-400 hover:text-slate-600">
+                  <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+            }
+          </div>
+        }
+
+        @if (resultados().length > 0) {
+          <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[1000px] divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Evaluación
+                    </th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Fecha
+                    </th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Personal
+                    </th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Unidad
+                    </th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Diagnóstico
+                    </th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Psicólogo
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  @for (fila of resultados(); track trackFicha(fila)) {
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                      <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-slate-900">{{ fila.numeroEvaluacion || '—' }}</p>
+                        @if (fila.estadoFicha) {
+                          <span [class]="getBadgeClass(fila.estadoFicha)">
+                            {{ fila.estadoFicha }}
+                          </span>
+                        }
+                      </td>
+                      <td class="whitespace-nowrap px-6 py-4">
+                        <span class="text-sm text-slate-600">{{ formatearFecha(fila.fechaEvaluacion) }}</span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-slate-900">{{ nombrePersonal(fila) }}</p>
+                        <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                          @if (fila.personalGrado) {
+                            <span class="rounded bg-slate-100 px-1.5 py-0.5 uppercase tracking-wide">
+                              {{ fila.personalGrado }}
+                            </span>
+                          }
+                          @if (fila.personalCedula) {
+                            <span>{{ fila.personalCedula }}</span>
+                          }
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        @if (fila.personalUnidadMilitar) {
+                          <span class="text-sm text-slate-600">{{ fila.personalUnidadMilitar }}</span>
+                        } @else {
+                          <span class="text-sm text-slate-400">—</span>
+                        }
+                      </td>
+                      <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-slate-900">{{ diagnosticoPrincipal(fila) }}</p>
+                        @if (fila.diagnosticoDescripcion) {
+                          <p class="mt-1 text-xs text-slate-500">{{ fila.diagnosticoDescripcion }}</p>
+                        }
+                      </td>
+                      <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-slate-900">{{ psicologoPrincipal(fila) }}</p>
+                        @if (fila.psicologoUnidadMilitar) {
+                          <p class="mt-1 text-xs text-slate-500">{{ fila.psicologoUnidadMilitar }}</p>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="border-t border-slate-200 px-6 py-3.5">
+              <div class="flex items-center justify-between">
+                <p class="text-sm text-slate-600">
+                  Mostrando <span class="font-medium">{{ resultados().length }}</span> fichas
+                  @if (filtrosResumen().length) {
+                    <span class="ml-2 text-slate-400">para los filtros aplicados</span>
+                  }
+                </p>
+                <div class="flex items-center gap-3">
+                  <button type="button" (click)="exportarPDF()" 
+                          class="rounded-lg border border-red-300 bg-white px-3.5 py-2 text-sm font-medium text-red-700 
+                                 hover:bg-red-50 transition-colors">
+                    <span class="flex items-center gap-2">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                      </svg>
+                      Exportar PDF
+                    </span>
+                  </button>
+                  <button type="button" (click)="exportarExcel()" 
+                          class="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 
+                                 hover:bg-slate-50 transition-colors">
+                    <span class="flex items-center gap-2">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      Exportar Excel
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </section>
+  }
+</section>

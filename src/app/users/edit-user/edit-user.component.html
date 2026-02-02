@@ -1,0 +1,137 @@
+<div class="register-wrapper">
+  <div class="register-shell">
+    <app-users-tabs></app-users-tabs>
+
+    <section class="register-card">
+      <header class="register-card__header">
+        <div class="register-card__header-text">
+          <p class="register-card__eyebrow">Gestión de credenciales</p>
+          <h1 class="register-card__title">Editar usuario y perfil psicológico</h1>
+          <p class="register-card__subtitle">
+            Actualiza la información de acceso y, cuando corresponda, los datos profesionales del psicólogo para mantener un expediente unificado en todos los módulos.
+          </p>
+        </div>
+        <div class="register-card__summary">
+          <p class="register-card__summary-title">Recordatorios rápidos</p>
+          <ul>
+            <li>El usuario define las credenciales de acceso.</li>
+            <li>El perfil del psicólogo alimenta fichas, reportes y agendas.</li>
+            <li>La cédula, nombres y apellidos son obligatorios para roles clínicos.</li>
+          </ul>
+        </div>
+      </header>
+
+      <div class="register-card__body">
+        @if (error()) {
+          <div class="register-alert register-alert--error" role="alert">{{ error() }}</div>
+        }
+        @if (mensajeExito()) {
+          <div class="register-alert register-alert--success">{{ mensajeExito() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="register-form">
+          <section class="register-section">
+            <header class="register-section__header">
+              <h2>Credenciales de acceso</h2>
+              <p>Actualiza el usuario, correo institucional y el rol. El rol determina los permisos dentro del sistema.</p>
+            </header>
+            <div class="field-grid">
+              <label class="field">
+                <span>Usuario<span class="required-indicator">*</span></span>
+                <input formControlName="username" type="text" autocomplete="username" placeholder="ej. mfgarcia" />
+                @if (campoInvalido('username')) {
+                  <span class="field__error">El usuario debe contener al menos 4 caracteres.</span>
+                }
+              </label>
+              <label class="field">
+                <span>Correo institucional<span class="required-indicator">*</span></span>
+                <input formControlName="email" type="email" autocomplete="email" placeholder="nombre@dominio.mil.ec" />
+                @if (campoInvalido('email')) {
+                  <span class="field__error">Ingresa un correo válido.</span>
+                }
+              </label>
+              <label class="field">
+                <span>Rol<span class="required-indicator">*</span></span>
+                <select formControlName="roleId">
+                  <option [ngValue]="null" disabled>Selecciona un rol</option>
+                  @for (rol of roles(); track rol.id) {
+                    <option [ngValue]="rol.id">{{ rol.name }}</option>
+                  }
+                </select>
+                @if (campoInvalido('roleId')) {
+                  <span class="field__error">Selecciona el rol que corresponda al usuario.</span>
+                }
+              </label>
+              <label class="field field--switch">
+                <input formControlName="activo" type="checkbox" />
+                <span>Cuenta activa</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="register-section">
+            <header class="register-section__header register-section__header--split">
+              <div>
+                <h2>Perfil profesional del psicólogo</h2>
+                <p>Estos datos sincronizan reportes, fichas clínicas y agendas de seguimiento.</p>
+              </div>
+              @if (!rolEsPsicologo()) {
+                <p class="register-hint">Selecciona el rol de psicólogo para activar los campos obligatorios.</p>
+              }
+            </header>
+            <div class="field-grid field-grid--profile">
+              <label class="field">
+                <span>Cédula @if (rolEsPsicologo()) { <span class="required-indicator">*</span> }</span>
+                <input formControlName="cedula" type="text" inputmode="numeric" placeholder="1712345678" />
+                @if (campoInvalido('cedula')) {
+                  <span class="field__error">La cédula debe contener entre 6 y 15 dígitos.</span>
+                }
+              </label>
+              <label class="field">
+                <span>Nombres @if (rolEsPsicologo()) { <span class="required-indicator">*</span> }</span>
+                <input formControlName="nombres" type="text" placeholder="Maria Fernanda" />
+                @if (campoInvalido('nombres') && rolEsPsicologo()) {
+                  <span class="field__error">Ingresa los nombres del profesional.</span>
+                }
+              </label>
+              <label class="field">
+                <span>Apellidos @if (rolEsPsicologo()) { <span class="required-indicator">*</span> }</span>
+                <input formControlName="apellidos" type="text" placeholder="Garcia Lopez" />
+                @if (campoInvalido('apellidos') && rolEsPsicologo()) {
+                  <span class="field__error">Ingresa los apellidos completos.</span>
+                }
+              </label>
+              <label class="field">
+                <span>Teléfono</span>
+                <input formControlName="telefono" type="text" inputmode="tel" placeholder="023456789" />
+              </label>
+              <label class="field">
+                <span>Celular</span>
+                <input formControlName="celular" type="text" inputmode="tel" placeholder="0991234567" />
+              </label>
+              <label class="field">
+                <span>Grado</span>
+                <input formControlName="grado" type="text" placeholder="TCnl." />
+              </label>
+              <label class="field">
+                <span>Especialidad</span>
+                <input formControlName="especialidad" type="text" placeholder="Psicología Clínica" />
+              </label>
+              <label class="field field--wide">
+                <span>Unidad militar</span>
+                <input formControlName="unidadMilitar" type="text" placeholder="Hospital Militar Quito" />
+              </label>
+            </div>
+          </section>
+
+          <footer class="register-footer">
+            <button type="button" class="register-btn register-btn--ghost" [disabled]="loading()" (click)="limpiar()">Restablecer</button>
+            <button type="submit" class="register-btn register-btn--primary" [disabled]="loading()">
+              {{ loading() ? 'Guardando...' : 'Actualizar usuario' }}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>

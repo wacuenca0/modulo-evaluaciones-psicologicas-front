@@ -1,0 +1,427 @@
+<section class="personal-search-wrapper">
+  <div class="personal-search-main-grid">
+    <div>
+      <header class="space-y-3 mb-8">
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg bg-military-900/10 p-2">
+            <svg class="w-6 h-6 text-military-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-military-700">GESTIÓN CLÍNICA MILITAR</p>
+            <h1 class="text-3xl font-bold text-military-900">Búsqueda de Personal</h1>
+          </div>
+        </div>
+        <p class="text-sm text-slate-600 max-w-2xl pl-11">
+          Sistema de localización de personal militar para evaluación psicológica. Busca por cédula o apellidos para acceder al historial clínico.
+        </p>
+      </header>
+
+      @if (error()) {
+        <div class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 mb-6 flex items-start gap-3">
+          <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="font-medium text-red-800">Error en la búsqueda</p>
+            <p class="text-red-700">{{ error() }}</p>
+          </div>
+        </div>
+      }
+
+      @if (mensajeExito()) {
+        <div class="flex items-start gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 mb-6">
+          <svg class="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="font-medium text-emerald-800">Operación exitosa</p>
+            <p class="text-emerald-700">{{ mensajeExito() }}</p>
+          </div>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="buscar()" class="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-md space-y-6">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-military-800 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+              </svg>
+              CÉDULA MILITAR
+            </label>
+            <input formControlName="cedula" type="text" maxlength="15" autocomplete="off"
+              class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-military-600 focus:ring-2 focus:ring-military-500/30 focus:outline-none transition"
+              placeholder="Ej: 1234567890" />
+            <p class="text-xs text-slate-500">Identificación militar única</p>
+          </div>
+          
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-military-800 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              APELLIDOS
+            </label>
+            <input formControlName="apellidos" type="text" autocomplete="off"
+              class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-military-600 focus:ring-2 focus:ring-military-500/30 focus:outline-none transition"
+              placeholder="Ej: Pérez García" />
+            <p class="text-xs text-slate-500">Coincidencias parciales aceptadas</p>
+          </div>
+        </div>
+        
+        <div class="rounded-lg bg-blue-50 border border-blue-200 p-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-blue-800">Instrucciones de búsqueda</p>
+              <p class="text-xs text-blue-700">Ingresa la cédula para una búsqueda exacta o apellidos para obtener coincidencias parciales. Al menos uno de los campos es obligatorio.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-wrap gap-4 pt-2">
+          <button type="submit" [disabled]="loading()" 
+            class="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-military-700 to-military-800 px-6 py-3 text-sm font-semibold text-white shadow-md hover:from-military-800 hover:to-military-900 transition-all disabled:opacity-60 disabled:cursor-not-allowed min-w-[140px]">
+            @if (loading()) {
+              <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Buscando...</span>
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <span>Buscar Personal</span>
+            }
+          </button>
+          
+          <button type="button" (click)="limpiar()" [disabled]="loading()"
+            class="flex items-center justify-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition disabled:opacity-60 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span>Limpiar</span>
+          </button>
+          
+          <a routerLink="/psicologo/personal/nuevo"
+            class="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-3 text-sm font-semibold text-white shadow-md hover:from-emerald-700 hover:to-emerald-800 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            <span>Nuevo Registro</span>
+          </a>
+        </div>
+      </form>
+    </div>
+    
+    <div class="personal-search-results">
+      <section class="space-y-6">
+        <header class="flex flex-wrap items-center justify-between gap-4 mb-2 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white border border-slate-200">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-military-900/10 p-2">
+              <svg class="w-5 h-5 text-military-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-military-900">Resultados de Búsqueda</h2>
+              <p class="text-xs text-slate-600">Personal militar localizado</p>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-3">
+            @if (state().mode === 'APELLIDOS' && resultados().length) {
+              <div class="flex items-center gap-2 text-sm">
+                <button type="button" (click)="paginaAnterior()" [disabled]="state().page === 0 || loading()"
+                  class="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-400 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                  </svg>
+                  <span>Anterior</span>
+                </button>
+                <span class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 font-medium">
+                  Página <span class="text-military-800">{{ state().page + 1 }}</span> de {{ state().totalPages }}
+                </span>
+                <button type="button" (click)="siguientePagina()" [disabled]="state().page + 1 >= state().totalPages || loading()"
+                  class="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-400 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <span>Siguiente</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        </header>
+
+        @if (loading()) {
+          <div class="space-y-4">
+            @for (_ of [0,1,2]; track $index) {
+              <div class="h-32 animate-pulse rounded-xl bg-gradient-to-r from-slate-200 to-slate-300"></div>
+            }
+          </div>
+        } @else if (sinResultados()) {
+          <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-gradient-to-b from-slate-50 to-white p-10 text-center">
+            <div class="mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">No se encontraron registros</h3>
+            <p class="text-sm text-slate-600 mb-6 max-w-md mx-auto">No hay personal militar que coincida con los criterios de búsqueda proporcionados.</p>
+            <div class="flex flex-wrap gap-3 justify-center">
+              <a routerLink="/psicologo/personal/nuevo"
+                class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-military-700 to-military-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:from-military-800 hover:to-military-900 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Registrar Nuevo Personal
+              </a>
+              <button type="button" (click)="limpiar()"
+                class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Intentar Nuevamente
+              </button>
+            </div>
+          </div>
+        } @else if (!resultados().length) {
+          <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-gradient-to-b from-slate-50 to-white p-10 text-center">
+            <div class="mx-auto w-16 h-16 rounded-full bg-military-50 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-military-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">Listo para buscar</h3>
+            <p class="text-sm text-slate-600">Ingresa criterios de búsqueda para localizar al personal militar.</p>
+          </div>
+        } @else {
+          <div class="grid gap-4">
+            @for (persona of resultados(); track persona.id ?? persona.cedula) {
+              @let resumen = resumenPara(persona);
+              @let personaId = idPara(persona);
+              <div class="group rounded-2xl border-2 border-slate-300 bg-gradient-to-b from-white to-slate-50 p-6 shadow-sm transition-all hover:shadow-md hover:border-military-500"
+                [class.border-military-600]="esSeleccionDestacada(persona)"
+                [class.bg-gradient-to-b]="esSeleccionDestacada(persona)"
+                [class.from-military-50]="esSeleccionDestacada(persona)"
+                [class.to-military-100/50]="esSeleccionDestacada(persona)">
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                  <div class="flex items-start gap-4">
+                    <div class="rounded-xl p-3"
+                      [class]="persona.esMilitar ? 'bg-military-100 text-military-800' : 'bg-slate-100 text-slate-800'">
+                      @if (persona.esMilitar) {
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                      } @else {
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                      }
+                    </div>
+                    <div class="space-y-1.5">
+                      <div class="flex items-center flex-wrap gap-2">
+                        <p class="text-lg font-bold text-military-900">{{ nombrePara(persona) }}</p>
+                        <div class="flex items-center gap-2">
+                          <span class="text-sm font-medium text-slate-600">Cédula: {{ persona.cedula || 'No registrada' }}</span>
+                          <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">{{ tipoPersonaLabel(persona) }}</span>
+                        </div>
+                      </div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        @if (persona.esMilitar) {
+                          <span class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full bg-military-900 text-white">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                            </svg>
+                            {{ servicioEtiqueta(persona) }}
+                          </span>
+                        }
+                        @if (persona.activo === false) {
+                          <span class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full bg-red-100 text-red-800">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Inactivo
+                          </span>
+                        }
+                        @if (esSeleccionDestacada(persona)) {
+                          <span class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Registro Reciente
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" (click)="verDetalle(persona)"
+                      class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-military-700 to-military-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-military-800 hover:to-military-900 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      {{ modoAtenciones ? 'Ver Atención' : 'Ver Detalle' }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804l-1.122-1.121a3 3 0 01-1.07-2.123V6.416c0-1.156.898-2.094 2.004-2.094h.001c.038 0 .077.002.115.005a2 2 0 011.726-1.726c.003-.038.005-.077.005-.115 0-1.106.938-2.004 2.094-2.004h7.544a3 3 0 012.123 1.07l1.122 1.122"></path>
+                      </svg>
+                      GRADO
+                    </p>
+                    <p class="text-sm font-medium text-slate-800">{{ mostrarDato(persona.grado) || 'No especificado' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                      </svg>
+                      UNIDAD
+                    </p>
+                    <p class="text-sm font-medium text-slate-800">{{ mostrarDato(persona.unidad) || 'No asignada' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                      </svg>
+                      SITUACIÓN
+                    </p>
+                    <p class="text-sm font-medium text-slate-800">{{ mostrarDato(persona.situacion) || 'No especificada' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                      </svg>
+                      ESPECIALIDAD
+                    </p>
+                    <p class="text-sm font-medium text-slate-800">{{ mostrarDato(persona.especialidad) || 'No especificada' }}</p>
+                  </div>
+                </div>
+
+                <section class="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-blue-50/50 p-5">
+                  <header class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-3">
+                      <div class="rounded-lg bg-blue-100 p-2">
+                        <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="text-sm font-bold text-blue-800">HISTORIAL CLÍNICO PSICOLÓGICO</p>
+                        <p class="text-xs text-blue-600">Evaluaciones y valoraciones</p>
+                      </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-3">
+                      <div class="px-3 py-1.5 bg-white border border-blue-200 rounded-lg">
+                        <p class="text-sm font-semibold text-blue-800">
+                          Total: <span class="text-blue-900">{{ resumen?.cargando ? '...' : resumen?.total ?? 0 }}</span>
+                        </p>
+                      </div>
+                      <button type="button" (click)="irAlHistorial(persona)"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-blue-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        [disabled]="personaId === null">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Ver Valoración
+                      </button>
+                    </div>
+                  </header>
+
+                  @if (personaId === null) {
+                    <div class="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                      <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.226 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div>
+                          <p class="text-sm font-medium text-amber-800">Identificador no disponible</p>
+                          <p class="text-xs text-amber-700">Este registro no cuenta con identificador para consultar su historial clínico.</p>
+                        </div>
+                      </div>
+                    </div>
+                  } @else if (!resumen || resumen.cargando) {
+                    <div class="flex items-center justify-center py-6">
+                      <div class="flex items-center gap-3">
+                        <svg class="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-sm text-blue-700 font-medium">Cargando historial clínico...</p>
+                      </div>
+                    </div>
+                  } @else if (!resumen.total) {
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                      <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <div>
+                          <p class="text-sm font-medium text-slate-700">Sin valoraciones registradas</p>
+                          <p class="text-xs text-slate-600">No existen evaluaciones psicológicas registradas para este personal militar.</p>
+                        </div>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="space-y-4">
+                      <div class="p-4 rounded-xl bg-white border border-blue-100">
+                        <p class="text-sm font-bold text-blue-900 mb-2">ÚLTIMA EVALUACIÓN PSICOLÓGICA</p>
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                          <div class="space-y-1">
+                            <p class="text-xs font-semibold text-blue-800">Fecha de evaluación:</p>
+                            <p class="text-sm font-bold text-blue-900">{{ fechaResumen(resumen.ultimaFecha) }}</p>
+                          </div>
+                          <div class="flex flex-wrap gap-3">
+                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-100 border border-emerald-200">
+                              <svg class="w-3 h-3 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                              </svg>
+                              <span class="text-xs font-bold text-emerald-800">{{ condicionLabel(resumen.ultimaCondicion) }}</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-100 border border-sky-200">
+                              <svg class="w-3 h-3 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                              </svg>
+                              <span class="text-xs font-bold text-sky-800">{{ estadoLabel(resumen.ultimoEstado) }}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between text-xs text-slate-600">
+                        <p class="font-medium">Historial completo disponible para consulta</p>
+                        <button type="button" (click)="irAlHistorial(persona)"
+                          class="text-blue-700 hover:text-blue-900 font-semibold flex items-center gap-1">
+                          <span>Acceder al historial</span>
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </section>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  </div>
+</section>
+

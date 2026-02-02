@@ -1,0 +1,1150 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 md:px-6">
+  <!-- Header principal -->
+  <div class="max-w-6xl mx-auto mb-10">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
+      <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-8 bg-indigo-600 rounded-full"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-indigo-600">Gestión Clínica</p>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Nueva Ficha Psicológica</h1>
+          
+          <!-- Información de la persona -->
+          @if (persona(); as personaData) {
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <p class="text-base text-slate-600">
+                  Evaluación para <span class="font-semibold text-slate-900">{{ personaDescripcion() }}</span>
+                </p>
+              </div>
+              
+              @if (numeroEvaluacion()) {
+                <div class="flex items-center gap-2">
+                  <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span class="text-sm font-medium text-slate-700">
+                    Ficha N°: <span class="font-bold text-indigo-700">{{ numeroEvaluacion() }}</span>
+                  </span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="flex items-center gap-2 text-amber-600">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span>Selecciona una persona desde el historial</span>
+            </div>
+          }
+          
+          @if (numeroEvaluacion() === null && !fichaCreada()) {
+            <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 mt-2">
+              <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span class="text-sm text-amber-700">El número de ficha se asignará después de guardar</span>
+            </div>
+          }
+        </div>
+        
+        <!-- Barra de progreso -->
+        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+          <p class="text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-1">Progreso Actual</p>
+          <div class="flex items-center gap-2">
+            <div class="w-32 bg-slate-200 rounded-full h-2">
+              <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" 
+                   [style.width.%]="getProgressPercentage()"></div>
+            </div>
+            <span class="text-sm font-bold text-slate-700">{{ getProgressPercentage() }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de navegación de pasos -->
+  <div class="max-w-6xl mx-auto mb-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-4">
+      <div class="flex flex-col md:flex-row gap-3 justify-between items-center">
+        <div class="flex-1 w-full overflow-x-auto">
+          <div class="flex gap-2 min-w-max">
+            @for (step of steps; track step.id; let index = $index) {
+              <button type="button" 
+                      (click)="goToStep(step.id)"
+                      [disabled]="step.id === 'generales' ? generalesGuardado() : !canAccessStep(step.id)"
+                      class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-w-[180px]"
+                      [class]="isStepActive(step.id) 
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg transform -translate-y-0.5' 
+                        : isStepCompleted(step.id)
+                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                        : 'bg-slate-50 border border-slate-200 text-slate-400'">
+                <div class="flex items-center justify-center w-8 h-8 rounded-full"
+                     [class]="isStepActive(step.id) 
+                       ? 'bg-white text-indigo-600' 
+                       : isStepCompleted(step.id)
+                       ? 'bg-emerald-500 text-white'
+                       : 'bg-slate-200 text-slate-500'">
+                  <span class="text-sm font-bold">{{ index + 1 }}</span>
+                </div>
+                <div class="text-left">
+                  <p class="text-xs font-semibold uppercase tracking-wide">Paso {{ index + 1 }}</p>
+                  <p class="text-sm font-medium">{{ step.label }}</p>
+                </div>
+                @if (isStepCompleted(step.id) && !isStepActive(step.id)) {
+                  <svg class="w-5 h-5 text-emerald-500 ml-auto" 
+                       fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                }
+              </button>
+            }
+          </div>
+        </div>
+        
+        <div class="flex gap-2 mt-4 md:mt-0">
+          @if (currentStep() === 'psicoanamnesis' || currentStep() === 'documentos') {
+            <button type="button"
+                    (click)="goToPreviousStep()"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-indigo-200 text-indigo-700 shadow-sm hover:shadow-md hover:border-indigo-400 transition">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Anterior
+            </button>
+          }
+          
+          @if (currentStep() !== 'documentos') {
+            <button type="button"
+                    (click)="goToNextStep()"
+                    [disabled]="!canGoToNextStep()"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              Siguiente
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensajes del sistema -->
+  @if (navigationMessage()) {
+    <div class="max-w-6xl mx-auto mb-6">
+      <div class="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 flex items-start gap-3">
+        <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-amber-800">{{ navigationMessage() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Contenido principal del formulario -->
+  <div class="max-w-6xl mx-auto">
+    
+    <!-- Paso: Datos Generales -->
+    @if (currentStep() === 'generales') {
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">Datos Generales de la Evaluación</h2>
+              <p class="text-indigo-100">Información básica de la ficha psicológica</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+          <!-- Mensajes de error -->
+          @if (generalesError()) {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm text-red-700">{{ generalesError() }}</p>
+            </div>
+          }
+
+          <!-- Mensajes de éxito -->
+          @if (generalesSuccess()) {
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-emerald-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <p class="text-sm text-emerald-700">{{ generalesSuccess() }}</p>
+            </div>
+          }
+
+          <form [formGroup]="generalesForm" (ngSubmit)="guardarDatosGenerales()" class="space-y-8">
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <!-- Fecha de evaluación -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Fecha de evaluación
+                  </span>
+                  <input type="date" formControlName="fechaEvaluacion"
+                    class="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" />
+                </label>
+                <p class="text-xs text-slate-500">Fecha de la primera entrevista o valoración</p>
+              </div>
+
+              <!-- Tipo de evaluación -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Tipo de evaluación *
+                  </span>
+                  <input type="text" formControlName="tipoEvaluacion"
+                    class="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition"
+                    placeholder="Escriba el tipo de evaluación" />
+                </label>
+                <p class="text-xs text-slate-500">Propósito principal de la evaluación</p>
+                @if (hasGeneralesError('tipoEvaluacion')) {
+                  <span class="block text-xs text-red-600 font-medium">Requerido</span>
+                }
+              </div>
+
+              <!-- Estado inicial -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Estado inicial
+                  </span>
+                  <select formControlName="estado" 
+                    class="mt-2 w-32 rounded border border-slate-300 bg-slate-50 px-2 py-1 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition">
+                    <option value="">Sin información</option>
+                    @for (estado of estadosCanonicos; track estado.value) {
+                      <option [value]="estado.value">{{ estado.label }}</option>
+                    }
+                  </select>
+                </label>
+                <p class="text-xs text-slate-500">Estado inicial: <span class="font-semibold">Abierta</span></p>
+              </div>
+            </div>
+
+            <!-- Footer de la sección -->
+            <div class="pt-6 border-t border-slate-200">
+              <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-700">Datos requeridos</p>
+                    <p class="text-xs text-slate-500">Todos los campos marcados con * son obligatorios</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                  <button type="submit"
+                    [disabled]="loadingGenerales() || !persona() || !personalId() || fichaCreada()"
+                    class="px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-lg hover:from-emerald-600 hover:to-teal-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (!loadingGenerales()) {
+                      <span>
+                        <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        Guardar y continuar
+                      </span>
+                    } @else {
+                      <span class="flex items-center gap-2">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                      </span>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              @if ((!persona() || !personalId()) && !fichaCreada()) {
+                <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p class="text-xs text-red-700 font-semibold flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    Debes seleccionar una persona desde el historial antes de registrar la ficha
+                  </p>
+                </div>
+              }
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Confirmación de ficha creada -->
+      @if (fichaCreada()) {
+        <section class="mt-6 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-6 shadow-lg">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div class="space-y-3 w-full">
+              <h3 class="text-lg font-bold text-emerald-900">¡Ficha generada exitosamente!</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white/50 rounded-lg p-3">
+                  <p class="text-xs font-semibold text-emerald-700 uppercase">Número asignado</p>
+                  <p class="text-xl font-bold text-slate-900">{{ fichaCreada()?.numeroEvaluacion ?? fichaCreada()?.id ?? numeroEvaluacion() ?? 'Pendiente' }}</p>
+                </div>
+                <div class="bg-white/50 rounded-lg p-3">
+                  <p class="text-xs font-semibold text-emerald-700 uppercase">Estado actual</p>
+                  <p class="text-xl font-bold text-slate-900">{{ fichaCreada()?.estado ?? estadoSeleccionadoLabel() }}</p>
+                </div>
+                <div class="bg-white/50 rounded-lg p-3">
+                  <p class="text-xs font-semibold text-emerald-700 uppercase">Tipo de evaluación</p>
+                  <p class="text-xl font-bold text-slate-900">{{ fichaCreada()?.tipoEvaluacion ?? tipoSeleccionadoLabel() }}</p>
+                </div>
+              </div>
+              <p class="text-sm text-emerald-800 font-medium mt-3">
+                Continúa con la observación clínica para completar la ficha.
+              </p>
+              <div class="pt-3">
+                <button type="button"
+                        (click)="goToStep('observacion')"
+                        class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-lg hover:shadow-xl hover:from-emerald-600 hover:to-teal-600 transition transform hover:-translate-y-0.5">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Continuar a Observación Clínica
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+    }
+
+    <!-- Paso: Observación Clínica -->
+    @if (currentStep() === 'observacion') {
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">Observación Clínica</h2>
+              <p class="text-blue-100">Registro detallado de la observación y motivo de consulta</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+          @if (observacionError()) {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm text-red-700">{{ observacionError() }}</p>
+            </div>
+          }
+
+          <form [formGroup]="observacionForm" (ngSubmit)="guardarObservacion()" class="space-y-8">
+            <!-- Sección 1: Observación Clínica -->
+            <div class="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-6 border border-slate-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Observación Clínica</h3>
+              </div>
+
+              <div class="grid gap-6">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Observación clínica detallada *
+                    <span class="text-xs font-normal text-slate-500">(Descripción completa de la observación)</span>
+                  </label>
+                  <textarea formControlName="observacionClinica" rows="6"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition"
+                    placeholder="Describa detalladamente la observación clínica..."></textarea>
+                  @if (hasObservacionError('observacionClinica')) {
+                    <span class="mt-1 block text-xs text-red-600 font-medium">Campo obligatorio</span>
+                  }
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Motivo de la consulta *
+                    <span class="text-xs font-normal text-slate-500">(Razón principal por la que acude el paciente)</span>
+                  </label>
+                  <textarea formControlName="motivoConsulta" rows="4"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition"
+                    placeholder="Describa el motivo principal de la consulta..."></textarea>
+                  @if (hasObservacionError('motivoConsulta')) {
+                    <span class="mt-1 block text-xs text-red-600 font-medium">Campo obligatorio</span>
+                  }
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Descripción de la enfermedad actual
+                    <span class="text-xs font-normal text-slate-500">(Historia de la enfermedad presente)</span>
+                  </label>
+                  <textarea formControlName="enfermedadActual" rows="4"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition"
+                    placeholder="Describa la enfermedad actual..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 2: Historia Pasada de Enfermedad -->
+            <div class="bg-gradient-to-br from-slate-50 to-cyan-50 rounded-xl p-6 border border-slate-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Historia Pasada de Enfermedad</h3>
+              </div>
+
+              <div class="space-y-6">
+                <!-- Descripción enfermedades previas -->
+                <div class="bg-white rounded-lg border border-slate-200 p-5" formGroupName="historiaPasadaEnfermedad">
+                  <label class="block text-sm font-semibold text-slate-700 mb-3">
+                    Descripción de enfermedades previas
+                    <span class="text-xs font-normal text-slate-500">(Enfermedades o condiciones médicas anteriores)</span>
+                  </label>
+                  <textarea formControlName="descripcion" rows="4"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition"
+                    placeholder="Describa las enfermedades previas del paciente..."></textarea>
+                </div>
+
+                <!-- Medicación actual -->
+                <div class="bg-white rounded-lg border border-slate-200 p-5" formGroupName="historiaPasadaEnfermedad">
+                  <div class="flex items-center justify-between mb-3">
+                    <label class="block text-sm font-semibold text-slate-700">
+                      ¿Toma medicación actualmente?
+                    </label>
+                    <select formControlName="tomaMedicacion"
+                      class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition">
+                      <option [ngValue]="null">Seleccionar</option>
+                      <option [ngValue]="false">No</option>
+                      <option [ngValue]="true">Sí</option>
+                    </select>
+                  </div>
+                  @if (mostrarMedicacionDetalle()) {
+                    <div class="mt-4 pt-4 border-t border-slate-200">
+                      <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                          Tipo de medicamento *
+                          <span class="text-xs font-normal text-slate-500">(Nombre y dosis)</span>
+                        </label>
+                        <input type="text" formControlName="tipoMedicacion"
+                          class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition"
+                          placeholder="Ej: Paracetamol 500mg cada 8 horas" />
+                        @if (hasObservacionError('historiaPasadaEnfermedad.tipoMedicacion')) {
+                          <span class="mt-1 block text-xs text-red-600 font-medium">Campo requerido</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Hospitalización/Rehabilitación -->
+                <div class="bg-white rounded-lg border border-slate-200 p-5" formGroupName="historiaPasadaEnfermedad">
+                  <div formGroupName="hospitalizacionRehabilitacion" class="space-y-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <label class="block text-sm font-semibold text-slate-700">
+                        ¿Requirió hospitalización/rehabilitación?
+                      </label>
+                      <select formControlName="requiere"
+                        class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition">
+                        <option [ngValue]="null">Seleccionar</option>
+                        <option [ngValue]="false">No</option>
+                        <option [ngValue]="true">Sí</option>
+                      </select>
+                    </div>
+                    
+                    @if (mostrarHospitalizacionDetalle()) {
+                      <div class="mt-4 pt-4 border-t border-slate-200">
+                        <div class="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                              Tipo de hospitalización *
+                            </label>
+                            <input type="text" formControlName="tipo"
+                              class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition"
+                              placeholder="Ej: Hospitalización psiquiátrica" />
+                            @if (hasObservacionError('historiaPasadaEnfermedad.hospitalizacionRehabilitacion.tipo')) {
+                              <span class="mt-1 block text-xs text-red-600 font-medium">Campo requerido</span>
+                            }
+                          </div>
+                          <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                              Duración *
+                            </label>
+                            <input type="text" formControlName="duracion"
+                              class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition"
+                              placeholder="Ej: 15 días" />
+                            @if (hasObservacionError('historiaPasadaEnfermedad.hospitalizacionRehabilitacion.duracion')) {
+                              <span class="mt-1 block text-xs text-red-600 font-medium">Campo requerido</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer de la sección -->
+            <div class="pt-6 border-t border-slate-200">
+              <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-700">Campos obligatorios</p>
+                    <p class="text-xs text-slate-500">Los campos marcados con * deben ser completados</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                  <button type="button" 
+                    (click)="limpiarObservacion()"
+                    class="px-6 py-3 rounded-lg border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Limpiar formulario
+                  </button>
+                  
+                  <button type="submit"
+                    [disabled]="observacionLoading()"
+                    class="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-cyan-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (!observacionLoading()) {
+                      <span>
+                        <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Guardar observación clínica
+                      </span>
+                    } @else {
+                      <span class="flex items-center gap-2">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                      </span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Confirmación de observación guardada -->
+      @if (observacionGuardado()) {
+        <section class="mt-6 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6 shadow-lg">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-blue-900">¡Observación clínica guardada!</h3>
+              <p class="text-blue-800 mt-2">
+                Continúa con la psicoanamnesis para completar la ficha psicológica.
+              </p>
+            </div>
+          </div>
+        </section>
+      }
+    }
+
+    <!-- Paso: Psicoanamnesis -->
+    @if (currentStep() === 'psicoanamnesis') {
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">Psicoanamnesis</h2>
+              <p class="text-purple-100">Historia psicológica y desarrollo del paciente</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+          @if (psicoanamnesisError()) {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm text-red-700">{{ psicoanamnesisError() }}</p>
+            </div>
+          }
+
+          @if (psicoanamnesisSuccess()) {
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-emerald-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <p class="text-sm text-emerald-700">{{ psicoanamnesisSuccess() }}</p>
+            </div>
+          }
+
+          <form [formGroup]="psicoanamnesisForm" (ngSubmit)="guardarPsicoanamnesis()" class="space-y-8">
+            <!-- Sección Prenatal -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Etapa Prenatal</h3>
+                <span class="ml-auto text-xs font-semibold px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
+                  Concepción y Embarazo
+                </span>
+              </div>
+
+              <div formGroupName="prenatal" class="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Condiciones biológicas de los padres
+                  </label>
+                  <input type="text" formControlName="condicionesBiologicasPadres"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none transition"
+                    placeholder="Ej: Edad, enfermedades, hábitos..." />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Condiciones psicológicas de los padres
+                  </label>
+                  <input type="text" formControlName="condicionesPsicologicasPadres"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none transition"
+                    placeholder="Ej: Estado emocional, estrés..." />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Observación de la concepción y embarazo
+                  </label>
+                  <input type="text" formControlName="observacionPrenatal"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none transition"
+                    placeholder="Observaciones relevantes del período prenatal..." />
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección Natal -->
+            <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 border border-indigo-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Etapa Natal</h3>
+                <span class="ml-auto text-xs font-semibold px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full">
+                  Nacimiento
+                </span>
+              </div>
+
+              <div formGroupName="natal" class="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    ¿Parto normal?
+                  </label>
+                  <select formControlName="partoNormal"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition">
+                    <option [ngValue]="null">Sin información</option>
+                    <option [ngValue]="true">Sí</option>
+                    <option [ngValue]="false">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    ¿A término?
+                  </label>
+                  <input type="text" formControlName="terminoParto"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition"
+                    placeholder="Ej: 40 semanas, prematuro..." />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Complicaciones del parto
+                  </label>
+                  <input type="text" formControlName="complicacionesParto"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition"
+                    placeholder="Ej: Distocia, sufrimiento fetal..." />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Observación natal
+                  </label>
+                  <input type="text" formControlName="observacionNatal"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition"
+                    placeholder="Observaciones relevantes del nacimiento..." />
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección Infancia -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Etapa de Infancia</h3>
+                <span class="ml-auto text-xs font-semibold px-3 py-1 bg-amber-100 text-amber-700 rounded-full">
+                  0 - 12 años
+                </span>
+              </div>
+
+              <div formGroupName="infancia" class="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Grado de sociabilidad
+                  </label>
+                  <select formControlName="gradoSociabilidad"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition">
+                    <option value="">Seleccionar grado</option>
+                    @for (op of sociabilidadOpciones; track op.value) {
+                      <option [value]="op.value">{{ op.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Relación con padres y hermanos
+                  </label>
+                  <input type="text" formControlName="relacionPadresHermanos"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition"
+                    placeholder="Describa la relación familiar..." />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    ¿Discapacidad intelectual?
+                  </label>
+                  <select formControlName="discapacidadIntelectual"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition">
+                    <option [ngValue]="null">Sin información</option>
+                    <option [ngValue]="true">Sí</option>
+                    <option [ngValue]="false">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Grado de discapacidad
+                  </label>
+                  <select formControlName="gradoDiscapacidad"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition">
+                    <option value="">Seleccionar grado</option>
+                    @for (op of gradosDiscapacidadOpciones; track op.value) {
+                      <option [value]="op.value">{{ op.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Trastornos identificados
+                  </label>
+                  <input type="text" formControlName="trastornos"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition"
+                    placeholder="Ej: TDAH, ansiedad..." />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    ¿Tratamientos médicos/psicológicos?
+                  </label>
+                  <select formControlName="tratamientosPsicologicosPsiquiatricos"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition">
+                    <option [ngValue]="null">Sin información</option>
+                    <option [ngValue]="true">Sí</option>
+                    <option [ngValue]="false">No</option>
+                  </select>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Observación general de la infancia
+                  </label>
+                  <textarea formControlName="observacionInfancia" rows="4"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition"
+                    placeholder="Observaciones relevantes del período de infancia..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer de la sección -->
+            <div class="pt-6 border-t border-slate-200">
+              <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-700">Completar historial</p>
+                    <p class="text-xs text-slate-500">Llene todos los campos relevantes para el historial psicológico</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                  <button type="submit"
+                    [disabled]="psicoanamnesisLoading()"
+                    class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (!psicoanamnesisLoading()) {
+                      <span>
+                        <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Guardar psicoanamnesis
+                      </span>
+                    } @else {
+                      <span class="flex items-center gap-2">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                      </span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+
+    <!-- Paso: Adolescencia, Juventud y Adultez -->
+    @if (currentStep() === 'adolescencia') {
+      <app-secciones-adicionales
+        [fichaId]="fichaCreada()?.id"
+        [currentStep]="currentStep()"
+        [loading]="adolescenciaLoading()"
+        [error]="adolescenciaError()"
+        [guardado]="adolescenciaGuardado()"
+        (guardar)="guardarAdolescencia($event)"
+        (limpiar)="limpiarAdolescencia()"
+        (siguiente)="goToNextStep()"
+        (anterior)="goToPreviousStep()">
+      </app-secciones-adicionales>
+    }
+
+    <!-- Paso: Psicoanamnesis Familiar -->
+    @if (currentStep() === 'familiar') {
+      <app-secciones-adicionales
+        [fichaId]="fichaCreada()?.id"
+        [currentStep]="currentStep()"
+        [loading]="familiarLoading()"
+        [error]="familiarError()"
+        [guardado]="familiarGuardado()"
+        (guardar)="guardarFamiliar($event)"
+        (limpiar)="limpiarFamiliar()"
+        (siguiente)="goToNextStep()"
+        (anterior)="goToPreviousStep()">
+      </app-secciones-adicionales>
+    }
+
+    <!-- Paso: Exámenes de Funciones Psicológicas -->
+    @if (currentStep() === 'funciones') {
+      <app-secciones-adicionales
+        [fichaId]="fichaCreada()?.id"
+        [currentStep]="currentStep()"
+        [loading]="funcionesLoading()"
+        [error]="funcionesError()"
+        [guardado]="funcionesGuardado()"
+        (guardar)="guardarFunciones($event)"
+        (limpiar)="limpiarFunciones()"
+        (siguiente)="goToNextStep()"
+        (anterior)="goToPreviousStep()">
+      </app-secciones-adicionales>
+    }
+
+    <!-- Paso: Rasgos de Personalidad y Exámenes Psicológicos -->
+    @if (currentStep() === 'rasgos') {
+      <app-secciones-adicionales
+        [fichaId]="fichaCreada()?.id"
+        [currentStep]="currentStep()"
+        [loading]="rasgosLoading()"
+        [error]="rasgosError()"
+        [guardado]="rasgosGuardado()"
+        (guardar)="guardarRasgos($event)"
+        (limpiar)="limpiarRasgos()"
+        (siguiente)="goToNextStep()"
+        (anterior)="goToPreviousStep()">
+      </app-secciones-adicionales>
+    }
+
+    <!-- Paso: Formulación Etiopatogénica y Pronóstico -->
+    @if (currentStep() === 'etiopatogenica') {
+      <app-secciones-adicionales
+        [fichaId]="fichaCreada()?.id"
+        [currentStep]="currentStep()"
+        [loading]="etiopatogenicaLoading()"
+        [error]="etiopatogenicaError()"
+        [guardado]="etiopatogenicaGuardado()"
+        (guardar)="guardarEtiopatogenica($event)"
+        (limpiar)="limpiarEtiopatogenica()"
+        (siguiente)="goToNextStep()"
+        (anterior)="goToPreviousStep()">
+      </app-secciones-adicionales>
+    }
+
+    <!-- Paso: Documentos -->
+    @if (currentStep() === 'documentos') {
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-700 to-slate-900 p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">Documentación y Cierre</h2>
+              <p class="text-slate-300">Gestión de archivos y estado final de la ficha</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+          <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Panel 1: Cambio de estado -->
+            <div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl p-6 border border-slate-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Estado de la Ficha</h3>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-2">
+                    Estado actual de la evaluación
+                  </label>
+                  <select [(ngModel)]="nuevoEstado" 
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-200 focus:outline-none transition bg-white">
+                    <option *ngFor="let est of estadosFicha" [value]="est">{{ est }}</option>
+                  </select>
+                </div>
+
+                <button (click)="cambiarEstadoFicha()" 
+                  [disabled]="cambiandoEstado"
+                  class="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 text-white font-semibold shadow-lg hover:from-slate-800 hover:to-slate-950 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  @if (!cambiandoEstado) {
+                    <span>
+                      <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Actualizar estado
+                    </span>
+                  } @else {
+                    <span class="flex items-center justify-center gap-2">
+                      <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Actualizando...
+                    </span>
+                  }
+                </button>
+
+                @if (estadoActualizado) {
+                  <div class="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <p class="text-sm text-emerald-700 font-semibold flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Estado actualizado correctamente
+                    </p>
+                  </div>
+                }
+
+                @if (errorCambioEstado) {
+                  <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p class="text-sm text-red-700 font-semibold flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {{ errorCambioEstado }}
+                    </p>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Panel 2: Subida de documentos -->
+            <div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl p-6 border border-slate-200">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Documentación Adjunta</h3>
+              </div>
+
+              <div class="space-y-4">
+                <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer bg-white hover:bg-slate-50 transition"
+                  (drop)="onDocumentoArchivoSeleccionado($event)" 
+                  (dragover)="$event.preventDefault()">
+                  <svg class="w-12 h-12 text-slate-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                  <p class="text-sm text-slate-600 mb-2">Arrastra y suelta archivos aquí</p>
+                  <p class="text-xs text-slate-500 mb-4">o</p>
+                  <button type="button" 
+                    (click)="fileInput.click()"
+                    class="px-6 py-2 rounded-lg bg-gradient-to-r from-slate-600 to-slate-700 text-white font-semibold hover:from-slate-700 hover:to-slate-800 transition">
+                    Seleccionar archivos
+                  </button>
+                  <input #fileInput type="file" class="hidden" (change)="onDocumentoArchivoSeleccionado($event)" multiple />
+                </div>
+
+                @if (documentoArchivoNombre()) {
+                  <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    <p class="text-sm font-semibold text-slate-700 mb-1">Archivo seleccionado:</p>
+                    <p class="text-sm text-slate-600 truncate">{{ documentoArchivoNombre() }}</p>
+                  </div>
+                }
+
+                <button type="button" 
+                  (click)="subirDocumento()" 
+                  [disabled]="documentoSubiendo() || !documentoArchivo()"
+                  class="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 text-white font-semibold shadow-lg hover:from-slate-800 hover:to-slate-950 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  @if (!documentoSubiendo()) {
+                    <span>
+                      <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                      </svg>
+                      Subir archivo
+                    </span>
+                  } @else {
+                    <span class="flex items-center justify-center gap-2">
+                      <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Subiendo...
+                    </span>
+                  }
+                </button>
+
+                @if (documentoFormularioError()) {
+                  <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p class="text-sm text-red-700 font-semibold flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {{ documentoFormularioError() }}
+                    </p>
+                  </div>
+                }
+
+                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p class="text-xs text-blue-700">
+                    <span class="font-semibold">Tipos de archivo aceptados:</span> PDF, DOC, DOCX, JPG, PNG (Máx. 10MB)
+                  </p>
+                  <p class="text-xs text-blue-600 mt-1">
+                    Puedes adjuntar test de personalidad, fichas médicas, entrevistas y cualquier documento relevante para la evaluación psicológica.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen final y botón de condición -->
+          <div class="mt-8 pt-6 border-t border-slate-200">
+            <div class="flex flex-col items-center gap-4">
+              <div class="text-center">
+                <svg class="w-12 h-12 text-emerald-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="text-lg font-bold text-slate-800">¡Ficha psicológica completada!</h3>
+                <p class="text-slate-600 mt-2 max-w-md mx-auto">
+                  Has finalizado el proceso de creación de la ficha psicológica. 
+                  Recuerda revisar todos los datos antes de cerrar definitivamente la evaluación.
+                </p>
+              </div>
+              
+              @if (fichaCreada() && personalId()) {
+                <button type="button"
+                  class="px-6 py-3 rounded-lg bg-gradient-to-r from-indigo-500 to-pink-500 text-white font-semibold shadow-lg hover:from-indigo-600 hover:to-pink-600 transition"
+                  (click)="abrirAsignarCondicionModal()">
+                  <svg class="w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Asignar condición y diagnóstico
+                </button>
+              } @else {
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p class="text-sm text-amber-700">
+                    Completa todos los pasos anteriores para habilitar la asignación de condición.
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal de seguimiento/condición -->
+<app-seguimiento-modal
+  [visible]="mostrarAsignarCondicionModal()"
+  [fichaId]="fichaCreada()?.id ?? null"
+  [personalMilitarId]="personalId()"
+  [guardando]="loadingGenerales() || observacionLoading() || psicoanamnesisLoading()"
+  (cancel)="cerrarAsignarCondicionModal()"
+  (submit)="onAsignarCondicionSubmit($event)">
+</app-seguimiento-modal>

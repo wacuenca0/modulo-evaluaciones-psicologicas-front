@@ -1,0 +1,377 @@
+<section class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+  <!-- Modal de términos y condiciones -->
+  <div *ngIf="showModal()" 
+       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <!-- Header del modal -->
+      <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-blue-100 p-2">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Confidencialidad institucional</p>
+              <h2 class="text-2xl font-bold text-slate-900">Acuerdo de confidencialidad</h2>
+            </div>
+          </div>
+          <button (click)="aceptarTerminos()" 
+                  class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenido del modal con scroll -->
+      <div class="px-8 py-6 overflow-y-auto max-h-[60vh]">
+        <div class="space-y-6 text-slate-700">
+          <!-- Encabezado legal -->
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div class="flex items-center gap-3">
+              <svg class="h-5 w-5 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+              </svg>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">REGLAMENTO DE INFORMACIÓN CONFIDENCIAL EN EL SISTEMA NACIONAL DE SALUD</p>
+                <p class="text-xs text-slate-500">Acuerdo Ministerial 5216 • Oficial Suplemento 427 de 29-ene-2015 • Estado: Vigente</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Artículos -->
+          <div class="space-y-6">
+            <!-- Artículo 9 -->
+            <div class="rounded-xl border border-blue-100 bg-blue-50/50 p-5">
+              <div class="flex items-start gap-4">
+                <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                  Art. 9
+                </span>
+                <div class="flex-1">
+                  <p class="text-sm leading-relaxed">
+                    El personal operativo y administrativo de los establecimientos del Sistema Nacional de Salud que tenga acceso a información de los/las usuarios/as durante el ejercicio de sus funciones, deberá guardar reserva de manera indefinida respecto de dicha información y no podrá divulgar la información contenida en la historia clínica, ni aquella constante en todo documento donde reposen datos confidenciales de los/las usuarios/as.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Artículo 10 -->
+            <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-5">
+              <div class="flex items-start gap-4">
+                <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                  Art. 10
+                </span>
+                <div class="flex-1">
+                  <p class="text-sm leading-relaxed">
+                    Los documento que contenga información confidencial se mantendrá abiertos (tanto en formato físico como electrónico) únicamente durante el tiempo estrictamente necesario para su procesamiento, después del cual deberá ser cerrado o bloqueado para garantizar la confidencialidad de la información. El acceso posterior requerirá autorización expresa, excepto cuando forme parte de un estudio epidemiológico, una auditoría de calidad de la atención en salud u otros debidamente justificados y que se enmarquen en los casos establecidos en el presente Reglamento.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Artículo 61 -->
+            <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-5">
+              <div class="flex items-start gap-4">
+                <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700">
+                  Art. 61
+                </span>
+                <div class="flex-1">
+                  <p class="text-sm leading-relaxed">
+                    Las instituciones públicas y privadas, los profesionales de salud y la población en general, reportarán en forma oportuna la existencia de casos sospechosos, probables, compatibles y confirmados de enfermedades declaradas por la autoridad sanitaria nacional como de notificación obligatoria y aquellas de reporte internacional. Las instituciones y profesionales de salud, garantizan la confidencialidad de la información entregada y recibida.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Separador -->
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-slate-200"></div>
+              </div>
+              <div class="relative flex justify-center">
+                <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-500 border border-slate-200">
+                  Ley de estadística
+                </span>
+              </div>
+            </div>
+
+            <!-- LEY DE ESTADÍSTICA -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="mb-4">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Registro Oficial</p>
+                <p class="text-sm font-medium text-slate-700">Órgano del Gobierno del Ecuador • Quito, Viernes 7 de Mayo de 1976 • Número 82</p>
+                <p class="text-lg font-bold text-slate-900 mt-1 italic">"El Ecuador ha sido, es y será país amazónico"</p>
+              </div>
+              
+              <div class="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <div class="flex items-start gap-4">
+                  <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">
+                    Art. 25
+                  </span>
+                  <div class="flex-1">
+                    <p class="text-sm leading-relaxed">
+                      Las personas que, de cualquier modo, intervengan en la ejecución de investigaciones que realicen las entidades sujetas al Sistema Estadístico Nacional, no podrán requerir información distinta de la que haya sido autorizada. De contravenir a esta prohibición, se les impondrá las sanciones establecidas en la Ley de Servicio Civil y Carrera Administrativa.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acuerdo final -->
+            <div class="rounded-xl border border-red-100 bg-red-50/50 p-5">
+              <div class="flex items-start gap-4">
+                <svg class="h-6 w-6 text-red-600 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold text-red-700 mb-2">Declaración de cumplimiento</p>
+                  <p class="text-sm text-slate-700 leading-relaxed">
+                    De acuerdo al <span class="font-semibold">REGLAMENTO DE INFORMACIÓN CONFIDENCIAL EN EL SISTEMA NACIONAL DE SALUD</span> y <span class="font-semibold">LEY DE ESTADÍSTICA</span>, acepto el cumplimiento de los artículos descritos y me comprometo a mantener la confidencialidad de toda la información a la que tenga acceso mediante este sistema.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer del modal -->
+      <div class="sticky bottom-0 border-t border-slate-200 bg-white px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs text-slate-500">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span>Esta acción es registrada en el sistema de auditoría</span>
+          </div>
+          <button (click)="aceptarTerminos()" 
+                  class="rounded-lg bg-slate-900 px-6 py-3 text-sm font-semibold text-white 
+                         transition-all hover:bg-slate-800 active:scale-[0.98] 
+                         flex items-center gap-2">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Aceptar términos y continuar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard principal -->
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header del dashboard -->
+    <div class="mb-12">
+      <div>
+        <h1 class="text-4xl font-bold text-slate-900">
+          Bienvenido,
+          <span class="text-blue-600">{{ psicologoNombre() }}</span>
+        </h1>
+        <p class="mt-2 text-slate-600">{{ rol() | titlecase }}</p>
+        <p class="mt-2 text-slate-600">El Sistema de Gestión Psicológica Militar (SIGEPM)</p>
+      </div>
+    </div>
+
+    <!-- Paneles de roles -->
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Panel Psicólogo -->
+      <div *ngIf="rol() === 'psicologo'" 
+           class="rounded-2xl border border-emerald-200 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-lg 
+                  hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div class="mb-5">
+          <div class="inline-flex rounded-full bg-emerald-100 p-3 mb-4">
+            <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h2 class="text-xl font-semibold text-emerald-800 mb-2">Panel del Psicólogo</h2>
+          <p class="text-sm text-slate-600 mb-4">Gestión clínica especializada para profesionales de la salud mental</p>
+          
+          <div class="flex gap-2 mb-6">
+            <button (click)="goToAtenciones()"
+              class="atenciones-tab flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-pink-600 shadow hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all text-base border-2 border-pink-700">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              Atenciones
+            </button>
+            <button (click)="goToPsicologo()"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-emerald-900 bg-emerald-100 shadow hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-base border-2 border-emerald-200">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              Buscar y crear paciente
+            </button>
+          </div>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Registrar y gestionar valoraciones psicológicas</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Emitir diagnósticos y observaciones clínicas</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Seguimientos y transferencias de casos</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Reportes de atenciones y estadísticas</span>
+            </li>
+          </ul>
+        </div>
+        <button (click)="goToPsicologo()" 
+                class="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white 
+                       transition-all hover:bg-emerald-700 active:scale-[0.98] 
+                       flex items-center justify-center gap-2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          Buscar y crear paciente
+        </button>
+      </div>
+
+      <!-- Panel Administrador -->
+      <div *ngIf="rol() === 'administrador'" 
+           class="rounded-2xl border border-blue-200 bg-gradient-to-br from-white to-blue-50 p-6 shadow-lg 
+                  hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div class="mb-5">
+          <div class="inline-flex rounded-full bg-blue-100 p-3 mb-4">
+            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h2 class="text-xl font-semibold text-blue-800 mb-2">Panel del Administrador</h2>
+          <p class="text-sm text-slate-600 mb-4">Control total del sistema y gestión institucional</p>
+          
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Gestión de usuarios y roles del sistema</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Supervisión de actividad de psicólogos</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Reportes globales y estadísticas institucionales</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Configuración de catálogos y parámetros</span>
+            </li>
+          </ul>
+        </div>
+        <button (click)="goToAdmin()" 
+                class="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white 
+                       transition-all hover:bg-blue-700 active:scale-[0.98] 
+                       flex items-center justify-center gap-2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0h-15"/>
+          </svg>
+          Gestión de usuarios
+        </button>
+      </div>
+
+      <!-- Panel Observador -->
+      <div *ngIf="rol() === 'observador'" 
+           class="rounded-2xl border border-indigo-200 bg-gradient-to-br from-white to-indigo-50 p-6 shadow-lg 
+                  hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div class="mb-5">
+          <div class="inline-flex rounded-full bg-indigo-100 p-3 mb-4">
+            <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </div>
+          <h2 class="text-xl font-semibold text-indigo-800 mb-2">Panel del Observador</h2>
+          <p class="text-sm text-slate-600 mb-4">Visualización de información institucional</p>
+          
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Visualización de reportes y estadísticas</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Consulta de fichas sin capacidad de edición</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Monitoreo de tendencias y alertas clínicas</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-700">
+              <svg class="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Acceso a información institucional general</span>
+            </li>
+          </ul>
+        </div>
+        <button (click)="goToObservador()" 
+                class="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white 
+                       transition-all hover:bg-indigo-700 active:scale-[0.98] 
+                       flex items-center justify-center gap-2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          Ver reportes
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer del dashboard -->
+    <div class="mt-16 pt-8 border-t border-slate-200">
+      <div class="flex flex-col items-center gap-4 text-center text-xs text-slate-500">
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <span>El Sistema de Gestión Psicológica Militar (SIGEPM)</span>
+          <span class="text-slate-300">•</span>
+          <span>Versión 1.0.0</span>
+          <span class="text-slate-300">•</span>
+          <span class="flex items-center gap-1">
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            Acceso autorizado
+          </span>
+        </div>
+        <p class="max-w-2xl">
+          Este sistema maneja información confidencial bajo las regulaciones del 
+          <span class="font-semibold">Sistema Nacional de Salud (Acuerdo 5216)</span> y 
+          <span class="font-semibold">Ley de Estadística</span>. 
+          Todo acceso es monitoreado y auditado.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

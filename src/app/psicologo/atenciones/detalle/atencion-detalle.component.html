@@ -1,0 +1,119 @@
+<div *ngIf="show" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cerrar.emit()" (keydown)="cerrar.emit()"></div>
+    <!-- Modal -->
+    <div class="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
+      <div class="border-b border-slate-200 p-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Detalle de Atención</h1>
+          <p class="text-slate-600">Información clínica y seguimiento de la atención seleccionada.</p>
+        </div>
+        <button (click)="cerrar.emit()"
+                class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
+        <div *ngIf="atencion" class="rounded-xl border border-slate-200 bg-white p-6 mb-6">
+          <div class="mb-4 flex flex-col md:flex-row md:items-center md:gap-8">
+            <div>
+              <h2 class="text-lg font-semibold text-blue-700">{{ atencion.pacienteNombreCompleto }}</h2>
+              <p class="text-sm text-slate-500">Cédula: {{ atencion.pacienteCedula }}</p>
+              <p class="text-sm text-slate-500">Grado: {{ atencion.pacienteGrado }}</p>
+              <p class="text-sm text-slate-500" *ngIf="atencion.pacienteUnidadMilitar">Unidad: {{ atencion.pacienteUnidadMilitar }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Psicólogo: <span class="font-semibold text-green-700">{{ atencion.psicologoNombreCompleto }}</span></p>
+              <p class="text-sm text-slate-500">Cédula: {{ atencion.psicologoCedula }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Fecha: <span class="font-semibold text-slate-900">{{ atencion.fechaAtencion }}</span></p>
+              <p class="text-sm text-slate-500">Hora: {{ atencion.horaInicio }} - {{ atencion.horaFin }}</p>
+              <p class="text-sm text-slate-500">Duración: {{ atencion.duracionMinutos }} min</p>
+            </div>
+            <div>
+              <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-blue-100 text-blue-800': atencion.estado === 'PROGRAMADA',
+                      'bg-yellow-100 text-yellow-800': atencion.estado === 'EN_CURSO',
+                      'bg-green-100 text-green-800': atencion.estado === 'FINALIZADA',
+                      'bg-red-100 text-red-800': atencion.estado === 'CANCELADA',
+                      'bg-gray-200 text-gray-700': atencion.estado === 'NO_ASISTIO'
+                    }">
+                {{ atencion.estado }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Mensajes personalizados por estado -->
+          <div *ngIf="atencion.estado === 'CANCELADA'" class="mb-4 rounded-lg bg-red-50 border border-red-200 p-4 flex items-center gap-3">
+            <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <div>
+              <p class="font-semibold text-red-800">Atención Cancelada</p>
+              <p class="text-sm text-red-700">Razón: {{ atencion.razonCancelacion }}</p>
+            </div>
+          </div>
+          <div *ngIf="atencion.estado === 'NO_ASISTIO'" class="mb-4 rounded-lg bg-gray-100 border border-gray-300 p-4 flex items-center gap-3">
+            <svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            <div>
+              <p class="font-semibold text-gray-800">Paciente no asistió</p>
+              <p class="text-sm text-gray-700">Esta atención fue marcada como no asistida.</p>
+            </div>
+          </div>
+          <div *ngIf="atencion.estado === 'FINALIZADA'" class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4 flex items-center gap-3">
+            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <div>
+              <p class="font-semibold text-green-800">Atención Finalizada</p>
+              <p class="text-sm text-green-700">La atención fue completada exitosamente.</p>
+            </div>
+          </div>
+          <div *ngIf="atencion.estado === 'EN_CURSO'" class="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 flex items-center gap-3">
+            <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div>
+              <p class="font-semibold text-yellow-800">Atención en Curso</p>
+              <p class="text-sm text-yellow-700">La atención está actualmente en curso.</p>
+            </div>
+          </div>
+          <div *ngIf="atencion.estado === 'PROGRAMADA'" class="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-center gap-3">
+            <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div>
+              <p class="font-semibold text-blue-800">Atención Programada</p>
+              <p class="text-sm text-blue-700">La atención está agendada y pendiente de realizarse.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Motivo de consulta</p>
+              <p class="text-sm text-slate-700 mb-4">{{ atencion.motivoConsulta || 'No registrado' }}</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Diagnósticos CIE-10</p>
+              <ul class="mb-4">
+                <li *ngFor="let diag of atencion.diagnosticos" class="text-xs text-blue-700">{{ diag.codigo }} - {{ diag.nombre }}</li>
+                <li *ngIf="!atencion.diagnosticos || atencion.diagnosticos.length === 0" class="text-xs text-slate-400">No hay diagnósticos registrados</li>
+              </ul>
+              <!-- Anamnesis, Examen mental, Impresión diagnóstica ocultos por privacidad -->
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Plan de intervención</p>
+              <p class="text-sm text-slate-700 mb-4">{{ atencion.planIntervencion || 'No registrado' }}</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Recomendaciones</p>
+              <p class="text-sm text-slate-700 mb-4">{{ atencion.recomendaciones || 'No registrado' }}</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Derivación</p>
+              <p class="text-sm text-slate-700 mb-4">{{ atencion.derivacion || 'No registrado' }}</p>
+            </div>
+          </div>
+
+          <!-- Próxima cita solo si existe -->
+          <div *ngIf="atencion.proximaCita" class="mt-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
+            <p class="text-sm text-blue-800 font-semibold">Próxima cita: {{ atencion.proximaCita }}</p>
+            <p class="text-xs text-blue-700">{{ atencion.observacionesProximaCita }}</p>
+          </div>
+        </div>
+        <div *ngIf="!atencion" class="text-slate-500">No se encontró información de la atención.</div>
+      </div>
+    </div>
+  </div>
+</div>

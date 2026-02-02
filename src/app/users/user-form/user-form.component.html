@@ -1,0 +1,91 @@
+<div class="user-form-wrapper my-8 px-4">
+  <div class="user-form-main-grid mx-auto grid max-w-6xl gap-6 lg:grid-cols-[2fr_1fr]">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <app-users-tabs></app-users-tabs>
+      <header class="mb-6 space-y-1 border-b border-slate-100 pb-4">
+        <h1 class="text-xl font-semibold text-slate-900">{{ isEdit() ? 'Editar usuario' : 'Registrar nuevo usuario' }}</h1>
+        <p class="text-sm text-slate-600">Captura la cuenta base del sistema y, si corresponde, completa los datos profesionales del psicólogo.</p>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+        <section class="rounded-xl border border-slate-200 p-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Cuenta de acceso</h2>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div class="md:col-span-1">
+              <label for="username" class="form-label">Usuario</label>
+              <input id="username" type="text" formControlName="username" class="form-input w-full" autocomplete="off" placeholder="admin01" />
+            </div>
+            <div class="md:col-span-1">
+              <label for="email" class="form-label">Correo</label>
+              <input id="email" type="email" formControlName="email" class="form-input w-full" autocomplete="email" placeholder="admin01@example.com" />
+            </div>
+            <div class="md:col-span-2">
+              <label for="password" class="form-label">Contraseña</label>
+              <input id="password" type="password" formControlName="password" class="form-input w-full" autocomplete="new-password" placeholder="C0ntr@se-na" />
+              <p class="mt-1 text-xs text-slate-500">Mínimo 8 caracteres. Requerida al crear; opcional al editar.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-xl border border-slate-200 p-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Rol y estado</h2>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div class="md:col-span-1">
+              <label for="roleId" class="form-label">Rol asignado</label>
+              <select id="roleId" formControlName="roleId" class="form-input w-full">
+                <option [ngValue]="null" disabled>Seleccione un rol</option>
+                @for (r of roles(); track r.id) {
+                  <option [ngValue]="r.id">{{ r.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="md:col-span-1 flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2">
+              <input id="active" type="checkbox" formControlName="active" class="h-4 w-4" />
+              <label for="active" class="text-sm font-medium text-slate-700">Cuenta activa</label>
+            </div>
+          </div>
+        </section>
+
+        @if (isEdit()) {
+          <div class="flex flex-col gap-2 my-4">
+            <button class="btn-secondary w-fit" type="button" (click)="goToPsicologoEdit()">
+              Editar perfil profesional del psicólogo
+            </button>
+            <!-- Formulario profesional embebido removido por errores. Solo botón de acceso. -->
+          </div>
+        }
+        
+        <div class="flex justify-end gap-3 pt-2">
+          <button class="btn-primary" type="submit" [disabled]="loading() || form.invalid">{{ loading() ? 'Guardando…' : 'Guardar cambios' }}</button>
+        </div>
+        @if (errorMessage()) {
+          <p class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{{ errorMessage() }}</p>
+        }
+      </form>
+    </section>
+
+    <aside class="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-100 shadow-sm">
+      <h2 class="text-base font-semibold text-slate-50">Cómo crear las cuentas</h2>
+      <p class="mt-2 text-sm text-slate-300">Aplica esta misma secuencia al usar la API o este formulario.</p>
+      <ol class="mt-4 space-y-3 text-sm">
+        <li class="rounded-xl bg-slate-800/60 p-3">
+          <span class="text-xs font-semibold uppercase tracking-widest text-indigo-300">Paso 1 · Administrador</span>
+          <p class="mt-1 leading-relaxed">Envía la cuenta con rol Administrador al servicio de catálogos. Solo necesitas usuario, correo y contraseña.</p>
+        </li>
+        <li class="rounded-xl bg-slate-800/60 p-3">
+          <span class="text-xs font-semibold uppercase tracking-widest text-indigo-300">Paso 2 · Psicólogo</span>
+          <p class="mt-1 leading-relaxed">Cuando el rol seleccionado sea Psicólogo agrega la ficha profesional (cédula, nombres, apellidos, grado, contacto y especialidad). El backend crea ambos registros en un mismo envío.</p>
+        </li>
+        <li class="rounded-xl bg-slate-800/60 p-3">
+          <span class="text-xs font-semibold uppercase tracking-widest text-indigo-300">Paso 3 · Validación</span>
+          <p class="mt-1 leading-relaxed">Verifica en el servicio de gestión que el nuevo profesional aparezca con su identificador y datos completos.</p>
+        </li>
+      </ol>
+      <div class="mt-4 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 text-xs text-slate-300">
+        <p><strong>Base catálogos:</strong> https://&lt;host&gt;/servicio-catalogos</p>
+        <p><strong>Base gestión:</strong> https://&lt;host&gt;/servicio-gestion</p>
+        <p><strong>Headers:</strong> Authorization: Bearer TOKEN_ADMIN · Content-Type: application/json</p>
+      </div>
+    </aside>
+  </div>
+</div>

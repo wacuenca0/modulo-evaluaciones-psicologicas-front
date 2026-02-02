@@ -1,0 +1,111 @@
+/* Estilos adicionales para los colores militares */
+:host {
+  --military-50: #f0f4f8;
+  --military-100: #d9e4ec;
+  --military-200: #b3c9d9;
+  --military-300: #8daec6;
+  --military-400: #6693b3;
+  --military-500: #4078a0;
+  --military-600: #336080;
+  --military-700: #264860;
+  --military-800: #1a3040;
+  --military-900: #0d1820;
+}
+
+.personal-search-wrapper {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.personal-search-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .personal-search-main-grid {
+    grid-template-columns: 1fr 1.5fr;
+    gap: 3rem;
+  }
+}
+
+.badge-base-class {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Efectos de hover mejorados */
+button, a {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled), a:hover {
+  transform: translateY(-1px);
+}
+
+/* Mejoras en los bordes y sombras */
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Animaciones de carga */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (max-width: 1024px) {
+  .personal-search-main-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .personal-search-results {
+    margin-top: 2rem;
+    max-width: 100vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .personal-search-wrapper {
+    padding: 0.5rem 0.1rem;
+  }
+  .personal-search-main-grid {
+    gap: 1rem;
+    max-width: 100vw;
+  }
+  section, .personal-search-results {
+    border-radius: 0.7rem !important;
+    padding: 1rem !important;
+  }
+  input, button, select {
+    font-size: 1rem;
+    padding: 0.5rem 0.6rem;
+  }
+}

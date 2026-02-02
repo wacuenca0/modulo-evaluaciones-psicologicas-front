@@ -1,0 +1,150 @@
+<!-- Modal visual igual al de programar atención, con ficha psicológica y campos extendidos -->
+<div *ngIf="show" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cancelar.emit()" (keydown.escape)="cancelar.emit()" tabindex="-1"></div>
+
+    <!-- Modal -->
+    <div class="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+      <!-- Header -->
+      <div class="border-b border-slate-200 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900">
+              <span class="text-purple-600">Seguimiento Clínico</span>
+            </h3>
+            <p class="text-sm text-slate-500">
+            Programar seguimiento para tipo de evaluación: <span class="font-bold text-purple-800">{{ formModel.tipoEvaluacion || 'Sin tipo' }}</span>
+            </p>
+          </div>
+          <button (click)="cancelar.emit()" 
+                  class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <div class="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
+        <!-- Mensajes de estado -->
+        <div *ngIf="error" class="mb-4 rounded-xl border border-red-300 bg-red-50 p-3 flex items-center gap-2">
+          <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-red-800 text-sm">{{ error }}</span>
+        </div>
+
+        <div *ngIf="mensajeExito" class="mb-4 rounded-xl border border-green-300 bg-green-50 p-3 flex items-center gap-2">
+          <svg class="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-green-800 text-sm">{{ mensajeExito }}</span>
+        </div>
+
+        <form (ngSubmit)="guardarSeguimiento()" class="space-y-6" autocomplete="off">
+          <div *ngIf="false" class="mb-4 p-3 bg-yellow-50 border border-yellow-300 rounded">
+            <p class="text-xs font-mono text-yellow-800">
+              DEBUG: fichaPsicologicaId = {{ formModel.fichaPsicologicaId }}<br>
+              DEBUG: paciente = {{ pacienteSeleccionado | json }}<br>
+              DEBUG: psicologo = {{ psicologoActual | json }}
+            </p>
+          </div>
+          <!-- Información mínima para programar seguimiento -->
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <!-- Ficha Psicológica -->
+            <div>
+              <label for="fichaPsicologicaId" class="mb-2 block text-sm font-medium text-slate-700">Ficha Psicológica</label>
+                <div class="flex items-center gap-3 rounded-lg border border-purple-300 bg-purple-50 px-3.5 py-2.5">
+                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span id="fichaPsicologicaId" class="text-sm font-bold text-purple-800">Asignada</span>
+                </div>
+            </div>
+
+            <!-- Paciente (Personal Militar) -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-slate-700 required">Paciente</label>
+              <app-paciente-autocomplete (pacienteSeleccionado)="asignarPaciente.emit($event)"></app-paciente-autocomplete>
+              <div *ngIf="pacienteSeleccionado" class="mt-2 flex items-center gap-2 text-sm text-blue-800 bg-blue-50 rounded px-3 py-1.5 border border-blue-200">
+                <svg class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="font-semibold">Paciente:</span>
+                <span>{{ pacienteSeleccionado.apellidosNombres }}</span>
+                <span class="text-xs text-blue-600 font-mono bg-blue-100 rounded px-2 py-0.5 ml-2">C.I. {{ pacienteSeleccionado.cedula }}</span>
+              </div>
+            </div>
+
+            <!-- Psicólogo (información solo lectura) -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-slate-700">Psicólogo responsable</label>
+              <div class="flex items-center gap-3 rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2.5">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span id="psicologoActual" class="text-sm font-medium text-slate-800">{{ psicologoActual?.nombre || 'No asignado' }}</span>
+              </div>
+            </div>
+
+            <!-- Fecha -->
+            <div>
+              <label for="fechaAtencion" class="mb-2 block text-sm font-medium text-slate-700 required">Fecha</label>
+              <input type="date" [(ngModel)]="formModel.fechaAtencion" name="fechaAtencion" required
+                     class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+            </div>
+
+            <!-- Horario -->
+            <div>
+              <label for="horaInicio" class="mb-2 block text-sm font-medium text-slate-700 required">Horario</label>
+              <div class="grid grid-cols-2 gap-3">
+                  <input id="horaInicio" type="time" [(ngModel)]="formModel.horaInicio" name="horaInicio" required
+                    placeholder="Inicio" class="rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                  <input id="horaFin" type="time" [(ngModel)]="formModel.horaFin" name="horaFin" required
+                    placeholder="Fin" class="rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Motivo de consulta -->
+          <div>
+            <label for="motivoConsulta" class="mb-2 block text-sm font-medium text-slate-700 required">Motivo de seguimiento</label>
+            <textarea id="motivoConsulta" [(ngModel)]="formModel.motivoConsulta" name="motivoConsulta" required rows="3"
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                      placeholder="Describa el motivo principal del seguimiento..."></textarea>
+          </div>
+
+
+          <!-- Footer -->
+          <div class="border-t border-slate-200 pt-6">
+            <div class="flex justify-end gap-3">
+              <button type="button" (click)="cancelar.emit()"
+                      class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98]">
+                Cancelar
+              </button>
+              <button type="submit" [disabled]="cargandoAccion"
+                      [class]="'rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] flex items-center gap-2 ' + 
+                               (cargandoAccion ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700')">
+                <ng-container *ngIf="cargandoAccion; else programarLabel">
+                  <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Programando...
+                </ng-container>
+                <ng-template #programarLabel>
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  Programar Seguimiento
+                </ng-template>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

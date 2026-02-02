@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+$primary: #1e3a5f;
+$accent: #2563eb; /* professional blue */
+$green: #16a34a;
+$light: #f5f5f5;
+$white: #ffffff;
+
+:host { display: block; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+/* screen-reader only utility (moved from template) */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ========== Full-bleed background layout ========== */
+.page-full { min-height: 100vh; position: relative; }
+.page-full::before { content: ''; position: fixed; inset: 0; background: url('/login-bg.svg') center center / cover no-repeat; z-index: -2; }
+.page-full::after { content: ''; position: fixed; inset: 0; background: linear-gradient(180deg, rgba(3,14,30,0.12), rgba(3,14,30,0.18)); z-index: -1; }
+
+.center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px; }
+
+.card { width: 100%; max-width: 520px; background: #fff; border-radius: 18px; box-shadow: 0 14px 46px rgba(0,0,0,0.22); overflow: hidden; border: 1px solid rgba(30,58,95,0.08); }
+
+@media (max-width: 900px) {
+	.center { padding: 20px; }
+	.card { max-width: 94%; }
+}
+
+.card-brand { display: flex; align-items: center; gap: 16px; background: linear-gradient(180deg, rgba(30,58,95,0.85), rgba(24,50,79,0.85)); color: #fff; padding: 22px 28px; }
+.brand-badge { width: 44px; height: 44px; background: rgba(255,255,255,0.80); color: $primary; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 22px; box-shadow: inset 0 0 0 2px rgba(30,58,95,0.1); }
+.brand-title { margin: 0; font-size: 22px; line-height: 1.05; color: #fff; font-weight: 800; letter-spacing: 0.2px; }
+.brand-sub { margin: 2px 0 0 0; color: #e2e8f0; font-size: 13px; }
+
+.card-body { padding: 28px; }
+.title { margin: 0 0 12px 0; font-size: 28px; line-height: 1.15; color: #0b1220; font-weight: 800; }
+
+/* Inputs */
+.input-group { margin-bottom: 14px; }
+.field-label { display: block; font-size: 13px; color: #0f172a; margin-bottom: 6px; font-weight: 600; }
+.input-with-icon { display:flex; align-items:center; gap:10px; background: rgba(255,255,255,0.80); border-radius: 10px; padding: 12px 14px; border: 1px solid rgba(2,6,23,0.12); box-shadow: 0 1px 0 rgba(2,6,23,0.04) inset; }
+.input-with-icon input { border: none; outline: none; font-size: 15px; flex: 1; background: transparent; color: #0f172a; }
+.input-with-icon input::placeholder { color: #6b7280; opacity: 1; }
+.left-icon { display:flex; align-items:center; justify-content:center; color: $primary; }
+.eye-btn { background: transparent; border: none; cursor: pointer; padding: 6px; display:flex; align-items:center; justify-content:center; border-radius:6px; }
+.eye-btn:hover { background: rgba(0,0,0,0.05); }
+
+.row.extras { display:flex; align-items:center; justify-content:space-between; margin:10px 0 18px 0; }
+.remember { display:flex; align-items:center; gap:8px; font-size:13px; color: #334155; }
+.remember input { width:16px; height:16px; accent-color: $accent; }
+.forgot { color: $primary; font-size:13px; text-decoration: none; }
+.forgot:hover { text-decoration: underline; }
+
+/* CTA button */
+.submit-btn { width:100%; background: $accent; color: #fff; border: none; padding: 14px 16px; border-radius: 10px; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(37,99,235,0.22); }
+.submit-green { background: $green; box-shadow: 0 10px 22px rgba(22,163,74,0.25); }
+.submit-btn[disabled] { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
+
+/* Security */
+.security-card { margin-top: 18px; display:flex; gap:12px; align-items:flex-start; background: rgba(241,245,249,0.80); border: 1px solid rgba(15,23,42,0.06); border-radius: 12px; padding: 14px 16px; color: #0f172a; }
+.security-card strong { display:block; margin-bottom: 3px; }
+.shield { width: 36px; height: 36px; display:grid; place-items:center; background: rgba(232,238,252,0.80); border-radius: 10px; }
+
+.card-footer { display:flex; justify-content: space-between; align-items:center; padding: 14px 20px 20px; color: #475569; font-size: 12px; }
+.card-footer .links { color: #334155; }
+.card-footer .links a { color: inherit; text-decoration: none; }
+.card-footer .links a:hover { text-decoration: underline; }
+
+/* Remove old split-screen styles to avoid duplicates */

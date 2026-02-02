@@ -1,0 +1,51 @@
+:host {
+  display: block;
+}
+
+.personal-detail-wrapper {
+  width: 100vw;
+  max-width: 100vw;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.personal-detail-main {
+  width: 100%;
+  max-width: 900px;
+  background: transparent;
+}
+
+@media (max-width: 1024px) {
+  .personal-detail-main {
+    max-width: 100vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .personal-detail-wrapper {
+    padding: 0.5rem 0.1rem;
+  }
+  .personal-detail-main {
+    padding: 0 !important;
+    max-width: 100vw;
+  }
+  section, form, article {
+    border-radius: 0.7rem !important;
+    padding: 1rem !important;
+  }
+  input, button, select {
+    font-size: 1rem;
+    padding: 0.5rem 0.6rem;
+  }
+}
+/* Puedes agregar estilos personalizados aquí si lo deseas. Ejemplo:
+
+:host {
+  display: block;
+}
+
+form {
+  /* ... */
+/* ...otros estilos... */

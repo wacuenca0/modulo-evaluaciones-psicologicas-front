@@ -1,0 +1,165 @@
+
+<!-- Modal visual igual al de crear/editar atención -->
+<div class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cancelar()" (keydown)="cancelar()"></div>
+
+    <!-- Modal -->
+    <div class="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+      <!-- Header -->
+      <div class="border-b border-slate-200 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900">Programar Nueva Atención</h3>
+            <p class="text-sm text-slate-500">Complete los datos mínimos para programar una nueva atención psicológica</p>
+          </div>
+          <button (click)="cancelar()" 
+                  class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <div class="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
+        <!-- Mensajes de estado -->
+        @if (error()) {
+          <div class="mb-4 rounded-xl border border-red-300 bg-red-50 p-3 flex items-center gap-2">
+            <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-red-800 text-sm">{{ error() }}</span>
+          </div>
+        }
+
+        @if (mensajeExito()) {
+          <div class="mb-4 rounded-xl border border-green-300 bg-green-50 p-3 flex items-center gap-2">
+            <svg class="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-green-800 text-sm">{{ mensajeExito() }}</span>
+          </div>
+        }
+
+        <form (ngSubmit)="guardarAtencionProgramada()" class="space-y-6" autocomplete="off">
+          <!-- Información básica -->
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <!-- Paciente -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-slate-700 required">Paciente</label>
+              <app-paciente-autocomplete (pacienteSeleccionado)="asignarPaciente($event)"></app-paciente-autocomplete>
+              @if (pacienteSeleccionado) {
+                <div class="mt-2 flex items-center gap-2 text-sm text-blue-800 bg-blue-50 rounded px-3 py-1.5 border border-blue-200">
+                  <svg class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span class="font-semibold">Paciente:</span>
+                  <span>{{ pacienteSeleccionado.apellidosNombres }}</span>
+                  <span class="text-xs text-blue-600 font-mono bg-blue-100 rounded px-2 py-0.5 ml-2">C.I. {{ pacienteSeleccionado.cedula }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Psicólogo (información solo lectura) -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-slate-700">Psicólogo responsable</label>
+              <div class="flex items-center gap-3 rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2.5">
+                @if (psicologoActual) {
+                  <div class="flex items-center gap-2">
+                    <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span class="text-sm font-medium text-slate-800">{{ psicologoActual.nombre }}</span>
+                  </div>
+                } @else {
+                  <span class="text-sm text-slate-500">Cargando psicólogo...</span>
+                }
+              </div>
+            </div>
+
+            <!-- Fecha -->
+            <div>
+              <label for="fechaAtencion" class="mb-2 block text-sm font-medium text-slate-700 required">Fecha de atención</label>
+              <input type="date" [(ngModel)]="formModel.fechaAtencion" name="fechaAtencion" required
+                     id="fechaAtencion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+            </div>
+
+            <!-- Horario -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="mb-2 block text-sm font-medium text-slate-700 required">Hora inicio</label>
+                <input type="time" [(ngModel)]="formModel.horaInicio" name="horaInicio" required
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-slate-700 required">Hora fin</label>
+                <input type="time" [(ngModel)]="formModel.horaFin" name="horaFin" required
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+              </div>
+            </div>
+
+            <!-- Tipo de consulta -->
+            <div>
+              <label for="tipoConsulta" class="mb-2 block text-sm font-medium text-slate-700 required">Tipo de consulta</label>
+              <select [(ngModel)]="formModel.tipoConsulta" name="tipoConsulta" required
+                      id="tipoConsulta" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                @for (tipo of tiposConsulta; track tipo.valor) {
+                  <option [value]="tipo.valor">{{ tipo.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Modalidad -->
+            <div>
+              <label for="tipoAtencion" class="mb-2 block text-sm font-medium text-slate-700 required">Modalidad</label>
+              <select [(ngModel)]="formModel.tipoAtencion" name="tipoAtencion" required
+                      id="tipoAtencion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                @for (modalidad of tiposAtencion; track modalidad.valor) {
+                  <option [value]="modalidad.valor">{{ modalidad.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Motivo de consulta -->
+          <div>
+            <label for="motivoConsulta" class="mb-2 block text-sm font-medium text-slate-700 required">Motivo de consulta</label>
+            <textarea [(ngModel)]="formModel.motivoConsulta" name="motivoConsulta" required rows="3"
+                      id="motivoConsulta" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                      placeholder="Describa el motivo principal de la consulta..."></textarea>
+          </div>
+
+          <!-- Footer del modal -->
+          <div class="border-t border-slate-200 pt-6">
+            <div class="flex justify-end gap-3">
+              <button type="button" (click)="cancelar()"
+                      class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98]">
+                Cancelar
+              </button>
+              <button type="submit" [disabled]="cargandoAccion()"
+                      [class]="'rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] flex items-center gap-2 ' + 
+                               (cargandoAccion() ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800')">
+                @if (cargandoAccion()) {
+                  <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Programando...
+                } @else {
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-4-8v8"/>
+                  </svg>
+                  Programar Atención
+                }
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

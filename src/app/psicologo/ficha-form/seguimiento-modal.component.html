@@ -1,0 +1,395 @@
+@if (visible()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
+  <!-- Fondo con blur -->
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-purple-900/40 backdrop-blur-md"
+    (click)="handleCancel()"></div>
+  
+  <!-- Contenido del modal -->
+  <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl animate-fade-in">
+    <!-- Header del modal -->
+    <header class="flex items-start justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-8 py-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-indigo-600">Gestión Clínica</p>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900">{{ titulo() }}</h2>
+        <p class="text-sm text-slate-600">Asigna la condición clínica y el plan de tratamiento correspondiente</p>
+      </div>
+      <button type="button" 
+              (click)="handleCancel()"
+              class="rounded-full border border-slate-300 p-2 text-slate-500 transition hover:bg-white hover:shadow-lg hover:border-indigo-300 hover:text-indigo-600">
+        <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Mensaje de error -->
+    @if (submitError()) {
+      <div class="mx-8 mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-rose-50 px-5 py-4">
+        <div class="flex items-start gap-3">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
+            <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p class="text-sm font-semibold text-red-800">{{ submitError() }}</p>
+        </div>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="handleSubmit($event)" class="max-h-[70vh] overflow-y-auto px-8 py-6">
+      <div class="space-y-8">
+        <!-- Sección: Selección de Condición -->
+        <section class="space-y-4">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-100 to-purple-100">
+              <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-slate-800">Condición Clínica</h3>
+              <p class="text-sm text-slate-500">Selecciona el desenlace de la evaluación</p>
+            </div>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-3">
+            @for (opcion of condicionOpciones; track opcion.value) {
+              @let isSelected = condicionSeleccionada() === opcion.value;
+              <button type="button" 
+                      (click)="seleccionarCondicion(opcion.value)"
+                      class="group relative overflow-hidden rounded-2xl border px-5 py-4 text-left transition-all duration-300"
+                      [class]="isSelected 
+                        ? 'border-2 shadow-lg transform -translate-y-1' 
+                        : 'border-slate-200 hover:border-slate-300 hover:shadow-md'"
+                      [class.border-emerald-500]="isSelected && opcion.value === 'ALTA'"
+                      [class.bg-gradient-to-br]="isSelected && opcion.value === 'ALTA'"
+                      [class.from-emerald-50]="isSelected && opcion.value === 'ALTA'"
+                      [class.to-green-50]="isSelected && opcion.value === 'ALTA'"
+                      [class.border-sky-500]="isSelected && opcion.value === 'SEGUIMIENTO'"
+                      [class.bg-gradient-to-br]="isSelected && opcion.value === 'SEGUIMIENTO'"
+                      [class.from-sky-50]="isSelected && opcion.value === 'SEGUIMIENTO'"
+                      [class.to-cyan-50]="isSelected && opcion.value === 'SEGUIMIENTO'"
+                      [class.border-amber-500]="isSelected && opcion.value === 'TRANSFERENCIA'"
+                      [class.bg-gradient-to-br]="isSelected && opcion.value === 'TRANSFERENCIA'"
+                      [class.from-amber-50]="isSelected && opcion.value === 'TRANSFERENCIA'"
+                      [class.to-orange-50]="isSelected && opcion.value === 'TRANSFERENCIA'">
+                <!-- Indicador de selección -->
+                <div class="absolute right-3 top-3">
+                  <div class="h-5 w-5 rounded-full border-2"
+                       [class]="isSelected 
+                         ? 'border-white bg-white' 
+                         : 'border-slate-300 group-hover:border-slate-400'">
+                    @if (isSelected) {
+                      <div class="h-full w-full rounded-full"
+                           [class]="opcion.value === 'ALTA' ? 'bg-emerald-500' 
+                             : opcion.value === 'SEGUIMIENTO' ? 'bg-sky-500'
+                             : 'bg-amber-500'"></div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Icono de la condición -->
+                <div class="mb-3">
+                  @if (opcion.value === 'ALTA') {
+                    <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
+                      <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  } @else if (opcion.value === 'SEGUIMIENTO') {
+                    <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-sky-100 to-cyan-100 flex items-center justify-center">
+                      <svg class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  } @else {
+                    <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                      <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  }
+                </div>
+
+                <!-- Texto de la condición -->
+                <div>
+                  <span class="text-xs font-semibold uppercase tracking-wide"
+                        [class]="isSelected 
+                          ? opcion.value === 'ALTA' ? 'text-emerald-600'
+                            : opcion.value === 'SEGUIMIENTO' ? 'text-sky-600'
+                            : 'text-amber-600'
+                          : 'text-slate-500'">
+                    Condición
+                  </span>
+                  <h4 class="mt-1 text-base font-bold"
+                      [class]="isSelected 
+                        ? opcion.value === 'ALTA' ? 'text-emerald-900'
+                          : opcion.value === 'SEGUIMIENTO' ? 'text-sky-900'
+                          : 'text-amber-900'
+                        : 'text-slate-800'">
+                    {{ opcion.label }}
+                  </h4>
+                  <p class="mt-2 text-xs leading-relaxed"
+                     [class]="isSelected 
+                       ? opcion.value === 'ALTA' ? 'text-emerald-700'
+                         : opcion.value === 'SEGUIMIENTO' ? 'text-sky-700'
+                         : 'text-amber-700'
+                       : 'text-slate-500'">
+                    {{ opcion.description }}
+                  </p>
+                </div>
+              </button>
+            }
+          </div>
+        </section>
+
+        <!-- Sección: Observaciones -->
+        <section class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-slate-100 to-gray-100">
+              <svg class="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-slate-800">Observaciones Clínicas</h3>
+              <p class="text-sm text-slate-500">Registro de hallazgos y acuerdos terapéuticos</p>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-5">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              Descripción detallada *
+              <span class="text-xs font-normal text-slate-500">(Mínimo 50 caracteres)</span>
+            </label>
+            <textarea formControlName="observaciones" rows="4"
+              class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition placeholder:text-slate-400"
+              placeholder="Describe los hallazgos clínicos, acuerdos terapéuticos, compromisos establecidos y cualquier observación relevante para el seguimiento..."></textarea>
+            
+            @if (form.controls.observaciones.invalid && form.controls.observaciones.touched) {
+              <p class="mt-2 text-xs font-semibold text-red-600 flex items-center gap-1">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Las observaciones clínicas son obligatorias
+              </p>
+            }
+          </div>
+        </section>
+
+        <!-- Sección: Diagnóstico CIE-10 (condicional) -->
+        @if (diagnosticoRequerido()) {
+          <section class="space-y-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-blue-50 p-5">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-blue-100 to-cyan-100">
+                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-slate-800">Diagnóstico CIE-10</h3>
+                <p class="text-sm text-slate-500">Selecciona el diagnóstico que respalda la condición</p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <app-cie10-lookup
+                (selectionChange)="onCie10MultiSelection($event)"
+                [placeholder]="'Buscar por código o descripción...'"
+                class="w-full">
+              </app-cie10-lookup>
+
+              @if (diagnosticosSeleccionados()?.length) {
+                <div class="rounded-xl border border-blue-200 bg-gradient-to-r from-white to-blue-50 p-4">
+                  <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-semibold text-blue-600 uppercase">Diagnósticos seleccionados</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      @for (dx of diagnosticosSeleccionados(); track dx.id) {
+                        <span class="flex items-center gap-1 rounded-lg bg-blue-100 px-2 py-1 text-xs font-bold text-blue-700">
+                          {{ dx.codigo }}
+                          <span class="font-normal text-slate-700">{{ dx.nombre || dx.descripcion }}</span>
+                          <button type="button" (click)="eliminarDiagnostico(dx.id)" class="ml-1 text-blue-500 hover:text-red-600">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+
+              @if (intentoEnvio() && diagnosticoRequerido() && (!diagnosticosSeleccionados() || !diagnosticosSeleccionados().length)) {
+                <p class="text-xs font-semibold text-red-600 flex items-center gap-1">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Debes seleccionar al menos un diagnóstico CIE-10 válido
+                </p>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Sección: Plan de Seguimiento (condicional) -->
+        @if (mostrarPlan()) {
+          <section class="space-y-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-5">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-emerald-100 to-teal-100">
+                <svg class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-slate-800">Plan de Seguimiento</h3>
+                <p class="text-sm text-slate-500">Configura la frecuencia y características del tratamiento</p>
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  Frecuencia *
+                  <span class="text-xs font-normal text-slate-500">(Intervalo de sesiones)</span>
+                </label>
+                <select formControlName="planFrecuencia"
+                  class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition">
+                  <option value="">Seleccionar frecuencia</option>
+                  @for (freq of planFrecuenciaOpciones; track freq.value) {
+                    <option [value]="freq.value">{{ freq.label }}</option>
+                  }
+                </select>
+                @if (intentoEnvio() && form.controls.planFrecuencia.invalid) {
+                  <p class="text-xs text-red-600 font-medium">Selecciona la frecuencia del plan</p>
+                }
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  Tipo de sesión *
+                  <span class="text-xs font-normal text-slate-500">(Modalidad del tratamiento)</span>
+                </label>
+                <select formControlName="planTipoSesion"
+                  class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition">
+                  <option value="">Seleccionar tipo</option>
+                  @for (tipo of planTipoSesionOpciones; track tipo.value) {
+                    <option [value]="tipo.value">{{ tipo.label }}</option>
+                  }
+                </select>
+                @if (intentoEnvio() && form.controls.planTipoSesion.invalid) {
+                  <p class="text-xs text-red-600 font-medium">Selecciona el tipo de sesión</p>
+                }
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  Detalle del plan
+                  <span class="text-xs font-normal text-slate-500">(Agenda, compromisos, responsables)</span>
+                </label>
+                <textarea formControlName="planDetalle" rows="3"
+                  class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition"
+                  placeholder="Describe el plan terapéutico en detalle..."></textarea>
+              </div>
+
+              @if (requiereProximo()) {
+                <div class="md:col-span-2 space-y-2">
+                  <label class="block text-sm font-semibold text-slate-700">
+                    Próximo seguimiento *
+                    <span class="text-xs font-normal text-slate-500">(Fecha sugerida para próximo control)</span>
+                  </label>
+                  <input type="date" formControlName="proximoSeguimiento"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition" />
+                  @if (intentoEnvio() && form.controls.proximoSeguimiento.invalid) {
+                    <p class="text-xs text-red-600 font-medium">Ingresa una fecha válida para el próximo seguimiento</p>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Sección: Transferencia (condicional) -->
+        @if (mostrarTransferencia()) {
+          <section class="space-y-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-amber-100 to-orange-100">
+                <svg class="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-slate-800">Datos de Transferencia</h3>
+                <p class="text-sm text-slate-500">Información de la unidad receptora y coordinaciones</p>
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  Unidad de destino *
+                  <span class="text-xs font-normal text-slate-500">(Nombre de la unidad receptora)</span>
+                </label>
+                <input type="text" formControlName="transferenciaUnidad"
+                  class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition"
+                  placeholder="Ej: Unidad de Salud Mental Especializada" />
+                @if (intentoEnvio() && form.controls.transferenciaUnidad.invalid) {
+                  <p class="text-xs text-red-600 font-medium">Ingresa la unidad de destino</p>
+                }
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  Observaciones de transferencia *
+                  <span class="text-xs font-normal text-slate-500">(Motivo, coordinaciones, responsables)</span>
+                </label>
+                <textarea formControlName="transferenciaObservacion" rows="3"
+                  class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none transition"
+                  placeholder="Describe las observaciones y coordinaciones realizadas para la transferencia..."></textarea>
+                @if (intentoEnvio() && form.controls.transferenciaObservacion.invalid) {
+                  <p class="text-xs text-red-600 font-medium">Describe las observaciones de la transferencia</p>
+                }
+              </div>
+            </div>
+          </section>
+        }
+      </div>
+
+      <!-- Footer del modal -->
+      <footer class="mt-8 flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 pt-6">
+        <button type="button" 
+                (click)="handleCancel()"
+                class="rounded-lg border-2 border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-400 hover:bg-slate-50 hover:shadow-md transition disabled:opacity-50"
+                [disabled]="guardando()">
+          Cancelar
+        </button>
+        <button type="submit"
+                class="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-7 py-3 text-sm font-bold text-white shadow-lg hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:cursor-not-allowed disabled:opacity-60"
+                [disabled]="guardando()">
+          @if (guardando()) {
+            <span class="flex items-center gap-2">
+              <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Guardando...
+            </span>
+          } @else {
+            <span class="flex items-center gap-2">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Asignar Condición
+            </span>
+          }
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>
+}

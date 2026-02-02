@@ -1,0 +1,204 @@
+html, body, app-root {
+	width: 100vw;
+	min-height: 100vh;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	box-sizing: border-box;
+}
+/* Estilos específicos para el nav */
+.sticky-nav {
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+
+/* Efectos hover para links del nav */
+.nav-link {
+	position: relative;
+	transition: all 0.2s ease;
+}
+
+.nav-link::after {
+	content: '';
+	position: absolute;
+	bottom: -2px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 2px;
+	background-color: #3b82f6;
+	transition: width 0.2s ease;
+}
+
+.nav-link:hover::after {
+	width: 80%;
+}
+
+/* Animación para el menú móvil */
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.mobile-menu-enter {
+	animation: slideDown 0.3s ease-out;
+}
+/* Estilos para badges */
+.badge {
+	@apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide;
+}
+
+.badge-success {
+	@apply bg-emerald-100 text-emerald-700;
+}
+
+.badge-warning {
+	@apply bg-amber-100 text-amber-700;
+}
+
+.badge-danger {
+	@apply bg-red-100 text-red-700;
+}
+
+.badge-info {
+	@apply bg-blue-100 text-blue-700;
+}
+
+.badge-neutral {
+	@apply bg-slate-100 text-slate-700;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fuentes personalizadas */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Estilos personalizados para la aplicación clínica */
+:root {
+	--institucional: #1E3A8A;
+	--medico: #059669;
+	--blanco: #FFFFFF;
+	--gris-claro: #F8FAFC;
+	--gris-medio: #64748B;
+	--rojo-institucional: #DC2626;
+	--bg: var(--gris-claro);
+}
+
+body {
+	font-family: 'Inter', sans-serif;
+	background-color: var(--bg);
+}
+
+/* Componentes personalizados */
+.clinic-container {
+	max-width: 1280px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.form-section {
+	background-color: rgba(255,255,255,0.80);
+	box-shadow: 0 10px 20px rgba(2,6,23,0.08);
+	border-radius: 8px;
+	padding: 1.5rem;
+	margin-bottom: 1.5rem;
+	border: 1px solid #e5e7eb;
+}
+
+.btn-primary {
+	background-color: var(--institucional);
+	color: var(--blanco);
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	font-weight: 600;
+	transition: filter .12s ease, transform .12s ease;
+}
+.btn-primary:hover { filter: brightness(.95); }
+.btn-primary:focus { outline: none; box-shadow: 0 0 0 4px rgba(30,58,138,0.12); }
+
+.btn-secondary {
+	background-color: var(--medico);
+	color: var(--blanco);
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	font-weight: 600;
+	transition: filter .12s ease, transform .12s ease;
+}
+.btn-secondary:hover { filter: brightness(.95); }
+.btn-secondary:focus { outline: none; box-shadow: 0 0 0 4px rgba(5,150,105,0.12); }
+
+.btn-outline {
+	border: 1px solid #d1d5db;
+	color: #374151;
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	background-color: transparent;
+	transition: background-color .12s ease;
+}
+.btn-outline:hover { background-color: #f8fafc; }
+.btn-outline:focus { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.08); }
+
+/* Estilos para formularios clínicos */
+.clinic-form { margin-bottom: 1.5rem; }
+.form-group { margin-bottom: .5rem; }
+.form-label { display: block; font-size: .875rem; font-weight: 500; color: #374151; margin-bottom: .25rem; }
+.form-input { width: 100%; padding: .5rem .75rem; border: 1px solid #d1d5db; border-radius: .5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.form-input:focus { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.08); }
+.form-select { width:100%; padding: .5rem .75rem; border:1px solid #d1d5db; border-radius:.5rem; background:#fff; }
+
+/* Estilos para tarjetas de paciente */
+.patient-card { background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(2,6,23,0.06); border:1px solid #e5e7eb; padding:1rem; transition: box-shadow .12s ease; }
+.patient-card:hover { box-shadow:0 12px 30px rgba(2,6,23,0.08); }
+
+/* Estilos para estados clínicos */
+.status-apto { background:#dcfce7; color:#14532d; padding:.25rem .5rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+.status-acompanamiento { background:#fef3c7; color:#92400e; padding:.25rem .5rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+.status-no-apto { background:#fee2e2; color:#7f1d1d; padding:.25rem .5rem; border-radius:9999px; font-size:.75rem; font-weight:600; }
+
+/* Login specific styles */
+/* Login layout for mockup-style centered card */
+.page-bg { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; background-color: var(--gris-claro); }
+.page-bg-image { position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1900&q=80'); background-size: cover; background-position: center; filter: saturate(.25) blur(0.6px); opacity: 0.7; }
+.page-center { position: relative; z-index: 5; display:flex; align-items:center; justify-content:center; width:100%; padding: 40px 20px; }
+.card { width:100%; max-width:420px; background: rgba(255,255,255,0.80); border-radius: 12px; box-shadow: 0 12px 30px rgba(2,6,23,0.08); overflow: hidden; }
+.card-header { background: var(--institucional); color: #fff; padding: 18px 20px; }
+.brand { display:flex; align-items:center; gap:12px; }
+.brand-logo { width:44px; height:44px; border-radius:8px; background: rgba(255,255,255,0.80); color: var(--institucional); display:flex; align-items:center; justify-content:center; font-weight:700; }
+.brand-title { font-weight:700; font-size:16px; }
+.brand-sub { font-size:12px; opacity:0.9; }
+.card-body { padding: 22px; }
+.card-heading { font-size:24px; font-weight:700; color: #0f172a; }
+.card-subheading { color: #6b7280; margin-bottom: 14px; }
+.form { margin-top: 10px; }
+.field { margin-bottom: 14px; }
+.field-label { display:block; font-size:14px; color:#374151; margin-bottom:6px; }
+.field-input { position:relative; }
+.field-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); background:#f1f5f9; color:#0f172a; padding:8px; border-radius:9999px; }
+.input { width:100%; padding:12px 14px 12px 48px; border-radius:8px; border:1px solid #e6eef6; background:#fff; color:#0f172a; }
+.input::placeholder { color:#94a3b8; }
+.field-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:transparent; border:none; }
+.row-between { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+.remember { display:flex; align-items:center; gap:8px; color:#475569; }
+.forgot { color:var(--institucional); cursor:pointer; }
+.row-cta { margin-top:18px; }
+.btn { display:inline-block; padding:12px 18px; border-radius:8px; font-weight:600; }
+.btn-primary { background: linear-gradient(90deg,var(--medico),var(--institucional)); color:#fff; width:100%; box-shadow: 0 10px 30px rgba(2,6,23,0.08); }
+.info-box { margin-top:18px; display:flex; gap:12px; align-items:flex-start; background:#eef8ff; border:1px solid #dbeefd; padding:14px; border-radius:10px; }
+.info-icon { background:#e6f9ef; padding:10px; border-radius:8px; color:#059669; }
+.info-title { font-weight:700; color:#0f172a; }
+.info-text { color:#475569; font-size:14px; }
+.card-footer { padding:16px 22px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#6b7280; }
+.copyright { }
+.links { }
+
+

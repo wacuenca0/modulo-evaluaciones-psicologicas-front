@@ -1,0 +1,288 @@
+<section class="space-y-8">
+  <header class="space-y-2">
+    <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Seguimiento clínico</p>
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-semibold text-slate-900">Historial de valoraciones por persona</h1>
+      <button type="button"
+        class="rounded-lg bg-emerald-600 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all"
+        (click)="crearEvaluacion()"
+        [disabled]="!personalIdDisponible()"
+        title="Crear nueva evaluación para la persona consultada">
+        <span class="flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Nueva evaluación
+        </span>
+      </button>
+    </div>
+    <p class="text-sm text-slate-500 max-w-3xl">
+      Revisa las valoraciones activas e históricas de un mismo personal militar o dependiente, 
+      <strong class="font-semibold text-slate-900">incluyendo automáticamente las valoraciones del repositorio histórico</strong>.
+    </p>
+  </header>
+
+  @if (error()) {
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <span>{{ error() }}</span>
+      </div>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="buscar()" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+    <div class="grid gap-4 md:grid-cols-2">
+      <label class="space-y-1.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cédula</span>
+        <input type="text" maxlength="20" formControlName="cedula" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
+               placeholder="Ej. 0912345678" />
+      </label>
+      
+      <div class="flex items-center space-x-2 pt-6">
+        <label class="relative flex cursor-pointer items-center rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:bg-slate-50 transition-colors">
+          <input type="checkbox" formControlName="incluirSeguimientos" 
+                 class="peer sr-only" />
+          <div class="flex h-5 w-5 items-center justify-center rounded border border-slate-300 peer-checked:border-slate-900 peer-checked:bg-slate-900">
+            <svg class="h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-slate-900">Incluir seguimientos</p>
+            <p class="text-xs text-slate-500">Mostrar detalle de cada seguimiento clínico</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3 pt-2">
+                  <button type="submit" [disabled]="loading()" 
+                    class="rounded-lg bg-slate-900 px-6 py-3 text-base font-semibold text-white transition-all 
+                     hover:bg-slate-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
+        @if (loading()) {
+          <span class="flex items-center gap-2">
+            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Consultando...
+          </span>
+        } @else {
+          <span class="flex items-center gap-2">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Buscar historial
+          </span>
+        }
+      </button>
+            <button type="button" (click)="limpiar()" [disabled]="loading()" 
+              class="rounded-lg border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 transition-all 
+               hover:bg-slate-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
+        <span class="flex items-center gap-2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Limpiar
+        </span>
+      </button>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <div class="space-y-3">
+      @for (_ of [0, 1, 2]; track $index) {
+        <div class="h-32 animate-pulse rounded-2xl bg-slate-100"></div>
+      }
+    </div>
+  } @else {
+    <section class="space-y-6">
+      @if (busquedaEjecutada() && sinResultados()) {
+        <div class="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
+          <div class="mx-auto max-w-md">
+            <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="mt-4 text-sm font-medium text-slate-900">No se registran fichas para la persona consultada</p>
+            <p class="mt-1 text-xs text-slate-500">Se buscó en fichas actuales e históricas</p>
+          </div>
+        </div>
+      } @else {
+        @if (filtrosResumen().length) {
+          <div class="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+            <span class="font-semibold text-slate-700">Búsqueda:</span>
+            @for (filtro of filtrosResumen(); track filtro.etiqueta) {
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
+                <span class="font-semibold text-slate-700">{{ filtro.etiqueta }}:</span> {{ filtro.valor }}
+                <button type="button" (click)="removerFiltro(filtro)" 
+                        class="ml-1 text-slate-400 hover:text-slate-600">
+                  <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+            }
+          </div>
+        }
+
+        @if (resultados().length > 0) {
+          <div class="grid gap-4 md:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total fichas</p>
+              <p class="mt-2 text-2xl font-semibold text-slate-900">{{ resultados().length }}</p>
+            </div>
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Fichas actuales</p>
+              <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ fichasActuales().length }}</p>
+            </div>
+            <div class="rounded-xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
+              <p class="text-xs font-semibold uppercase tracking-wide text-blue-600">Historial previo</p>
+              <p class="mt-2 text-2xl font-semibold text-blue-700">{{ fichasHistoricas().length }}</p>
+            </div>
+          </div>
+        }
+
+        @if (fichasActuales().length) {
+          <section class="space-y-4">
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-semibold text-slate-900">Fichas vigentes</h2>
+              <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                {{ fichasActuales().length }} activas
+              </span>
+            </div>
+            <div class="grid gap-4 lg:grid-cols-2">
+              @for (ficha of fichasActuales(); track trackFicha(ficha)) {
+                <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                  <header class="mb-3 flex items-start justify-between gap-4">
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Evaluación</p>
+                      <p class="text-lg font-semibold text-slate-900">{{ ficha.numeroFicha || '—' }}</p>
+                    </div>
+                    <span [class]="getBadgeClass(ficha.estadoFicha)">
+                      {{ ficha.estadoFicha || ficha.condicionClinica || 'Activa' }}
+                    </span>
+                    <!-- Botón solo para fichas en seguimiento -->
+                    @if ((ficha.estadoFicha || ficha.condicionClinica || '').toLowerCase().includes('seguimiento')) {
+                      <button type="button"
+                        class="ml-2 rounded bg-blue-600 text-white px-3 py-1 text-xs font-semibold hover:bg-blue-700 transition"
+                        (click)="abrirModalSeguimiento(ficha)">
+                        Programar seguimiento
+                      </button>
+                    }
+                  </header>
+                  <!-- Modal de seguimiento -->
+                  <app-programar-seguimiento-modal
+                    *ngIf="mostrarModalSeguimiento()"
+                    [show]="mostrarModalSeguimiento()"
+                    [psicologoActual]="seguimientoFicha() ? { id: (seguimientoFicha()?.psicologoId ?? null), nombre: seguimientoFicha()?.psicologoNombre ?? '' } : null"
+
+                    [formModel]="{}"
+                    [cargandoAccion]="seguimientoCargando() === true"
+                    [error]="seguimientoError()"
+                    [mensajeExito]="seguimientoMensajeExito()"
+                    (cancelar)="cerrarModalSeguimiento()"
+                    (guardar)="guardarSeguimiento()"
+                  ></app-programar-seguimiento-modal>
+                  <dl class="space-y-2 text-sm text-slate-600">
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Fecha</dt>
+                      <dd>{{ formatearFecha(ficha.fechaEvaluacion) }}</dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Diagnóstico</dt>
+                      <dd class="text-right">
+                        <p class="font-semibold text-slate-900">{{ diagnosticoPrincipal(ficha) }}</p>
+                        @if (ficha.diagnosticoDescripcion) {
+                          <p class="text-xs text-slate-500">{{ ficha.diagnosticoDescripcion }}</p>
+                        }
+                      </dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Psicólogo</dt>
+                      <dd>{{ ficha.psicologoNombre || 'No asignado' }}</dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Seguimientos</dt>
+                      <dd>{{ ficha.seguimientos?.length || ficha.totalSeguimientos || ficha.seguimientosCantidad || 0 }}</dd>
+                    </div>
+                  </dl>
+
+                  @if (ficha.seguimientos?.length && form.getRawValue().incluirSeguimientos) {
+                    <details class="mt-4 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <summary class="cursor-pointer text-sm font-semibold text-slate-900">
+                        Ver seguimientos ({{ ficha.seguimientos?.length || 0 }})
+                      </summary>
+                      <ul class="space-y-3 text-sm text-slate-600">
+                        @for (seguimiento of ficha.seguimientos; track trackSeguimiento(seguimiento)) {
+                          <li class="rounded-lg border border-slate-200 bg-white p-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                              {{ formatearFecha(seguimiento.fecha) }}
+                            </p>
+                            <p class="mt-1 text-sm text-slate-700">{{ seguimiento.descripcion || 'Sin descripción' }}</p>
+                            @if (seguimiento.registradoPor) {
+                              <p class="mt-1 text-xs text-slate-500">Registrado por {{ seguimiento.registradoPor }}</p>
+                            }
+                          </li>
+                        }
+                      </ul>
+                    </details>
+                  }
+                </article>
+              }
+            </div>
+          </section>
+        }
+
+        @if (fichasHistoricas().length) {
+          <section class="space-y-4">
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-semibold text-slate-900">Historial previo</h2>
+              <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                {{ fichasHistoricas().length }} históricas
+              </span>
+            </div>
+            <div class="grid gap-4 lg:grid-cols-2">
+              @for (ficha of fichasHistoricas(); track trackFicha(ficha)) {
+                <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                  <header class="mb-3 flex items-start justify-between gap-4">
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Evaluación</p>
+                      <p class="text-lg font-semibold text-slate-900">{{ ficha.numeroFicha || '—' }}</p>
+                    </div>
+                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      {{ ficha.origen || 'Histórico' }}
+                    </span>
+                  </header>
+                  <dl class="space-y-2 text-sm text-slate-600">
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Fecha</dt>
+                      <dd>{{ formatearFecha(ficha.fechaEvaluacion) }}</dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Condición</dt>
+                      <dd>{{ ficha.condicionClinica || ficha.estadoFicha || 'Sin registro' }}</dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-4">
+                      <dt class="font-semibold text-slate-700">Diagnóstico</dt>
+                      <dd class="text-right">
+                        <p class="font-semibold text-slate-900">{{ diagnosticoPrincipal(ficha) }}</p>
+                        @if (ficha.diagnosticoDescripcion) {
+                          <p class="text-xs text-slate-500">{{ ficha.diagnosticoDescripcion }}</p>
+                        }
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              }
+            </div>
+          </section>
+        }
+      }
+    </section>
+  }
+</section>
