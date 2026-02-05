@@ -146,6 +146,21 @@ export class AtencionPsicologicaService {
   }
 
   /**
+   * Cancelar atención usando parámetro de query ?razon=, según contrato indicado
+   */
+  cancelarAtencionQuery(id: number, razon: string): Observable<AtencionPsicologicaResponseDTO> {
+    const params = new HttpParams().set('razon', razon);
+    return this.http.post<AtencionPsicologicaResponseDTO>(
+      `${this.apiUrl}/${id}/cancelar`,
+      null,
+      {
+        params,
+        headers: this.getHeaders()
+      }
+    );
+  }
+
+  /**
    * Cancelar atención (método legacy - mantenido por compatibilidad)
    */
   cancelarAtencionLegacy(id: number, razon: string): Observable<AtencionPsicologicaResponseDTO> {
@@ -219,7 +234,7 @@ export class AtencionPsicologicaService {
   }
 
   /**
-   * Registrar no asistencia
+    * Registrar no asistencia usando endpoint dedicado (legacy)
    */
   registrarNoAsistencia(id: number, observaciones: string): Observable<AtencionPsicologicaResponseDTO> {
     const request = { observaciones };
@@ -245,6 +260,18 @@ export class AtencionPsicologicaService {
         params,
         headers: this.getHeaders() 
       }
+    );
+  }
+
+  /**
+   * Marcar atención como NO_ASISTIO usando PUT /api/atenciones/{id}
+   */
+  marcarNoAsistio(id: number): Observable<AtencionPsicologicaResponseDTO> {
+    const payload = this.agregarUsuarioAlRequest({ estado: 'NO_ASISTIO' });
+    return this.http.put<AtencionPsicologicaResponseDTO>(
+      `${this.apiUrl}/${id}`,
+      payload,
+      { headers: this.getHeaders() }
     );
   }
 
@@ -356,6 +383,16 @@ export class AtencionPsicologicaService {
   obtenerHistorico(id: number): Observable<any> {
     return this.http.get<any>(
       `${this.apiUrl}/${id}/historico`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /**
+   * Obtener historial de cambios de una atención (endpoint /historial)
+   */
+  obtenerHistorialCambios(id: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/${id}/historial`,
       { headers: this.getHeaders() }
     );
   }

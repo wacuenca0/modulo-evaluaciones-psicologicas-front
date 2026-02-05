@@ -65,6 +65,7 @@ export interface AtencionPsicologicaResponseDTO {
   fechaActualizacion?: string;
   duracionMinutos: number;
   fichaPsicologicaId?: number | null;
+  tipoEvaluacion?: string | null;
   
   // Nuevas propiedades para reprogramación
   reprogramada?: boolean;

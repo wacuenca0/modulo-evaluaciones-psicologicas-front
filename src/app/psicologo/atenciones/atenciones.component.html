@@ -84,13 +84,14 @@
   <!-- Lista de Atenciones -->
   <app-atenciones-lista
     [atenciones]="atenciones()"
+    [resaltarId]="atencionResaltadaId()"
     (verDetalle)="abrirDetalleModal($event)"
+    (verHistorial)="abrirHistorialCambios($event)"
     (finalizar)="abrirFinalizarModal($event)"
     (cancelar)="cancelarAtencion($event)"
     (noAsistio)="marcarNoAsistio($event)"
-    (reprogramar)="reprogramarAtencion($event)"
-  ></app-atenciones-lista>
-
+    (reprogramar)="reprogramarAtencion($event)">
+  </app-atenciones-lista>
   <!-- Modal Detalle Atención -->
   @if (showDetalleModal()) {
     <app-atencion-detalle
@@ -100,25 +101,111 @@
     ></app-atencion-detalle>
   }
 
-  <!-- Modal Finalizar Atención -->
-  @if (showFinalizarModal()) {
-    <app-finalizar-atencion-modal
-      [open]="showFinalizarModal()"
-      (closed)="cerrarFinalizarModal()"
-      (finalizar)="onFinalizarAtencion($event)"
-    ></app-finalizar-atencion-modal>
+  <!-- Modal Historial de Cambios -->
+  @if (showHistorialModal()) {
+    <div class="modal-overlay" (click)="cerrarHistorialModal()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-md" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
+        <!-- Header -->
+        <div class="modal-header">
+          <div class="modal-header-contenido">
+            <h3 class="modal-titulo">Historial de cambios</h3>
+            <p class="modal-subtitulo">
+              Revisa cómo ha ido cambiando el estado de esta atención en el tiempo.
+            </p>
+          </div>
+          <button class="modal-cerrar" (click)="cerrarHistorialModal()">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contenido -->
+        <div class="modal-body">
+          @if (cargandoHistorial()) {
+            <div class="cargando-resultados">Cargando historial...</div>
+          } @else {
+            @if (historialError()) {
+              <div class="mensaje-error-modal">{{historialError()}}</div>
+            }
+
+            @if (historialCambios().length === 0 && !historialError()) {
+              <div class="sin-resultados">Esta atención aún no tiene cambios registrados.</div>
+            } @else if (historialCambios().length > 0) {
+              <div class="timeline">
+                <div class="timeline-linea"></div>
+                @for (cambio of historialCambios(); track cambio.id) {
+                  <div class="timeline-item">
+                    <div class="timeline-punto"
+                      [ngClass]="{
+                        'punto-programada': cambio.estado === 'PROGRAMADA',
+                        'punto-reprogramada': cambio.estado === 'REPROGRAMADA',
+                        'punto-finalizada': cambio.estado === 'FINALIZADA',
+                        'punto-cancelada': cambio.estado === 'CANCELADA',
+                        'punto-no_asistio': cambio.estado === 'NO_ASISTIO'
+                      }"></div>
+
+                    <div class="timeline-contenido">
+                      <div class="timeline-header">
+                        <div class="timeline-estado">
+                          <svg class="estado-icono" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                          </svg>
+                          <span class="estado-label"
+                            [ngClass]="{
+                              'programada': cambio.estado === 'PROGRAMADA',
+                              'reprogramada': cambio.estado === 'REPROGRAMADA',
+                              'finalizada': cambio.estado === 'FINALIZADA',
+                              'cancelada': cambio.estado === 'CANCELADA',
+                              'no-asistio': cambio.estado === 'NO_ASISTIO'
+                            }">
+                            {{ cambio.estado }}
+                          </span>
+                        </div>
+                        <span class="historial-fecha">{{ cambio.fechaCambio | date:'short' }}</span>
+                      </div>
+
+                      <div class="timeline-metadata">
+                        <div class="metadata-item">
+                          <span class="metadata-label">Psicólogo</span>
+                          <span class="metadata-valor">{{ cambio.psicologoNombres }} {{ cambio.psicologoApellidos }}</span>
+                        </div>
+                      </div>
+
+                      @if (cambio.razonCambio) {
+                        <div class="timeline-razon">
+                          <span class="razon-label">Razón del cambio</span>
+                          <p class="razon-texto">{{ cambio.razonCambio }}</p>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="cerrarHistorialModal()">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   }
 
   <!-- Modal Cancelar Atención -->
   @if (showCancelarModal()) {
-    <div class="modal-overlay" (click)="cerrarCancelarModal()">
-      <div class="modal-container modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="cerrarCancelarModal()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
         <div class="modal-header">
           <h3>Cancelar atención</h3>
         </div>
         <div class="modal-body">
-          <label>Razón de cancelación</label>
-          <input type="text" [(ngModel)]="razonCancelacion" class="form-input" />
+          <label for="razonCancelacionModal">Razón de cancelación</label>
+          <input id="razonCancelacionModal" type="text" [(ngModel)]="razonCancelacion" class="form-input" />
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" (click)="cerrarCancelarModal()">Cerrar</button>
@@ -128,38 +215,50 @@
     </div>
   }
 
-  <!-- Modal No Asistió -->
-  @if (showNoAsistioModal()) {
-    <div class="modal-overlay" (click)="cerrarNoAsistioModal()">
-      <div class="modal-container modal-sm" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Marcar como No Asistió</h3>
-        </div>
-        <div class="modal-body">
-          <p>¿Confirmar que el paciente no asistió?</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" (click)="cerrarNoAsistioModal()">Cerrar</button>
-          <button class="btn btn-warning" (click)="onNoAsistioAtencion()">Confirmar</button>
-        </div>
-      </div>
-    </div>
-  }
+  <!-- Modal No Asistió eliminado: acción directa desde el botón de la tarjeta -->
 
   <!-- Modal Reprogramar Atención -->
   @if (showReprogramarModal()) {
-    <div class="modal-overlay" (click)="cerrarReprogramarModal()">
-      <div class="modal-container modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="cerrarReprogramarModal()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
         <div class="modal-header">
-          <h3>Reprogramar atención</h3>
+          <div class="modal-header-contenido">
+            <h3 class="modal-titulo">Reprogramar atención</h3>
+            <p class="modal-subtitulo">Actualice la fecha, horario y modalidad de la cita.</p>
+          </div>
+          <button class="modal-cerrar" (click)="cerrarReprogramarModal()">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
         <div class="modal-body">
-          <label>Nueva fecha</label>
-          <input type="date" [(ngModel)]="nuevaFechaReprogramar" class="form-input" />
+          <div class="form-group">
+            <label class="form-label requerido" for="reprogramarFechaAtencion">Fecha de atención</label>
+            <input id="reprogramarFechaAtencion" type="date" [(ngModel)]="reprogramarForm.fechaAtencion" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label requerido" for="reprogramarHoraInicio">Horario</label>
+            <div class="horario-inputs">
+              <input id="reprogramarHoraInicio" type="time" [(ngModel)]="reprogramarForm.horaInicio" class="form-input hora-input" />
+              <span class="horario-separador">-</span>
+              <input id="reprogramarHoraFin" type="time" [(ngModel)]="reprogramarForm.horaFin" class="form-input hora-input" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label requerido" for="reprogramarTipoAtencion">Modalidad</label>
+            <select id="reprogramarTipoAtencion" class="form-select" [(ngModel)]="reprogramarForm.tipoAtencion">
+              <option *ngFor="let tipo of tiposAtencion()" [value]="tipo.valor">{{ tipo.label }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label requerido" for="reprogramarMotivo">Motivo de reprogramación</label>
+            <textarea id="reprogramarMotivo" rows="3" class="form-textarea" [(ngModel)]="reprogramarForm.motivoReprogramacion" placeholder="Explique por qué se reprograma la atención..."></textarea>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" (click)="cerrarReprogramarModal()">Cerrar</button>
-          <button class="btn btn-secondary" (click)="onReprogramarAtencion()">Reprogramar</button>
+          <button class="btn btn-secondary" (click)="onReprogramarAtencion()" [disabled]="cargandoAccion()">Reprogramar</button>
         </div>
       </div>
     </div>
@@ -172,8 +271,16 @@
         <!-- Header -->
         <div class="modal-header">
           <div class="modal-header-contenido">
-            <h3 class="modal-titulo">{{modoEdicion() ? 'Editar' : 'Crear Nueva'}} Atención</h3>
-            <p class="modal-subtitulo">Complete la información de la atención psicológica</p>
+            <h3 class="modal-titulo">
+              {{ modoFinalizar() 
+                  ? 'Finalizar atención programada'
+                  : (modoEdicion() ? 'Editar' : 'Crear Nueva') + ' Atención' }}
+            </h3>
+            <p class="modal-subtitulo">
+              {{ modoFinalizar() 
+                  ? 'Complete la información clínica para finalizar la atención'
+                  : 'Complete la información de la atención psicológica' }}
+            </p>
           </div>
           <button class="modal-cerrar" (click)="cerrarModal()">
             <svg viewBox="0 0 24 24">
@@ -194,8 +301,7 @@
             <div class="form-seccion">
               <h4 class="seccion-titulo">Información Básica</h4>
               <div class="form-grid">
-                <!-- Fila 1: Paciente | Fecha de atención -->
-                <div class="form-group">
+                <div class="form-group full-width">
                   <label for="pacienteAutocomplete" class="form-label requerido">Paciente</label>
                   <app-paciente-autocomplete id="pacienteAutocomplete" (pacienteSeleccionado)="asignarPaciente($event)"></app-paciente-autocomplete>
                   @if (pacienteSeleccionado) {
@@ -210,11 +316,19 @@
                     </div>
                   }
                 </div>
+                <!-- Fecha de atención -->
                 <div class="form-group">
                   <label for="fechaAtencion" class="form-label requerido">Fecha de atención</label>
                   <input type="date" name="fechaAtencion" required id="fechaAtencion" class="form-input" [(ngModel)]="formModel.fechaAtencion">
                 </div>
-                <!-- Fila 2: Horario | Tipo de consulta -->
+                <!-- Tipo de consulta -->
+                <div class="form-group">
+                  <label for="tipoConsulta" class="form-label requerido">Tipo de consulta</label>
+                  <select name="tipoConsulta" required id="tipoConsulta" class="form-select" [(ngModel)]="formModel.tipoConsulta">
+                    <option *ngFor="let tipo of tiposConsulta()" [value]="tipo.valor">{{tipo.label}}</option>
+                  </select>
+                </div>
+                <!-- Horario debajo de fecha -->
                 <div class="form-group">
                   <label for="horaInicio" class="form-label requerido">Horario</label>
                   <div class="horario-inputs">
@@ -223,14 +337,8 @@
                     <input type="time" name="horaFin" required id="horaFin" class="form-input hora-input" [(ngModel)]="formModel.horaFin">
                   </div>
                 </div>
+                <!-- Modalidad -->
                 <div class="form-group">
-                  <label for="tipoConsulta" class="form-label requerido">Tipo de consulta</label>
-                  <select name="tipoConsulta" required id="tipoConsulta" class="form-select" [(ngModel)]="formModel.tipoConsulta">
-                    <option *ngFor="let tipo of tiposConsulta()" [value]="tipo.valor">{{tipo.label}}</option>
-                  </select>
-                </div>
-                <!-- Fila 3: Modalidad (ocupa las dos columnas) -->
-                <div class="form-group" style="grid-column: 1/3;">
                   <label for="tipoAtencion" class="form-label requerido">Modalidad</label>
                   <select name="tipoAtencion" required id="tipoAtencion" class="form-select" [(ngModel)]="formModel.tipoAtencion">
                     <option *ngFor="let tipo of tiposAtencion()" [value]="tipo.valor">{{tipo.label}}</option>
@@ -251,27 +359,33 @@
               <div class="diagnosticos-container">
                 <!-- Búsqueda -->
                 <div class="diagnosticos-busqueda">
-                  <input type="text" name="cie10Search" placeholder="Buscar por código o nombre..." class="busqueda-input" [(ngModel)]="cie10SearchTerm">
+                  <input
+                    type="text"
+                    name="cie10Search"
+                    placeholder="Buscar por código o nombre..."
+                    class="busqueda-input"
+                    [ngModel]="cie10SearchTerm()"
+                    (ngModelChange)="cie10SearchTerm.set($event)"
+                  >
                   @if (cie10SearchTerm() && cie10SearchTerm().length >= 2) {
                     <div class="busqueda-resultados">
                       @if (cargandoDiagnosticos()) {
                         <div class="instruccion-busqueda">Buscando...</div>
                       } @else if (diagnosticosFiltrados().length === 0) {
-                        <div class="instruccion-busqueda">No se encontraron diagnósticos</div>
+                        <div class="sin-resultados">No se encontraron diagnósticos</div>
                       } @else {
                         <div class="resultados-lista">
                           @for (diagnostico of diagnosticosFiltrados(); track diagnostico.id) {
-                            <div class="resultado-item" (click)="toggleDiagnostico(diagnostico.id!)" (keydown)="onDiagnosticoKeyDown($event, diagnostico.id!)" [class.seleccionado]="formModel.diagnosticoIds.includes(diagnostico.id!)">
-                              <div class="resultado-info">
-                                <span class="resultado-codigo">{{diagnostico.codigo}}</span>
-                                <span class="resultado-nombre">{{diagnostico.nombre}}</span>
+                            <button
+                              type="button"
+                              class="diagnostico-opcion"
+                              (click)="toggleDiagnostico(diagnostico.id!)"
+                            >
+                              <div class="diagnostico-info">
+                                <span class="diagnostico-codigo">{{diagnostico.codigo}}</span>
+                                <span class="diagnostico-nombre">{{diagnostico.nombre}}</span>
                               </div>
-                              @if (formModel.diagnosticoIds.includes(diagnostico.id!)) {
-                                <svg class="check-icon" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                </svg>
-                              }
-                            </div>
+                            </button>
                           }
                         </div>
                       }
@@ -354,9 +468,9 @@
             <!-- Footer del Formulario -->
             <div class="form-footer">
               <div class="form-acciones">
-                <button type="button" class="btn btn-outline" (click)="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger" (click)="cerrarModal()">Cancelar</button>
                 
-                @if (!modoEdicion() && !modoProgramada()) {
+                @if (!modoEdicion() && !modoProgramada() && !modoFinalizar()) {
                   <button type="button" class="btn btn-warning" (click)="guardarEnCurso()" [disabled]="cargandoAccion()">
                     @if (cargandoAccion()) {
                       <span class="cargando-spinner"></span> Guardando...
@@ -366,11 +480,13 @@
                   </button>
                 }
                 
-                <button type="submit" class="btn btn-primary" [disabled]="cargandoAccion()">
+                <button type="submit" class="btn btn-success" [disabled]="cargandoAccion()">
                   @if (cargandoAccion()) {
                     <span class="cargando-spinner"></span> Procesando...
                   } @else {
-                    {{modoEdicion() ? 'Actualizar' : modoProgramada() ? 'Programar' : 'Crear'}} Atención
+                    {{ modoFinalizar() 
+                        ? 'Finalizar atención'
+                        : (modoEdicion() ? 'Actualizar' : modoProgramada() ? 'Programar' : 'Crear') + ' Atención' }}
                   }
                 </button>
               </div>

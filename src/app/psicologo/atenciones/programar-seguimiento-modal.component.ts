@@ -83,6 +83,15 @@ export class ProgramarSeguimientoModalComponent implements OnInit {
     return item.valor;
   }
 
+  private scrollToError(): void {
+    setTimeout(() => {
+      const container = document.querySelector('.seguimiento-modal-body') as HTMLElement | null;
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 0);
+  }
+
   // Enviar el seguimiento al backend y redirigir
   guardarSeguimiento() {
     console.log('FormModel al enviar:', this.formModel);
@@ -107,6 +116,7 @@ export class ProgramarSeguimientoModalComponent implements OnInit {
                      formModelFichaId: this.formModel.fichaId,
                      pacienteProps: this.pacienteSeleccionado ? Object.keys(this.pacienteSeleccionado) : 'no paciente'
                    });
+      this.scrollToError();
       return;
     }
     
@@ -120,6 +130,7 @@ export class ProgramarSeguimientoModalComponent implements OnInit {
     
     if (!this.formModel.motivoConsulta) {
       this.error = 'El motivo de consulta es obligatorio.';
+      this.scrollToError();
       return;
     }
     
@@ -152,18 +163,19 @@ export class ProgramarSeguimientoModalComponent implements OnInit {
         // Cerrar modal y redirigir resaltando la atención creada
         setTimeout(() => {
           this.cancelar.emit();
-          // Redirigir a la página de atenciones y pasar el id de la nueva atención para resaltar
+          // Redirigir a la pantalla de atenciones del psicólogo
           const atencionId = response?.id || response?.atencionId || null;
           if (atencionId) {
-            this.router.navigate(['/atenciones'], { queryParams: { resaltar: atencionId } });
+            this.router.navigate(['/psicologo/atenciones'], { queryParams: { resaltar: atencionId } });
           } else {
-            this.router.navigate(['/atenciones']);
+            this.router.navigate(['/psicologo/atenciones']);
           }
         }, 1500);
       },
       error: (err) => {
         console.error('Error del servidor:', err);
         this.error = err?.error?.message || err?.message || 'Error al programar seguimiento';
+        this.scrollToError();
         this.cargandoAccion = false;
       },
       complete: () => {

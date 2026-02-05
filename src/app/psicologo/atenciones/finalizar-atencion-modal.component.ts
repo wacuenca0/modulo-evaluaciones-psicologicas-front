@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Output, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -10,13 +10,13 @@ import { FormsModule } from '@angular/forms';
 })
 export class FinalizarAtencionModalComponent {
   open = input(false);
-  anamnesis = signal('');
-  examenMental = signal('');
-  impresionDiagnostica = signal('');
-  planIntervencion = signal('');
-  recomendaciones = signal('');
-  derivacion = signal('');
-  diagnosticoIds = signal<string>(''); // IDs separados por coma
+  anamnesis = '';
+  examenMental = '';
+  impresionDiagnostica = '';
+  planIntervencion = '';
+  recomendaciones = '';
+  derivacion = '';
+  diagnosticoIds = ''; // IDs separados por coma
 
   @Output() closed = new EventEmitter<void>();
   @Output() finalizar = new EventEmitter<any>();
@@ -27,18 +27,18 @@ export class FinalizarAtencionModalComponent {
 
   onFinalizar() {
     // Validar todos los campos
-    if (!this.anamnesis() || !this.examenMental() || !this.impresionDiagnostica() || !this.planIntervencion() || !this.recomendaciones() || !this.derivacion() || !this.diagnosticoIds()) {
+    if (!this.anamnesis || !this.examenMental || !this.impresionDiagnostica || !this.planIntervencion || !this.recomendaciones || !this.derivacion || !this.diagnosticoIds) {
       alert('Todos los campos son obligatorios.');
       return;
     }
-    const diagnosticoIdsArr = this.diagnosticoIds().split(',').map(id => Number(id.trim())).filter(id => !!id);
+    const diagnosticoIdsArr = this.diagnosticoIds.split(',').map(id => Number(id.trim())).filter(id => !!id);
     this.finalizar.emit({
-      anamnesis: this.anamnesis(),
-      examenMental: this.examenMental(),
-      impresionDiagnostica: this.impresionDiagnostica(),
-      planIntervencion: this.planIntervencion(),
-      recomendaciones: this.recomendaciones(),
-      derivacion: this.derivacion(),
+      anamnesis: this.anamnesis,
+      examenMental: this.examenMental,
+      impresionDiagnostica: this.impresionDiagnostica,
+      planIntervencion: this.planIntervencion,
+      recomendaciones: this.recomendaciones,
+      derivacion: this.derivacion,
       diagnosticoIds: diagnosticoIdsArr
     });
   }

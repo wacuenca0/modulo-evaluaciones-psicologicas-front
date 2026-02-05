@@ -11,9 +11,12 @@ import { AtencionPsicologicaResponseDTO } from '../../models/atenciones-psicolog
 })
 export class AtencionesListaComponent {
   @Input() atenciones: AtencionPsicologicaResponseDTO[] = [];
+  @Input() resaltarId: number | null = null;
   @Output() verDetalle = new EventEmitter<number>();
   @Output() editar = new EventEmitter<AtencionPsicologicaResponseDTO>();
   @Output() eliminar = new EventEmitter<number>();
+
+  @Output() verHistorial = new EventEmitter<number>();
 
   @Output() finalizar = new EventEmitter<AtencionPsicologicaResponseDTO>();
   @Output() cancelar = new EventEmitter<AtencionPsicologicaResponseDTO>();
