@@ -1,3 +1,4 @@
+
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,6 +7,7 @@ import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UserService } from '../../services/user.service';
+import { PsicologoGestionService, PsicologoGestionDTO } from '../../services/psicologo-gestion.service';
 import { RoleService } from '../../services/role.service';
 import { UsersTabsComponent } from '../users-tabs.component';
 import { CreateUserRequestDTO, RoleDTO } from '../../models/auth.models';
@@ -34,8 +36,14 @@ type RegisterFormValue = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {
+  // ...existing code...
+
+  goToList() {
+    this.router.navigate(['/users']);
+  }
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly userService = inject(UserService);
+  private readonly psicologoGestionService = inject(PsicologoGestionService);
   private readonly roleService = inject(RoleService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -131,6 +139,7 @@ export class RegisterComponent {
 
     console.debug('Intentando crear usuario', payload);
 
+    // Siempre usar el servicio de usuarios y enviar el JSON con psicologo anidado
     this.userService.create(payload)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
@@ -146,7 +155,6 @@ export class RegisterComponent {
           return;
         }
         this.mensajeExito.set('Usuario creado correctamente.');
-        // Navegar a la lista de usuarios después de crear
         this.router.navigate(['/users']).catch(() => {});
       });
   }

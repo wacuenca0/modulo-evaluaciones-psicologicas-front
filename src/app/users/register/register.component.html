@@ -133,6 +133,7 @@
 
           <footer class="register-footer">
             <button type="button" class="register-btn register-btn--ghost" [disabled]="loading()" (click)="limpiar()">Limpiar</button>
+            <button type="button" class="register-btn register-btn--ghost" [disabled]="loading()" (click)="goToList()">Volver a la lista</button>
             <button type="submit" class="register-btn register-btn--primary" [disabled]="loading()">
               {{ loading() ? 'Guardando...' : 'Crear usuario' }}
             </button>

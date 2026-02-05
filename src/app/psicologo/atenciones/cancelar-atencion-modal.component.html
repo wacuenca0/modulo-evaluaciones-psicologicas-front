@@ -1,0 +1,18 @@
+<!-- Modal para cancelar atención -->
+<div class="modal" *ngIf="open">
+  <div class="modal-content">
+    <h2 class="text-lg font-bold mb-4">Cancelar atención</h2>
+    <form (ngSubmit)="onCancelar()" class="flex flex-col gap-4">
+      <label class="font-semibold">Motivo de cancelación</label>
+      <textarea [(ngModel)]="motivo" name="motivo" rows="3" class="border rounded p-2"></textarea>
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">
+          <span class="material-icons align-middle">close</span> Cerrar
+        </button>
+        <button type="submit" class="btn btn-danger">
+          <span class="material-icons align-middle">cancel</span> Cancelar atención
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -16,7 +16,9 @@ export const environment = {
     authBaseUrl: `${gatewayBaseUrl}${authBasePath}`,
     catalogosBaseUrl: `${gatewayBaseUrl}${catalogosBasePath}`,
     gestionBaseUrl: `${gatewayBaseUrl}${gestionBasePath}`,
-    documentosBaseUrl: `${gatewayBaseUrl}${documentosBasePath}`
+    documentosBaseUrl: `${gatewayBaseUrl}${documentosBasePath}`,
+    // Agregado para compatibilidad con tu requerimiento
+    gestionBaseUrlLegacy: 'http://localhost:8080/api'
   },
   apiBaseUrl: `${gatewayBaseUrl}${catalogosBasePath}`,
   catalogBaseUrl: `${gatewayBaseUrl}${catalogosBasePath}`,

@@ -1,0 +1,37 @@
+<!-- Modal para finalizar atención -->
+<div class="modal" *ngIf="open">
+  <div class="modal-content max-w-lg mx-auto">
+    <h2 class="text-lg font-bold mb-4">Finalizar atención</h2>
+    <form (ngSubmit)="onFinalizar()" class="flex flex-col gap-4">
+      <label class="font-semibold">Anamnesis</label>
+      <textarea [(ngModel)]="anamnesis" name="anamnesis" rows="2" class="border rounded p-2" required></textarea>
+
+      <label class="font-semibold">Examen mental</label>
+      <textarea [(ngModel)]="examenMental" name="examenMental" rows="2" class="border rounded p-2" required></textarea>
+
+      <label class="font-semibold">Impresión diagnóstica</label>
+      <textarea [(ngModel)]="impresionDiagnostica" name="impresionDiagnostica" rows="2" class="border rounded p-2" required></textarea>
+
+      <label class="font-semibold">Plan de intervención</label>
+      <textarea [(ngModel)]="planIntervencion" name="planIntervencion" rows="2" class="border rounded p-2" required></textarea>
+
+      <label class="font-semibold">Recomendaciones</label>
+      <textarea [(ngModel)]="recomendaciones" name="recomendaciones" rows="2" class="border rounded p-2" required></textarea>
+
+      <label class="font-semibold">Derivación</label>
+      <input [(ngModel)]="derivacion" name="derivacion" class="border rounded p-2" required />
+
+      <label class="font-semibold">Diagnóstico IDs (separados por coma)</label>
+      <input [(ngModel)]="diagnosticoIds" name="diagnosticoIds" class="border rounded p-2" required placeholder="Ej: 1,2,3" />
+
+      <div class="flex gap-2 justify-end mt-2">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">
+          <span class="material-icons align-middle">close</span> Cancelar
+        </button>
+        <button type="submit" class="btn btn-success">
+          <span class="material-icons align-middle">check_circle</span> Finalizar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

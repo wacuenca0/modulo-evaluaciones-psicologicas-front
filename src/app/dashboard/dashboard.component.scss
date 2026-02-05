@@ -15,8 +15,16 @@
   color: #fff;
   box-shadow: 0 4px 16px 0 rgba(236, 72, 153, 0.25);
 }
+
 :host {
   display: block;
+}
+
+section.dashboard-bg {
+  background-image: url('/dashboard-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Animaciones */

@@ -1,7 +1,8 @@
+import { buildApiUrl } from '../core/config/api.config';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { buildApiUrl } from '../core/config/api.config';
+
 import { UserDTO, CreateUserRequestDTO, UpdateUserRequestDTO, ChangePasswordRequestDTO } from '../models/auth.models';
 
 @Injectable({ providedIn: 'root' })

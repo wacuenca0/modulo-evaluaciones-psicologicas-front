@@ -13,8 +13,14 @@ import { AtencionPsicologicaRequestDTO } from '../../models/atenciones-psicologi
   // styleUrls: ['./programar-atencion-modal.component.scss']
 })
 export class ProgramarAtencionModalComponent {
+    get isCargandoAccion(): boolean {
+      if (typeof this.cargandoAccion === 'function') {
+        return !!this.cargandoAccion();
+      }
+      return !!this.cargandoAccion;
+    }
   @Input() show = false;
-  @Input() cargandoAccion = signal(false);
+  @Input() cargandoAccion: boolean | ReturnType<typeof signal> = false;
   @Input() error: string | null = null;
   @Input() mensajeExito: string | null = null;
   @Input() psicologoActual: { id: number | null, nombre: string } | null = null;

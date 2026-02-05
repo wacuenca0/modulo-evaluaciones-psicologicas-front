@@ -1,3 +1,4 @@
+
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -19,6 +20,11 @@ import { PsicologoGestionService, PsicologoGestionDTO } from '../../services/psi
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditUserComponent {
+  // ...existing code...
+
+  goToList() {
+    this.router.navigate(['/users']);
+  }
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly userService = inject(UserService);
   private readonly roleService = inject(RoleService);

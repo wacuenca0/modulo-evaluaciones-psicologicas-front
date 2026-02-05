@@ -1,0 +1,20 @@
+<!-- Modal para reprogramar atención -->
+<div class="modal" *ngIf="open">
+  <div class="modal-content">
+    <h2 class="text-lg font-bold mb-4">Reprogramar atención</h2>
+    <form (ngSubmit)="onReprogramar()" class="flex flex-col gap-4">
+      <label class="font-semibold">Nueva fecha y hora</label>
+      <input type="datetime-local" [(ngModel)]="nuevaFecha" name="nuevaFecha" class="border rounded p-2" />
+      <label class="font-semibold">Motivo de reprogramación</label>
+      <textarea [(ngModel)]="motivo" name="motivo" rows="3" class="border rounded p-2"></textarea>
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">
+          <span class="material-icons align-middle">close</span> Cerrar
+        </button>
+        <button type="submit" class="btn btn-warning">
+          <span class="material-icons align-middle">event_repeat</span> Reprogramar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

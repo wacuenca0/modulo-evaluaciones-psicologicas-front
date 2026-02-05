@@ -1,837 +1,475 @@
-<section class="atenciones-wrapper">
-  <div class="atenciones-main">
-    
-    <!-- Header -->
-    <header class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-900">Atenciones Psicológicas</h1>
-          <p class="text-slate-600">Gestión de consultas y seguimientos psicológicos</p>
-        </div>
-        
-        <div class="flex gap-2">
-                  <button (click)="abrirModalCrear('ABIERTA')"
-                          class="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-[0.98] flex items-center gap-2">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Nueva Atención
-                  </button>
-                  <button (click)="programarAtencion()"
-                          class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] flex items-center gap-2">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-4-8v8"/>
-                    </svg>
-                    Programar Atención
-                  </button>
-        </div>
-        <!-- Modal Programar Atención -->
-        <app-programar-atencion-modal
-          *ngIf="showProgramarModal()"
-          [show]="showProgramarModal()"
-          [cargandoAccion]="programarCargandoAccion"
-          [error]="programarError()"
-          [mensajeExito]="programarMensajeExito()"
-          [psicologoActual]="psicologoActual()"
-          [tiposConsulta]="tiposConsulta()"
-          [tiposAtencion]="tiposAtencion()"
-          [pacienteSeleccionado]="programarPacienteSeleccionado"
-          [formModel]="programarFormModel"
-          (cancelar)="cerrarProgramarModal()"
-          (guardar)="guardarAtencionProgramada()"
-          (asignarPaciente)="asignarPacienteProgramar($event)">
-        </app-programar-atencion-modal>
-
-        <!-- Modal Programar Seguimiento -->
-        <app-programar-seguimiento-modal
-          *ngIf="showProgramarSeguimientoModal()"
-          [show]="showProgramarSeguimientoModal()"
-          [cargandoAccion]="programarSeguimientoCargandoAccion()"
-          [error]="programarSeguimientoError()"
-          [mensajeExito]="programarSeguimientoMensajeExito()"
-          [psicologoActual]="psicologoActual()"
-          [formModel]="programarSeguimientoFormModel"
-          [diagnosticos]="todosDiagnosticosCIE10()"
-          (cancelar)="cerrarProgramarSeguimientoModal()"
-          (guardar)="guardarSeguimientoProgramado()">
-        </app-programar-seguimiento-modal>
-
-        <!-- Modal Programar Seguimiento -->
-        <app-programar-seguimiento-modal
-          *ngIf="showProgramarSeguimientoModal()"
-          [formModel]="programarSeguimientoFormModel"
-            [psicologoActual]="programarSeguimientoPsicologo"
-          [diagnosticos]="programarSeguimientoDiagnosticos"
-          [cargandoAccion]="programarSeguimientoCargandoAccion()"
-          [error]="programarSeguimientoError()"
-          [mensajeExito]="programarSeguimientoMensajeExito()"
-          (cerrar)="cerrarProgramarSeguimientoModal()"
-          (guardar)="guardarSeguimientoProgramado()"
-        ></app-programar-seguimiento-modal>
+<!DOCTYPE html>
+<section class="atenciones-psicologicas">
+  <!-- Header Principal -->
+  <header class="atenciones-header">
+    <div class="header-container">
+      <div class="header-text">
+        <h1 class="header-title">Gestión de Atenciones Psicológicas</h1>
+        <p class="header-subtitle">Administra consultas, seguimientos y programaciones psicológicas</p>
       </div>
-      
-      <!-- Resumen -->
-      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-slate-200 bg-white p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-500">Total Atenciones</p>
-              <p class="text-2xl font-bold text-slate-900">{{ atenciones().length }}</p>
-            </div>
-            <div class="rounded-lg bg-slate-100 p-2">
-              <svg class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-blue-600">Programadas Hoy</p>
-              <p class="text-2xl font-bold text-blue-900">{{ atencionesProgramadasHoy() }}</p>
-            </div>
-            <div class="rounded-lg bg-blue-100 p-2">
-              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div class="rounded-xl border border-green-200 bg-green-50 p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-green-600">Finalizadas</p>
-              <p class="text-2xl font-bold text-green-900">
-                {{ atencionesFinalizadas() }}
-              </p>
-            </div>
-            <div class="rounded-lg bg-green-100 p-2">
-              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Mensajes -->
-    @if (error()) {
-      <div class="mb-6 rounded-xl border border-red-300 bg-red-50 p-4">
-        <div class="flex items-start gap-3">
-          <div class="rounded-full bg-red-100 p-1.5">
-            <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      <div class="header-actions">
+        <div class="action-buttons">
+          <button class="btn btn-primary btn-icon" (click)="abrirModalCrear('ABIERTA')">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
-          </div>
-          <div class="flex-1">
-            <p class="font-semibold text-red-800">Error</p>
-            <p class="text-sm text-red-700">{{ error() }}</p>
-          </div>
-          <button type="button" (click)="error.set(null)" class="text-red-400 hover:text-red-600">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            <span>Nueva Atención</span>
+          </button>
+          <button class="btn btn-secondary btn-icon" (click)="programarAtencion()">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
+            <span>Programar</span>
           </button>
         </div>
-      </div>
-    }
-
-    
-    @if (mensajeExito()) {
-      <div class="mb-6 rounded-xl border border-green-300 bg-green-50 p-4">
-        <div class="flex items-start gap-3">
-          <div class="rounded-full bg-green-100 p-1.5">
-            <svg class="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <div class="flex-1">
-            <p class="font-semibold text-green-800">Éxito</p>
-            <p class="text-sm text-green-700">{{ mensajeExito() }}</p>
-          </div>
-        </div>
-      </div>
-    }
-    
-    <!-- Filtros -->
-    <div class="mb-8 rounded-2xl border border-slate-200 bg-white p-6">
-      <div class="mb-4">
-        <h3 class="text-lg font-semibold text-slate-900">Filtrar Atenciones</h3>
-        <p class="text-sm text-slate-500">Ajusta los filtros para encontrar las atenciones específicas</p>
-      </div>
-      
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <!-- Estado -->
-        <div>
-          <label for="filtroEstado" class="mb-2 block text-sm font-medium text-slate-700">Estado</label>
-          <select [(ngModel)]="filtroEstado" 
-                  id="filtroEstado" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-            <option value="TODAS">Todas las atenciones</option>
-            <option value="PROGRAMADA">Programada</option>
-            <option value="EN_CURSO">En curso</option>
-            <option value="FINALIZADA">Finalizada</option>
-            <option value="CANCELADA">Cancelada</option>
-            <option value="NO_ASISTIO">No asistió</option>
-          </select>
-        </div>
-        
-        <!-- Nombre del Paciente -->
-        <div>
-          <label for="filtroNombrePaciente" class="mb-2 block text-sm font-medium text-slate-700">Nombre Paciente</label>
-          <input type="text" [(ngModel)]="filtroNombrePaciente" 
-                 id="filtroNombrePaciente" 
-                 placeholder="Buscar por nombre..."
-                 class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-        </div>
-        
-        <!-- Fecha -->
-        <div>
-          <label for="filtroFecha" class="mb-2 block text-sm font-medium text-slate-700">Fecha</label>
-          <input type="date" [(ngModel)]="filtroFecha" 
-                 id="filtroFecha" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-        </div>
-
-        <!-- Tamaño de página -->
-        <div>
-          <label for="tamanioPagina" class="mb-2 block text-sm font-medium text-slate-700">Registros por página</label>
-          <select [ngModel]="size()" (ngModelChange)="cambiarTamanioPagina($event)"
-                  id="tamanioPagina" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-            <option [value]="5">5 registros</option>
-            <option [value]="10">10 registros</option>
-            <option [value]="20">20 registros</option>
-            <option [value]="50">50 registros</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="mt-6 flex justify-between">
-        <div class="text-sm text-slate-500">
-          Mostrando <span class="font-semibold text-slate-900">{{ getAtencionStart() }}-{{ getAtencionEnd() }}</span> de 
-          <span class="font-semibold text-slate-900">{{ totalElements() }}</span> atenciones
-        </div>
-        <button (click)="limpiarFiltros()" 
-                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98]">
-          Limpiar filtros
-        </button>
       </div>
     </div>
-    
-    <!-- Lista de Atenciones -->
-    @if (cargando()) {
-      <div class="space-y-4">
-        @for (_ of [0, 1, 2]; track $index) {
-          <div class="h-32 animate-pulse rounded-2xl bg-slate-100"></div>
-        }
+  </header>
+
+  <!-- Panel de Filtros -->
+  <div class="filtros-panel">
+    <div class="filtros-header">
+      <h3>Filtros de Búsqueda</h3>
+      <p>Especifica los criterios para encontrar atenciones</p>
+    </div>
+    <div class="filtros-grid">
+      <!-- Estado -->
+      <div class="filtro-group">
+        <label for="filtroEstado" class="filtro-label">Estado</label>
+        <select id="filtroEstado" class="filtro-select" [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event); cargarAtencionesFiltradas()">
+          <option value="TODAS">Todas las atenciones</option>
+          <option *ngFor="let estado of estadosFiltrados()" [value]="estado">
+            {{estadosConfig[estado]?.label || estado}}
+          </option>
+        </select>
       </div>
-    } @else if (atencionesFiltradas().length === 0) {
-      <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
-        <div class="mx-auto max-w-md">
-          <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
-          <p class="mt-4 text-sm font-medium text-slate-900">No se encontraron atenciones</p>
-          <p class="mt-1 text-xs text-slate-500">Ajusta los filtros o crea una nueva atención</p>
-          <button (click)="abrirModalCrear()" 
-                  class="mt-4 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-[0.98]">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nueva Atención
-          </button>
+      <!-- Nombre del Paciente -->
+      <div class="filtro-group">
+        <label for="filtroNombrePaciente" class="filtro-label">Paciente</label>
+        <input type="text" id="filtroNombrePaciente" placeholder="Buscar por nombre..." class="filtro-input" [ngModel]="filtroNombrePaciente()" (ngModelChange)="filtroNombrePaciente.set($event); cargarAtencionesFiltradas()">
+      </div>
+      <!-- Fecha Específica -->
+      <div class="filtro-group">
+        <label for="filtroFecha" class="filtro-label">Fecha</label>
+        <input type="date" id="filtroFecha" class="filtro-input" [ngModel]="filtroFecha()" (ngModelChange)="filtroFecha.set($event); cargarAtencionesFiltradas()">
+      </div>
+      <!-- Filtro Hoy -->
+      <div class="filtro-group filtro-checkbox">
+        <div class="checkbox-container">
+          <input type="checkbox" id="filtroHoy" class="checkbox-input" [ngModel]="filtroHoy()" (ngModelChange)="filtroHoy.set($event); cargarAtencionesFiltradas()">
+          <label for="filtroHoy" class="checkbox-label">Solo atenciones de hoy</label>
         </div>
       </div>
-    } @else {
-      <div class="space-y-4">
-        @for (atencion of atencionesFiltradas(); track atencion.id) {
-          <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all">
-            <!-- Barra lateral con estado -->
-            <div [class]="'absolute left-0 top-0 h-full w-1.5 ' + (atencion['fichaPsicologicaId'] && atencion.tipoConsulta === 'SEGUIMIENTO' ? 'bg-purple-500' : getEstadoColor(atencion.estado).split(' ')[0])"></div>
-            
-            <div class="pl-6">
-              <div class="flex flex-wrap items-start justify-between gap-4">
-                <!-- Información principal -->
-                <div class="flex-1 space-y-3">
-                  <div class="flex flex-wrap items-center gap-3">
-                    <!-- Distintivo tipo de consulta, excepto cuando es seguimiento con ficha (en ese caso solo el morado) -->
-                    <ng-container *ngIf="!(atencion.tipoConsulta === 'SEGUIMIENTO' && atencion.fichaPsicologicaId) && tipoConsultaBadge(atencion.tipoConsulta) as badge">
-                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold {{ badge.color }}">
-                        <ng-container [ngSwitch]="badge.icon">
-                          <svg *ngSwitchCase="'star'" class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"/></svg>
-                          <svg *ngSwitchCase="'refresh'" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M5.635 19.364A9 9 0 104.582 9m0 0V4m0 5h5"/></svg>
-                          <svg *ngSwitchCase="'warning'" class="h-3 w-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-                          <svg *ngSwitchCase="'check'" class="h-3 w-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                          <svg *ngSwitchDefault class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4h4"/></svg>
-                        </ng-container>
-                        {{ badge.label }}
-                      </span>
-                    </ng-container>
-                    <!-- Etiqueta de Seguimiento y tipo de evaluación en badge morado -->
-                    <ng-container *ngIf="atencion.tipoConsulta === 'SEGUIMIENTO' && atencion.fichaPsicologicaId">
-                      <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800 border border-purple-200">
-                        <svg class="h-3 w-3 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                        </svg>
-                        Seguimiento
-                        <ng-container *ngIf="obtenerTipoEvaluacion(atencion.fichaPsicologicaId)">
-                          : {{ obtenerTipoEvaluacion(atencion.fichaPsicologicaId) }}
-                        </ng-container>
-                      </span>
-                    </ng-container>
-                    <!-- Fecha y hora -->
-                    <div class="flex items-center gap-2">
-                      <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                      </svg>
-                      <span class="text-sm font-semibold text-slate-900">{{ formatearFecha(atencion.fechaAtencion) }}</span>
-                      <span class="text-sm text-slate-500">• {{ atencion.horaInicio }} - {{ atencion.horaFin }}</span>
-                    </div>
-                    <!-- Badge de estado -->
-                    <span [class]="'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ' + getEstadoColor(atencion.estado)">
-                      <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
-                        <path [attr.d]="getEstadoIcon(atencion.estado)"/>
-                      </svg>
-                      {{ atencion.estado }}
-                    </span>
-                    <!-- Tipo de consulta -->
-                    <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                      {{ atencion.tipoConsulta === 'PRIMERA_VEZ' ? 'Primera Vez' : 
-                         atencion.tipoConsulta === 'SEGUIMIENTO' ? 'Seguimiento' :
-                         atencion.tipoConsulta === 'URGENCIA' ? 'Urgencia' : 
-                         atencion.tipoConsulta === 'CONTROL' ? 'Control' : atencion.tipoConsulta }}
-                    </span>
-                  </div>
-                  
-                  <!-- Paciente y psicólogo -->
-                  <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
-                    <div>
-                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Paciente</p>
-                      <p class="text-sm font-medium text-slate-900">{{ atencion.pacienteNombreCompleto }}</p>
-                      <p class="text-xs text-slate-500">{{ atencion.pacienteGrado }} • {{ atencion.pacienteUnidadMilitar || 'Sin unidad' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Psicólogo</p>
-                      <p class="text-sm font-medium text-slate-900">{{ atencion.psicologoNombreCompleto }}</p>
-                    </div>
-                  </div>
-                  
-                  <!-- Motivo de consulta -->
-                  @if (atencion.motivoConsulta) {
-                    <div>
-                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Motivo de consulta</p>
-                      <p class="text-sm text-slate-700 line-clamp-2">{{ atencion.motivoConsulta }}</p>
-                    </div>
-                  }
-                  
-                  <!-- Diagnósticos -->
-                  @if (atencion.diagnosticos && atencion.diagnosticos.length > 0) {
-                    <div>
-                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Diagnósticos CIE-10</p>
-                      <div class="mt-1 flex flex-wrap gap-1">
-                        @for (diag of atencion.diagnosticos; track diag.id) {
-                          <span class="rounded-lg bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 border border-blue-100">
-                            {{ diag.codigo }}
-                          </span>
-                        }
-                      </div>
-                    </div>
-                  }
-                  
-                  <!-- Próxima cita -->
-                  @if (atencion.proximaCita) {
-                    <div class="flex items-center gap-2 text-sm">
-                      <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                      </svg>
-                      <span class="text-slate-600">Próxima cita:</span>
-                      <span class="font-medium text-slate-900">{{ formatearFecha(atencion.proximaCita) }}</span>
-                    </div>
-                  }
-                </div>
-                
-                <!-- Acciones -->
-                <div class="flex flex-col gap-2">
-                  <button (click)="verDetalle(atencion.id)"
-                          class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 
-                                 transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98]">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Ver Detalle
-                  </button>
-                  
-                  @if (atencion.estado === 'PROGRAMADA') {
-                    <button (click)="finalizarAtencion(atencion)"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-3.5 py-2 text-xs font-semibold text-white 
-                                   transition-all hover:bg-green-700 active:scale-[0.98]">
-                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                      </svg>
-                      Finalizar
-                    </button>
-                    
-                    <button (click)="abrirModalCancelar(atencion)"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-red-300 bg-white px-3.5 py-2 text-xs font-medium text-red-700 
-                                   transition-all hover:bg-red-50 hover:border-red-400 active:scale-[0.98]">
-                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                      </svg>
-                      Cancelar
-                    </button>
-                  }
-                  
-                  @if (atencion.estado === 'PROGRAMADA') {
-                    <button (click)="registrarNoAsistencia(atencion)"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-medium text-gray-700 
-                                   transition-all hover:bg-gray-50 hover:border-gray-400 active:scale-[0.98]">
-                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                      </svg>
-                      No Asistió
-                    </button>
-                  }
-                  
-                  <button (click)="abrirModalEditar(atencion)"
-                          class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 
-                                 transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98]">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Editar
-                  </button>
-                  
-                  <button (click)="abrirModalEliminar(atencion.id)"
-                          class="inline-flex items-center justify-center gap-2 rounded-lg border border-red-300 bg-white px-3.5 py-2 text-xs font-medium text-red-700 
-                                 transition-all hover:bg-red-50 hover:border-red-400 active:scale-[0.98]">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                    Eliminar
-                  </button>
-                  <!-- Modal de Eliminación -->
-                  @if (showDeleteModal()) {
-                    <div class="fixed inset-0 z-[70] overflow-y-auto">
-                      <div class="flex min-h-screen items-center justify-center p-4">
-                        <!-- Overlay -->
-                        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cerrarModalEliminar()" (keydown)="cerrarModalEliminar()"></div>
-                        <!-- Modal -->
-                        <div class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl">
-                          <div class="border-b border-slate-200 p-6">
-                            <h3 class="text-lg font-semibold text-slate-900">Eliminar Atención</h3>
-                            <p class="text-sm text-slate-500">¿Está seguro de eliminar esta atención? Esta acción no se puede deshacer.</p>
-                          </div>
-
-                            <!-- Modal de Detalle moved to root -->
-                          <div class="p-6 flex justify-end gap-3">
-                            <button type="button" (click)="cerrarModalEliminar()"
-                                    class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98]">
-                              Cancelar
-                            </button>
-                            <button type="button" (click)="confirmarEliminarAtencion()"
-                                    class="rounded-lg px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all active:scale-[0.98]">
-                              Eliminar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+      <!-- Tamaño de Página -->
+      <div class="filtro-group">
+        <label for="tamanioPagina" class="filtro-label">Registros por página</label>
+        <select id="tamanioPagina" class="filtro-select" [ngModel]="size()" (ngModelChange)="size.set($event); cambiarTamanioPagina($event)">
+          <option value="5">5 registros</option>
+          <option value="10">10 registros</option>
+          <option value="20">20 registros</option>
+          <option value="50">50 registros</option>
+        </select>
       </div>
-    }
+    </div>
+    <div class="filtros-footer">
+      <div class="resultados-info">
+        Mostrando <span class="info-destacado">{{getAtencionStart()}}-{{getAtencionEnd()}}</span> de <span class="info-destacado">{{totalElements()}}</span> atenciones
+      </div>
+      <div class="filtros-acciones">
+        <button class="btn btn-outline" (click)="limpiarFiltros()">Limpiar filtros</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Modal de Detalle (root level, not inside list) -->
-  <app-atencion-detalle
-    *ngIf="showDetalleModal()"
-    [show]="showDetalleModal()"
-    [atencionId]="detalleAtencionId()"
-    (cerrar)="cerrarDetalleModal()">
-  </app-atencion-detalle>
+  <!-- Lista de Atenciones -->
+  <app-atenciones-lista
+    [atenciones]="atenciones()"
+    (verDetalle)="abrirDetalleModal($event)"
+    (finalizar)="abrirFinalizarModal($event)"
+    (cancelar)="cancelarAtencion($event)"
+    (noAsistio)="marcarNoAsistio($event)"
+    (reprogramar)="reprogramarAtencion($event)"
+  ></app-atenciones-lista>
 
-  <!-- Modal para Crear/Editar -->
+  <!-- Modal Detalle Atención -->
+  @if (showDetalleModal()) {
+    <app-atencion-detalle
+      [show]="showDetalleModal()"
+      [atencionId]="detalleAtencionId()"
+      (cerrar)="cerrarDetalleModal()"
+    ></app-atencion-detalle>
+  }
+
+  <!-- Modal Finalizar Atención -->
+  @if (showFinalizarModal()) {
+    <app-finalizar-atencion-modal
+      [open]="showFinalizarModal()"
+      (closed)="cerrarFinalizarModal()"
+      (finalizar)="onFinalizarAtencion($event)"
+    ></app-finalizar-atencion-modal>
+  }
+
+  <!-- Modal Cancelar Atención -->
+  @if (showCancelarModal()) {
+    <div class="modal-overlay" (click)="cerrarCancelarModal()">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Cancelar atención</h3>
+        </div>
+        <div class="modal-body">
+          <label>Razón de cancelación</label>
+          <input type="text" [(ngModel)]="razonCancelacion" class="form-input" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="cerrarCancelarModal()">Cerrar</button>
+          <button class="btn btn-danger" (click)="onCancelarAtencion()">Cancelar atención</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal No Asistió -->
+  @if (showNoAsistioModal()) {
+    <div class="modal-overlay" (click)="cerrarNoAsistioModal()">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Marcar como No Asistió</h3>
+        </div>
+        <div class="modal-body">
+          <p>¿Confirmar que el paciente no asistió?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="cerrarNoAsistioModal()">Cerrar</button>
+          <button class="btn btn-warning" (click)="onNoAsistioAtencion()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Reprogramar Atención -->
+  @if (showReprogramarModal()) {
+    <div class="modal-overlay" (click)="cerrarReprogramarModal()">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Reprogramar atención</h3>
+        </div>
+        <div class="modal-body">
+          <label>Nueva fecha</label>
+          <input type="date" [(ngModel)]="nuevaFechaReprogramar" class="form-input" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="cerrarReprogramarModal()">Cerrar</button>
+          <button class="btn btn-secondary" (click)="onReprogramarAtencion()">Reprogramar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Crear/Editar Atención -->
   @if (showModal()) {
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex min-h-screen items-center justify-center p-4">
-        <!-- Overlay -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cerrarModal()" (keydown)="cerrarModal()"></div>
-        
-        <!-- Modal -->
-        <div class="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
-          <!-- Header -->
-          <div class="border-b border-slate-200 p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold text-slate-900">
-                  {{ modoEdicion() ? 'Editar Atención' : 'Nueva Atención Psicológica' }}
-                </h3>
-                <p class="text-sm text-slate-500">
-                  {{ modoEdicion() ? 'Modifica los datos de la atención existente' : 'Completa los datos para crear una nueva atención' }}
-                </p>
-              </div>
-              <button (click)="cerrarModal()" 
-                      class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
+    <div class="modal-overlay atencion-modal" (click)="cerrarModal()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-lg" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
+        <!-- Header -->
+        <div class="modal-header">
+          <div class="modal-header-contenido">
+            <h3 class="modal-titulo">{{modoEdicion() ? 'Editar' : 'Crear Nueva'}} Atención</h3>
+            <p class="modal-subtitulo">Complete la información de la atención psicológica</p>
           </div>
-          
-          <!-- Formulario -->
-          <div class="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
-            <!-- Errores de validación dentro del modal -->
-            @if (error()) {
-              <div class="mb-4 rounded-xl border border-red-300 bg-red-50 p-3 flex items-center gap-2">
-                <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                </svg>
-                <span class="text-red-800 text-sm">{{ error() }}</span>
-              </div>
-            }
-            <form (ngSubmit)="guardarAtencion()" class="space-y-6" autocomplete="off">
-              <!-- Información básica (si es programada, solo campos mínimos) -->
-              <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <!-- Paciente -->
-                <div>
-                  <label for="formPaciente" class="mb-2 block text-sm font-medium text-slate-700 required">Paciente</label>
-                  <app-paciente-autocomplete id="formPaciente" (pacienteSeleccionado)="asignarPaciente($event)"></app-paciente-autocomplete>
+          <button class="modal-cerrar" (click)="cerrarModal()">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Contenido -->
+        <div class="modal-body">
+          @if (error()) {
+            <div class="mensaje-error-modal">{{error()}}</div>
+          }
+          @if (mensajeExito()) {
+            <div class="mensaje-exito-modal">{{mensajeExito()}}</div>
+          }
+          <form class="formulario-atencion" (ngSubmit)="guardarAtencion()" #atencionForm="ngForm">
+            <!-- Información Básica -->
+            <div class="form-seccion">
+              <h4 class="seccion-titulo">Información Básica</h4>
+              <div class="form-grid">
+                <!-- Fila 1: Paciente | Fecha de atención -->
+                <div class="form-group">
+                  <label for="pacienteAutocomplete" class="form-label requerido">Paciente</label>
+                  <app-paciente-autocomplete id="pacienteAutocomplete" (pacienteSeleccionado)="asignarPaciente($event)"></app-paciente-autocomplete>
                   @if (pacienteSeleccionado) {
-                    <div class="mt-2 flex items-center gap-2 text-sm text-blue-800 bg-blue-50 rounded px-3 py-1.5 border border-blue-200">
-                      <svg class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                      <span class="font-semibold">Paciente seleccionado:</span>
-                      <span>{{ pacienteSeleccionado.apellidosNombres }}</span>
-                      <span class="text-xs text-blue-600 font-mono bg-blue-100 rounded px-2 py-0.5 ml-2">C.I. {{ pacienteSeleccionado.cedula }}</span>
+                    <div class="paciente-seleccionado-card">
+                      <svg class="check-icon" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      <div class="paciente-info">
+                        <span class="paciente-nombre">{{pacienteSeleccionado.nombres}} {{pacienteSeleccionado.apellidos}}</span>
+                        <span class="paciente-datos">C.I. {{pacienteSeleccionado.cedula}} • {{pacienteSeleccionado.grado}}</span>
+                      </div>
                     </div>
                   }
                 </div>
-                <!-- Psicólogo oculto por seguridad -->
-                <!-- Fecha -->
-                <div>
-                  <label for="formFechaAtencion" class="mb-2 block text-sm font-medium text-slate-700 required">Fecha de atención</label>
-                  <input type="date" [(ngModel)]="formModel.fechaAtencion" name="fechaAtencion" required
-                         id="formFechaAtencion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                <div class="form-group">
+                  <label for="fechaAtencion" class="form-label requerido">Fecha de atención</label>
+                  <input type="date" name="fechaAtencion" required id="fechaAtencion" class="form-input" [(ngModel)]="formModel.fechaAtencion">
                 </div>
-                <!-- Horario -->
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label for="formHoraInicio" class="mb-2 block text-sm font-medium text-slate-700 required">Hora inicio</label>
-                    <input type="time" [(ngModel)]="formModel.horaInicio" name="horaInicio" required
-                           id="formHoraInicio" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-                  </div>
-                  <div>
-                    <label for="formHoraFin" class="mb-2 block text-sm font-medium text-slate-700 required">Hora fin</label>
-                    <input type="time" [(ngModel)]="formModel.horaFin" name="horaFin" required
-                           id="formHoraFin" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                <!-- Fila 2: Horario | Tipo de consulta -->
+                <div class="form-group">
+                  <label for="horaInicio" class="form-label requerido">Horario</label>
+                  <div class="horario-inputs">
+                    <input type="time" name="horaInicio" required id="horaInicio" class="form-input hora-input" [(ngModel)]="formModel.horaInicio">
+                    <span class="horario-separador">-</span>
+                    <input type="time" name="horaFin" required id="horaFin" class="form-input hora-input" [(ngModel)]="formModel.horaFin">
                   </div>
                 </div>
-                <!-- Tipo de consulta -->
-                <div>
-                  <label for="formTipoConsulta" class="mb-2 block text-sm font-medium text-slate-700 required">Tipo de consulta</label>
-                  <select [(ngModel)]="formModel.tipoConsulta" name="tipoConsulta" required
-                          id="formTipoConsulta" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-                    <option value="PRIMERA_VEZ">Primera Vez</option>
-                    <option value="SEGUIMIENTO">Seguimiento</option>
-                    <option value="URGENCIA">Urgencia</option>
-                    <option value="SUBSECUENTE">Subsecuente</option>
+                <div class="form-group">
+                  <label for="tipoConsulta" class="form-label requerido">Tipo de consulta</label>
+                  <select name="tipoConsulta" required id="tipoConsulta" class="form-select" [(ngModel)]="formModel.tipoConsulta">
+                    <option *ngFor="let tipo of tiposConsulta()" [value]="tipo.valor">{{tipo.label}}</option>
                   </select>
                 </div>
-                <!-- Modalidad -->
-                <div>
-                  <label for="formTipoAtencion" class="mb-2 block text-sm font-medium text-slate-700 required">Modalidad</label>
-                  <select [(ngModel)]="formModel.tipoAtencion" name="tipoAtencion" required
-                          id="formTipoAtencion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-                    @for (modalidad of tiposAtencion(); track modalidad.valor) {
-                      <option [value]="modalidad.valor">{{ modalidad.label }}</option>
-                    }
+                <!-- Fila 3: Modalidad (ocupa las dos columnas) -->
+                <div class="form-group" style="grid-column: 1/3;">
+                  <label for="tipoAtencion" class="form-label requerido">Modalidad</label>
+                  <select name="tipoAtencion" required id="tipoAtencion" class="form-select" [(ngModel)]="formModel.tipoAtencion">
+                    <option *ngFor="let tipo of tiposAtencion()" [value]="tipo.valor">{{tipo.label}}</option>
                   </select>
                 </div>
               </div>
-              <!-- Motivo de consulta -->
-              <div>
-                <label for="formMotivoConsulta" class="mb-2 block text-sm font-medium text-slate-700 required">Motivo de consulta</label>
-                <textarea [(ngModel)]="formModel.motivoConsulta" name="motivoConsulta" required rows="3"
-                          id="formMotivoConsulta" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                          placeholder="Describa el motivo principal de la consulta..."></textarea>
-              </div>
-              <!-- Si no es programada o está en edición, mostrar el resto del formulario -->
-              @if (!modoProgramada() || modoEdicion()) {
-                <!-- ...resto del formulario completo aquí... -->
-              }
-              
-              <!-- Diagnósticos CIE-10 -->
-              <div>
-                <label for="formDiagnosticosCIE10" class="mb-2 block text-sm font-medium text-slate-700">Diagnósticos CIE-10</label>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <!-- Columna de búsqueda y selección -->
-                  <div id="formDiagnosticosCIE10" class="rounded-lg border border-slate-300 bg-white p-3">
-                    <input type="text"
-                           [ngModel]="cie10SearchTerm()" (ngModelChange)="cie10SearchTerm.set($event)"
-                           name="cie10Search"
-                           placeholder="Buscar por código o nombre..."
-                           class="w-full rounded-md border-slate-300 text-sm focus:border-slate-400 focus:ring-1 focus:ring-slate-300 mb-2">
-                    <div class="space-y-2 pr-2">
-                      @if (cie10SearchTerm().length >= 2) {
-                        @for(diagnostico of diagnosticosFiltrados().slice(0, 10); track diagnostico.id) {
-                          <label class="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer">
-                            <input type="checkbox"
-                                   [checked]="typeof diagnostico.id === 'number' && formModel.diagnosticoIds.includes(diagnostico.id)"
-                                   (change)="typeof diagnostico.id === 'number' && toggleDiagnostico(diagnostico.id)"
-                                   class="rounded border-slate-400 text-slate-600 focus:ring-slate-500">
-                            <div class="text-sm">
-                              <p class="font-semibold text-slate-800">{{ diagnostico.codigo }}</p>
-                              <p class="text-xs text-slate-600">{{ diagnostico.nombre }}</p>
-                            </div>
-                          </label>
-                        }
-                        @if(diagnosticosFiltrados().length === 0 && !cargandoDiagnosticos()) {
-                          <p class="text-center text-xs text-slate-500 py-4">No se encontraron diagnósticos.</p>
-                        }
-                        @if(cargandoDiagnosticos()) {
-                          <p class="text-center text-xs text-slate-500 py-4">Cargando...</p>
-                        }
+            </div>
+            
+            <!-- Motivo de Consulta -->
+            <div class="form-seccion">
+              <label for="motivoConsulta" class="form-label requerido">Motivo de consulta</label>
+              <textarea name="motivoConsulta" required rows="3" id="motivoConsulta" class="form-textarea" placeholder="Describa el motivo principal de la consulta..." [(ngModel)]="formModel.motivoConsulta"></textarea>
+            </div>
+            
+            <!-- Diagnósticos CIE-10 -->
+            <div class="form-seccion">
+              <h4 class="seccion-titulo">Diagnósticos CIE-10</h4>
+              <div class="diagnosticos-container">
+                <!-- Búsqueda -->
+                <div class="diagnosticos-busqueda">
+                  <input type="text" name="cie10Search" placeholder="Buscar por código o nombre..." class="busqueda-input" [(ngModel)]="cie10SearchTerm">
+                  @if (cie10SearchTerm() && cie10SearchTerm().length >= 2) {
+                    <div class="busqueda-resultados">
+                      @if (cargandoDiagnosticos()) {
+                        <div class="instruccion-busqueda">Buscando...</div>
+                      } @else if (diagnosticosFiltrados().length === 0) {
+                        <div class="instruccion-busqueda">No se encontraron diagnósticos</div>
                       } @else {
-                        <p class="text-xs text-slate-500 py-2">Escriba al menos 2 caracteres para buscar diagnósticos.</p>
+                        <div class="resultados-lista">
+                          @for (diagnostico of diagnosticosFiltrados(); track diagnostico.id) {
+                            <div class="resultado-item" (click)="toggleDiagnostico(diagnostico.id!)" (keydown)="onDiagnosticoKeyDown($event, diagnostico.id!)" [class.seleccionado]="formModel.diagnosticoIds.includes(diagnostico.id!)">
+                              <div class="resultado-info">
+                                <span class="resultado-codigo">{{diagnostico.codigo}}</span>
+                                <span class="resultado-nombre">{{diagnostico.nombre}}</span>
+                              </div>
+                              @if (formModel.diagnosticoIds.includes(diagnostico.id!)) {
+                                <svg class="check-icon" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <!-- Seleccionados -->
+                @if (formModel.diagnosticoIds && formModel.diagnosticoIds.length > 0) {
+                  <div class="diagnosticos-seleccionados">
+                    <h5 class="seleccionados-titulo">Diagnósticos seleccionados</h5>
+                    <div class="seleccionados-lista">
+                      @for (diagnosticoId of formModel.diagnosticoIds; track diagnosticoId) {
+                        @let diagnostico = getDiagnosticoCIE10ById(diagnosticoId);
+                        @if (diagnostico) {
+                          <div class="diagnostico-seleccionado">
+                            <div class="diagnostico-contenido">
+                              <span class="diagnostico-codigo">{{diagnostico.codigo}}</span>
+                              <span class="diagnostico-nombre">{{diagnostico.nombre}}</span>
+                            </div>
+                            <button type="button" class="diagnostico-eliminar" (click)="toggleDiagnostico(diagnosticoId)">
+                              <svg viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                              </svg>
+                            </button>
+                          </div>
+                        }
                       }
                     </div>
                   </div>
-                  
-                  <!-- Columna de diagnósticos seleccionados -->
-                  <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 h-48 overflow-y-auto">
-                    <p class="text-sm font-medium text-slate-700 mb-2">Diagnósticos seleccionados:</p>
-                    @if (formModel.diagnosticoIds && formModel.diagnosticoIds.length > 0) {
-                      <ul class="space-y-1">
-                        @for (diagId of formModel.diagnosticoIds; track diagId) {
-                          @let diagnostico = getDiagnosticoCIE10ById(diagId);
-                          @if (diagnostico) {
-                            <li class="text-xs text-slate-800 flex items-center justify-between group">
-                              <span>
-                                <span class="font-bold">{{ diagnostico.codigo }}</span> - {{ diagnostico.nombre }}
-                              </span>
-                              <button type="button" (click)="typeof diagnostico.id === 'number' && toggleDiagnostico(diagnostico.id)" class="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                              </button>
-                            </li>
-                          }
-                        }
-                      </ul>
-                    } @else {
-                      <p class="text-xs text-slate-500">No hay diagnósticos seleccionados.</p>
-                    }
-                  </div>
+                }
+              </div>
+            </div>
+            
+            <!-- Información Clínica -->
+            <div class="form-seccion">
+              <h4 class="seccion-titulo">Información Clínica</h4>
+              <div class="form-columna" style="display: flex; flex-direction: column; gap: 18px;">
+                <div class="form-group">
+                  <label for="anamnesis" class="form-label">Anamnesis</label>
+                  <textarea name="anamnesis" rows="4" id="anamnesis" class="form-textarea" placeholder="Historia clínica del paciente..." [(ngModel)]="formModel.anamnesis"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="examenMental" class="form-label">Examen mental</label>
+                  <textarea name="examenMental" rows="3" id="examenMental" class="form-textarea" placeholder="Observaciones del estado mental..." [(ngModel)]="formModel.examenMental"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="impresionDiagnostica" class="form-label">Impresión diagnóstica</label>
+                  <textarea name="impresionDiagnostica" rows="3" id="impresionDiagnostica" class="form-textarea" placeholder="Lo que observa el psicólogo..." [(ngModel)]="formModel.impresionDiagnostica"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="planIntervencion" class="form-label">Plan de intervención</label>
+                  <textarea name="planIntervencion" rows="3" id="planIntervencion" class="form-textarea" placeholder="Qué se va a hacer..." [(ngModel)]="formModel.planIntervencion"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="recomendaciones" class="form-label">Recomendaciones</label>
+                  <textarea name="recomendaciones" rows="3" id="recomendaciones" class="form-textarea" placeholder="Recomendaciones para el paciente..." [(ngModel)]="formModel.recomendaciones"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="derivacion" class="form-label">Derivación</label>
+                  <input type="text" name="derivacion" id="derivacion" class="form-input" placeholder="Si deriva a otro especialista..." [(ngModel)]="formModel.derivacion">
                 </div>
               </div>
-              
-              <!-- Campos clínicos -->
-              <div class="grid grid-cols-1 gap-6">
-                <div>
-                  <label for="formAnamnesis" class="mb-2 block text-sm font-medium text-slate-700">Anamnesis</label>
-                  <textarea [(ngModel)]="formModel.anamnesis" name="anamnesis" rows="4"
-                            id="formAnamnesis" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Historia clínica del paciente..."></textarea>
+            </div>
+            
+            <!-- Seguimiento -->
+            <div class="form-seccion">
+              <h4 class="seccion-titulo">Seguimiento</h4>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="proximaCita" class="form-label">Próxima cita</label>
+                  <input type="date" name="proximaCita" id="proximaCita" class="form-input" [(ngModel)]="formModel.proximaCita">
                 </div>
-                
-                <div>
-                  <label for="formExamenMental" class="mb-2 block text-sm font-medium text-slate-700">Examen mental</label>
-                  <textarea [(ngModel)]="formModel.examenMental" name="examenMental" rows="3"
-                            id="formExamenMental" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Observaciones del estado mental durante la sesión..."></textarea>
-                </div>
-                
-                <div>
-                  <label for="formImpresionDiagnostica" class="mb-2 block text-sm font-medium text-slate-700">Impresión diagnóstica</label>
-                  <textarea [(ngModel)]="formModel.impresionDiagnostica" name="impresionDiagnostica" rows="3"
-                            id="formImpresionDiagnostica" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Lo que observa el psicólogo..."></textarea>
-                </div>
-                
-                <div>
-                  <label for="formPlanIntervencion" class="mb-2 block text-sm font-medium text-slate-700">Plan de intervención</label>
-                  <textarea [(ngModel)]="formModel.planIntervencion" name="planIntervencion" rows="3"
-                            id="formPlanIntervencion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Qué se va a hacer..."></textarea>
-                </div>
-                
-                <div>
-                  <label for="formRecomendaciones" class="mb-2 block text-sm font-medium text-slate-700">Recomendaciones</label>
-                  <textarea [(ngModel)]="formModel.recomendaciones" name="recomendaciones" rows="3"
-                            id="formRecomendaciones" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Recomendaciones para el paciente..."></textarea>
-                </div>
-                
-                <div>
-                  <label for="formDerivacion" class="mb-2 block text-sm font-medium text-slate-700">Derivación</label>
-                  <input type="text" [(ngModel)]="formModel.derivacion" name="derivacion"
-                         id="formDerivacion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                         placeholder="Si deriva a otro especialista...">
+                <div class="form-group full-width">
+                  <label for="observacionesProximaCita" class="form-label">Observaciones</label>
+                  <textarea name="observacionesProximaCita" rows="2" id="observacionesProximaCita" class="form-textarea" placeholder="Observaciones para la próxima cita..." [(ngModel)]="formModel.observacionesProximaCita"></textarea>
                 </div>
               </div>
-              
-              <!-- Próxima cita -->
-              <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <label for="formProximaCita" class="mb-2 block text-sm font-medium text-slate-700">Próxima cita</label>
-                  <input type="date" [(ngModel)]="formModel.proximaCita" name="proximaCita"
-                         id="formProximaCita" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200">
-                </div>
+            </div>
+            
+            <!-- Footer del Formulario -->
+            <div class="form-footer">
+              <div class="form-acciones">
+                <button type="button" class="btn btn-outline" (click)="cerrarModal()">Cancelar</button>
                 
-                <div>
-                  <label for="formObsProximaCita" class="mb-2 block text-sm font-medium text-slate-700">Observaciones próxima cita</label>
-                  <textarea [(ngModel)]="formModel.observacionesProximaCita" name="observacionesProximaCita" rows="2"
-                            id="formObsProximaCita" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                            placeholder="Observaciones para la próxima cita..."></textarea>
-                </div>
-              </div>
-              
-              <!-- Footer del modal -->
-              <div class="border-t border-slate-200 pt-6">
-                <div class="flex justify-end gap-3">
-                  <button type="button" (click)="cerrarModal()"
-                          class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98]">
-                    Cancelar
-                  </button>
-                  
-                  <button type="submit" [disabled]="cargandoAccion()"
-                          [class]="'rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] flex items-center gap-2 ' + 
-                                   (cargandoAccion() ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800')">
+                @if (!modoEdicion() && !modoProgramada()) {
+                  <button type="button" class="btn btn-warning" (click)="guardarEnCurso()" [disabled]="cargandoAccion()">
                     @if (cargandoAccion()) {
-                      <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Procesando...
+                      <span class="cargando-spinner"></span> Guardando...
                     } @else {
-                      {{ modoEdicion() ? 'Actualizar Atención' : 'Crear Atención' }}
+                      Guardar en curso
                     }
                   </button>
-                  @if (!modoEdicion()) {
-                    <button type="button" (click)="guardarEnCurso()" [disabled]="cargandoAccion()"
-                            class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-900 bg-yellow-200 hover:bg-yellow-300 transition-all active:scale-[0.98] flex items-center gap-2">
-                      Guardar en curso
-                    </button>
-                  }
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
-  
-  <!-- Modal de Cancelación -->
-  @if (showCancelModal()) {
-    <div class="fixed inset-0 z-[60] overflow-y-auto">
-      <div class="flex min-h-screen items-center justify-center p-4">
-        <!-- Overlay -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cerrarModalCancelar()" (keydown)="cerrarModalCancelar()"></div>
-        
-        <!-- Modal -->
-        <div class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl">
-          <!-- Header -->
-          <div class="border-b border-slate-200 p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold text-slate-900">Cancelar Atención</h3>
-                <p class="text-sm text-slate-500">Ingrese la razón de la cancelación</p>
-              </div>
-              <button (click)="cerrarModalCancelar()" 
-                      class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Contenido -->
-          <div class="p-6">
-            @if (atencionParaCancelar(); as atencion) {
-              <div class="mb-4 rounded-lg bg-slate-50 p-4">
-                <p class="text-sm font-medium text-slate-900">{{ atencion.pacienteNombreCompleto }}</p>
-                <p class="text-xs text-slate-600">{{ formatearFecha(atencion.fechaAtencion) }} • {{ atencion.horaInicio }} - {{ atencion.horaFin }}</p>
-              </div>
-            }
-            
-            <div class="mb-6">
-              <label for="formRazonCancelacion" class="mb-2 block text-sm font-medium text-slate-700 required">Razón de cancelación</label>
-              <textarea [(ngModel)]="razonCancelacion" rows="3"
-                        id="formRazonCancelacion" class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                        placeholder="Describa la razón de la cancelación..."></textarea>
-            </div>
-            
-            <div class="border-t border-slate-200 pt-6">
-              <div class="flex justify-end gap-3">
-                <button type="button" (click)="cerrarModalCancelar()"
-                        class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98]">
-                  Cancelar
-                </button>
+                }
                 
-                <button type="button" (click)="confirmarCancelacion()" [disabled]="!razonCancelacion().trim()"
-                        [class]="'rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] flex items-center gap-2 ' + 
-                                 (!razonCancelacion().trim() ? 'bg-slate-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700')">
-                  Confirmar Cancelación
+                <button type="submit" class="btn btn-primary" [disabled]="cargandoAccion()">
+                  @if (cargandoAccion()) {
+                    <span class="cargando-spinner"></span> Procesando...
+                  } @else {
+                    {{modoEdicion() ? 'Actualizar' : modoProgramada() ? 'Programar' : 'Crear'}} Atención
+                  }
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
   }
-  <!-- Barra de paginación visual inferior -->
-  @if (totalPages() > 1) {
-    <div class="mt-12 flex justify-center">
-      <nav class="inline-flex gap-2 items-center" aria-label="Paginación">
-        <!-- Botón Anterior -->
-        <button 
-          class="px-3 py-1 rounded border text-sm font-medium transition-colors duration-200"
-          [class.bg-blue-600]="page() === 0"
-          [class.text-white]="page() === 0"
-          [class.bg-slate-50]="page() !== 0"
-          [class.text-slate-700]="page() !== 0"
-          [class.cursor-not-allowed]="page() === 0"
-          [class.hover:bg-blue-100]="page() !== 0"
-          [disabled]="page() === 0"
-          (click)="page() > 0 && cambiarPagina(page() - 1)">
-          Anterior
-        </button>
-        <!-- Números de página -->
-        @for (p of getPageNumbers(); track p) {
-          <button 
-            class="px-3 py-1 rounded border text-sm font-medium transition-colors duration-200"
-            [class.bg-blue-600]="p === page()"
-            [class.text-white]="p === page()"
-            [class.font-bold]="p === page()"
-            [class.shadow-md]="p === page()"
-            [class.bg-slate-50]="p !== page()"
-            [class.text-slate-700]="p !== page()"
-            [class.hover:bg-blue-100]="p !== page()"
-            (click)="cambiarPagina(p)">
-            {{ p + 1 }}
+
+  <!-- Modal Eliminar -->
+  @if (showEliminarModal()) {
+    <div class="modal-overlay" (click)="cerrarModalEliminar()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
+        <!-- Header -->
+        <div class="modal-header">
+          <div class="modal-header-contenido">
+            <h3 class="modal-titulo">Confirmar Eliminación</h3>
+            <p class="modal-subtitulo">¿Está seguro de eliminar esta atención?</p>
+          </div>
+          <button class="modal-cerrar" (click)="cerrarModalEliminar()">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           </button>
-        }
-        <!-- Botón Siguiente -->
-        <button 
-          class="px-3 py-1 rounded border text-sm font-medium transition-colors duration-200"
-          [class.bg-blue-600]="page() === totalPages() - 1"
-          [class.text-white]="page() === totalPages() - 1"
-          [class.bg-slate-50]="page() !== totalPages() - 1"
-          [class.text-slate-700]="page() !== totalPages() - 1"
-          [class.cursor-not-allowed]="page() === totalPages() - 1"
-          [class.hover:bg-blue-100]="page() !== totalPages() - 1"
-          [disabled]="page() === totalPages() - 1"
-          (click)="page() < totalPages() - 1 && cambiarPagina(page() + 1)">
-          Siguiente
-        </button>
-      </nav>
+        </div>
+        
+        <!-- Contenido -->
+        <div class="modal-body">
+          <div class="advertencia-eliminar">
+            <svg class="advertencia-icono" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" 
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <div class="advertencia-contenido">
+              <h4>Advertencia</h4>
+              <p>Esta acción eliminará permanentemente la atención y todos sus datos asociados. Esta acción no se puede deshacer.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="cerrarModalEliminar()">
+            Cancelar
+          </button>
+          
+          <button type="button" class="btn btn-danger" (click)="confirmarEliminarAtencion()" [disabled]="cargandoAccion()">
+            @if (cargandoAccion()) {
+              <span class="cargando-spinner"></span> Procesando...
+            } @else {
+              Eliminar Permanentemente
+            }
+          </button>
+        </div>
+      </div>
     </div>
+  }
+
+  <!-- Modal Programar Atención -->
+  @if (showProgramarModal()) {
+    <app-programar-atencion-modal 
+      [show]="showProgramarModal()"
+      [cargandoAccion]="programarCargandoAccion()"
+      [error]="programarError()"
+      [mensajeExito]="programarMensajeExito()"
+      [psicologoActual]="psicologoActual()"
+      [tiposConsulta]="tiposConsulta()"
+      [tiposAtencion]="tiposAtencion()"
+      [pacienteSeleccionado]="programarPacienteSeleccionado"
+      [formModel]="programarFormModel"
+      (cancelar)="cerrarProgramarModal()"
+      (guardar)="guardarAtencionProgramada()"
+      (asignarPaciente)="asignarPacienteProgramar($event)"
+    ></app-programar-atencion-modal>
+  }
+
+  <!-- Modal Programar Seguimiento -->
+  @if (showProgramarSeguimientoModal()) {
+    <app-programar-seguimiento-modal 
+      [show]="showProgramarSeguimientoModal()"
+      [cargandoAccion]="programarSeguimientoCargandoAccion()"
+      [error]="programarSeguimientoError()"
+      [mensajeExito]="programarSeguimientoMensajeExito()"
+      [psicologoActual]="psicologoActual()"
+      [diagnosticos]="todosDiagnosticosCIE10()"
+      [pacienteSeleccionado]="programarPacienteSeleccionado"
+      [formModel]="programarSeguimientoFormModel"
+      (cancelar)="cerrarProgramarSeguimientoModal()"
+      (guardar)="guardarSeguimientoProgramado()"
+      (asignarPaciente)="asignarPacienteProgramar($event)"
+    ></app-programar-seguimiento-modal>
+  }
+
+  <!-- Modal Detalle -->
+  @if (showDetalleModal()) {
+    <app-atencion-detalle
+      [atencionId]="detalleAtencionId()"
+      (closeModal)="cerrarDetalleModal()">
+    </app-atencion-detalle>
   }
 </section>

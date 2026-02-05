@@ -1,4 +1,3 @@
-
 // DTO para crear una atención
 export interface AtencionPsicologicaRequestDTO {
   personalMilitarId: number | null;
@@ -21,6 +20,8 @@ export interface AtencionPsicologicaRequestDTO {
   estado: string;
   razonCancelacion: string;
   fichaPsicologicaId?: number | null;
+  usuarioId?: number;
+  usuarioNombre?: string;
 }
 
 // DTO para respuesta de atención
@@ -55,8 +56,20 @@ export interface AtencionPsicologicaResponseDTO {
   activo: boolean;
   createdAt: string;
   updatedAt: string;
+  // Propiedades para compatibilidad con el template
+  creadoPor?: string;
+  fechaCreacion?: string;
+  finalizadoPor?: string;
+  canceladoPor?: string;
+  reprogramadoPor?: string;
+  fechaActualizacion?: string;
   duracionMinutos: number;
   fichaPsicologicaId?: number | null;
+  
+  // Nuevas propiedades para reprogramación
+  reprogramada?: boolean;
+  fechaReprogramacion?: string;
+  motivoReprogramacion?: string;
 }
 
 // DTO para diagnóstico CIE-10
@@ -100,4 +113,17 @@ export enum TipoAtencion {
   PRESENCIAL = 'PRESENCIAL',
   TELEFONICA = 'TELEFONICA',
   VIRTUAL = 'VIRTUAL'
+}
+
+// DTO para reprogramar atención
+export interface ReprogramarAtencionRequestDTO {
+  fechaAtencion: string;
+  horaInicio: string;
+  horaFin: string;
+  tipoAtencion: string;
+  motivoReprogramacion: string;
+  estado?: string;
+  usuarioId?: number;
+  usuarioNombre?: string;
+  reprogramada?: boolean;
 }

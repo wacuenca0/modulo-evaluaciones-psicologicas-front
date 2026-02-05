@@ -1,61 +1,2002 @@
-:host {
-  display: block;
-  min-height: 100vh;
+// Estilos del modal y formulario de atención (migrados desde el HTML)
+.modal-header-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.modal-titulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.modal-subtitulo {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.form-seccion {
+  margin-bottom: 18px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.horario-inputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.form-footer, .form-acciones {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+.form-textarea, .form-input, .form-select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  font-size: 1rem;
+  min-height: 44px;
+  box-sizing: border-box;
 }
 
-.atenciones-wrapper {
-  @apply bg-slate-50 min-h-screen;
+.form-textarea {
+  min-height: 80px;
 }
 
-.atenciones-main {
-  @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
+.form-select {
+  min-width: 120px;
 }
 
-// Estilos para el autocompletado
-.line-clamp-2 {
+.form-acciones button, .form-footer button {
+  min-width: 120px;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1.25rem;
+}
+
+/* Otros estilos movidos del modal principal */
+.form-textarea {
+  min-height: 44px;
+}
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+.form-acciones button, .form-footer button {
+  min-width: 140px;
+  height: 44px;
+  font-size: 1rem;
+  border-radius: 8px;
+  padding: 0 20px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.form-acciones button.btn-outline, .form-footer button.btn-outline {
+  background: #fff;
+  color: #222;
+  border: 1px solid #e5e7eb;
+}
+.form-acciones button.btn-primary, .form-footer button.btn-primary {
+  background: #2563eb;
+  color: #fff;
+}
+// Variables
+$primary: #3b82f6;
+$primary-dark: #2563eb;
+$primary-light: #60a5fa;
+$secondary: #6366f1;
+$success: #10b981;
+$warning: #f59e0b;
+$danger: #ef4444;
+$info: #06b6d4;
+
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+$transition: all 0.2s ease-in-out;
+$transition-slow: all 0.3s ease-in-out;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin line-clamp($lines) {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: $lines;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-// Estilos para los estados
-.bg-blue-100 { background-color: #dbeafe; }
-.text-blue-800 { color: #1e40af; }
-.border-blue-200 { border-color: #bfdbfe; }
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-.bg-yellow-100 { background-color: #fef3c7; }
-.text-yellow-800 { color: #92400e; }
-.border-yellow-200 { border-color: #fde68a; }
+  &::-webkit-scrollbar-track {
+    background: $gray-100;
+    border-radius: 3px;
+  }
 
-.bg-green-100 { background-color: #d1fae5; }
-.text-green-800 { color: #065f46; }
-.border-green-200 { border-color: #a7f3d0; }
+  &::-webkit-scrollbar-thumb {
+    background: $gray-300;
+    border-radius: 3px;
 
-.bg-red-100 { background-color: #fee2e2; }
-.text-red-800 { color: #991b1b; }
-.border-red-200 { border-color: #fecaca; }
+    &:hover {
+      background: $gray-400;
+    }
+  }
+}
 
-.bg-gray-100 { background-color: #f3f4f6; }
-.text-gray-800 { color: #1f2937; }
-.border-gray-200 { border-color: #e5e7eb; }
+// Reset y estilos base
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: $gray-50;
+  color: $gray-800;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.atenciones-psicologicas {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+// Botones
+.btn {
+  @include flex-center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: $border-radius;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: $transition;
+  outline: none;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &-primary {
+    background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+    color: white;
+    box-shadow: $shadow-md;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, darken($primary, 5%) 0%, darken($primary-dark, 5%) 100%);
+      box-shadow: $shadow-lg;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($primary, 0.2);
+    }
+  }
+
+  &-secondary {
+    background: white;
+    color: $gray-700;
+    border: 1px solid $gray-300;
+    box-shadow: $shadow-sm;
+
+    &:hover:not(:disabled) {
+      background: $gray-50;
+      border-color: $gray-400;
+      box-shadow: $shadow;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($gray-400, 0.2);
+    }
+  }
+
+  &-outline {
+    background: transparent;
+    color: $gray-700;
+    border: 1px solid $gray-300;
+
+    &:hover:not(:disabled) {
+      background: $gray-50;
+      border-color: $gray-400;
+    }
+  }
+
+  &-danger {
+    background: linear-gradient(135deg, $danger 0%, darken($danger, 10%) 100%);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, darken($danger, 5%) 0%, darken($danger, 15%) 100%);
+    }
+  }
+
+  &-warning {
+    background: linear-gradient(135deg, $warning 0%, darken($warning, 10%) 100%);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, darken($warning, 5%) 0%, darken($warning, 15%) 100%);
+    }
+  }
+
+  &-icon {
+    padding: 0.5rem 1rem;
+    
+    .btn-icon-svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+  }
+
+  &-cargando {
+    position: relative;
+    color: transparent;
+
+    .cargando-spinner {
+      position: absolute;
+      width: 1.25rem;
+      height: 1.25rem;
+      animation: spin 1s linear infinite;
+      stroke: currentColor;
+    }
+  }
+}
+
+// Header principal
+.atenciones-header {
+  background: linear-gradient(135deg, #1e3a8a 0%, $primary 100%);
+  border-radius: $border-radius-lg;
+  padding: 2rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  box-shadow: $shadow-xl;
+
+  .header-container {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+
+    .header-text {
+      flex: 1;
+      min-width: 300px;
+
+      .header-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: white;
+      }
+
+      .header-subtitle {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 600px;
+      }
+    }
+
+    .header-actions {
+      .action-buttons {
+        @include flex-center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+    }
+  }
+}
+
+// Estadísticas
+.estadisticas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .estadistica-card {
+    background: white;
+    border-radius: $border-radius;
+    padding: 1.5rem;
+    box-shadow: $shadow-md;
+    transition: $transition;
+    border: 1px solid transparent;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-lg;
+    }
+
+    &.total {
+      border-left: 4px solid $primary;
+
+      .estadistica-icon svg {
+        color: $primary;
+      }
+    }
+
+    &.programadas {
+      border-left: 4px solid $info;
+
+      .estadistica-icon svg {
+        color: $info;
+      }
+    }
+
+    &.finalizadas {
+      border-left: 4px solid $success;
+
+      .estadistica-icon svg {
+        color: $success;
+      }
+    }
+
+    &.en-curso {
+      border-left: 4px solid $warning;
+
+      .estadistica-icon svg {
+        color: $warning;
+      }
+    }
+
+    .estadistica-content {
+      @include flex-between;
+
+      .estadistica-text {
+        @include flex-column;
+        gap: 0.25rem;
+
+        .estadistica-label {
+          font-size: 0.875rem;
+          color: $gray-600;
+          font-weight: 500;
+        }
+
+        .estadistica-valor {
+          font-size: 2rem;
+          font-weight: 700;
+          color: $gray-900;
+        }
+      }
+
+      .estadistica-icon {
+        @include flex-center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background: $gray-50;
+
+        svg {
+          width: 1.5rem;
+          height: 1.5rem;
+          stroke-width: 2;
+        }
+      }
+    }
+  }
+}
+
+// Panel de filtros
+.filtros-panel {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $shadow-md;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+
+  .filtros-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid $gray-200;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $gray-900;
+      margin-bottom: 0.25rem;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: $gray-600;
+    }
+  }
+
+  .filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+
+    .filtro-group {
+      @include flex-column;
+      gap: 0.5rem;
+
+      &.filtro-checkbox {
+        align-self: flex-end;
+        padding-bottom: 0.5rem;
+      }
+
+      .filtro-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $gray-700;
+      }
+
+      .filtro-select,
+      .filtro-input {
+        padding: 0.625rem 0.75rem;
+        border: 1px solid $gray-300;
+        border-radius: $border-radius-sm;
+        font-size: 0.875rem;
+        transition: $transition;
+        background: white;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        }
+
+        &:hover {
+          border-color: $gray-400;
+        }
+      }
+
+      .checkbox-container {
+        @include flex-center;
+        gap: 0.5rem;
+        cursor: pointer;
+
+        .checkbox-input {
+          width: 1rem;
+          height: 1rem;
+          border: 2px solid $gray-400;
+          border-radius: 0.25rem;
+          appearance: none;
+          cursor: pointer;
+          position: relative;
+
+          &:checked {
+            background-color: $primary;
+            border-color: $primary;
+
+            &::after {
+              content: '';
+              position: absolute;
+              top: 2px;
+              left: 5px;
+              width: 4px;
+              height: 8px;
+              border: solid white;
+              border-width: 0 2px 2px 0;
+              transform: rotate(45deg);
+            }
+          }
+
+          &:focus {
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+          }
+        }
+
+        .checkbox-label {
+          font-size: 0.875rem;
+          color: $gray-700;
+          user-select: none;
+        }
+      }
+    }
+  }
+
+  .filtros-footer {
+    @include flex-between;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid $gray-200;
+    background: $gray-50;
+
+    .resultados-info {
+      font-size: 0.875rem;
+      color: $gray-600;
+
+      .info-destacado {
+        font-weight: 600;
+        color: $gray-900;
+      }
+    }
+  }
+}
+
+// Mensajes de estado
+.mensaje-error,
+.mensaje-exito {
+  @include flex-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: $border-radius;
+  margin-bottom: 1.5rem;
+  animation: slideIn 0.3s ease-out;
+
+  .mensaje-icono {
+    @include flex-center;
+    flex-shrink: 0;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  .mensaje-contenido {
+    flex: 1;
+
+    .mensaje-titulo {
+      font-weight: 600;
+      margin-bottom: 0.125rem;
+    }
+
+    .mensaje-texto {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.mensaje-error {
+  background: rgba($danger, 0.1);
+  border: 1px solid rgba($danger, 0.2);
+  color: darken($danger, 10%);
+
+  .mensaje-icono svg {
+    fill: $danger;
+  }
+
+  .mensaje-cerrar {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.25rem;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      stroke-width: 2;
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.mensaje-exito {
+  background: rgba($success, 0.1);
+  border: 1px solid rgba($success, 0.2);
+  color: darken($success, 20%);
+
+  .mensaje-icono svg {
+    fill: $success;
+  }
+}
+
+// Estados de carga
+.estado-cargando {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+
+  .cargando-card {
+    background: white;
+    border-radius: $border-radius;
+    overflow: hidden;
+    box-shadow: $shadow;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    .cargando-header {
+      height: 3rem;
+      background: $gray-200;
+    }
+
+    .cargando-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .cargando-linea {
+        height: 0.75rem;
+        background: $gray-200;
+        border-radius: $border-radius-sm;
+
+        &.ancho-100 {
+          width: 100%;
+        }
+
+        &.ancho-80 {
+          width: 80%;
+        }
+
+        &.ancho-60 {
+          width: 60%;
+        }
+      }
+    }
+
+    .cargando-footer {
+      height: 2rem;
+      background: $gray-100;
+    }
+  }
+}
+
+// Estado vacío
+.estado-vacio {
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $shadow-md;
+
+  .vacio-icono {
+    @include flex-center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: $gray-100;
+    margin-bottom: 1.5rem;
+
+    svg {
+      width: 2rem;
+      height: 2rem;
+      color: $gray-400;
+      stroke-width: 1.5;
+    }
+  }
+
+  .vacio-contenido {
+    margin-bottom: 2rem;
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $gray-900;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: $gray-600;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+  }
+}
+
+// Lista de atenciones
+.atenciones-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.atencion-card {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  display: flex;
+  transition: $transition-slow;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  .card-estado-barra {
+    width: 4px;
+    flex-shrink: 0;
+  }
+
+  &.estado-programada .card-estado-barra {
+    background: $info;
+  }
+
+  &.estado-finalizada .card-estado-barra {
+    background: $success;
+  }
+
+  &.estado-en_curso .card-estado-barra {
+    background: $warning;
+  }
+
+  &.estado-cancelada .card-estado-barra {
+    background: $danger;
+  }
+
+  &.estado-no_asistio .card-estado-barra {
+    background: $gray-400;
+  }
+
+  .card-contenido {
+    flex: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .card-encabezado {
+      @include flex-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      .badges-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        .badge {
+          @include flex-center;
+          gap: 0.375rem;
+          padding: 0.375rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
+
+          .badge-icon {
+            width: 0.875rem;
+            height: 0.875rem;
+            stroke-width: 2;
+          }
+
+          &-estado {
+            &.estado-programada {
+              background: rgba($info, 0.1);
+              color: darken($info, 20%);
+              border: 1px solid rgba($info, 0.2);
+
+              .badge-icon {
+                color: $info;
+              }
+            }
+
+            &.estado-finalizada {
+              background: rgba($success, 0.1);
+              color: darken($success, 20%);
+              border: 1px solid rgba($success, 0.2);
+
+              .badge-icon {
+                color: $success;
+              }
+            }
+
+            &.estado-en_curso {
+              background: rgba($warning, 0.1);
+              color: darken($warning, 20%);
+              border: 1px solid rgba($warning, 0.2);
+
+              .badge-icon {
+                color: $warning;
+              }
+            }
+
+            &.estado-cancelada {
+              background: rgba($danger, 0.1);
+              color: darken($danger, 20%);
+              border: 1px solid rgba($danger, 0.2);
+
+              .badge-icon {
+                color: $danger;
+              }
+            }
+
+            &.estado-no_asistio {
+              background: rgba($gray-400, 0.1);
+              color: $gray-700;
+              border: 1px solid rgba($gray-400, 0.2);
+
+              .badge-icon {
+                color: $gray-500;
+              }
+            }
+          }
+
+          &-tipo-consulta {
+            background: rgba($primary, 0.1);
+            color: darken($primary, 20%);
+            border: 1px solid rgba($primary, 0.2);
+
+            &.tipo-primera_vez {
+              background: rgba($info, 0.1);
+              color: darken($info, 20%);
+              border-color: rgba($info, 0.2);
+            }
+
+            &.tipo-seguimiento {
+              background: rgba($success, 0.1);
+              color: darken($success, 20%);
+              border-color: rgba($success, 0.2);
+            }
+
+            &.tipo-urgencia {
+              background: rgba($warning, 0.1);
+              color: darken($warning, 20%);
+              border-color: rgba($warning, 0.2);
+            }
+
+            &.tipo-control {
+              background: rgba($secondary, 0.1);
+              color: darken($secondary, 20%);
+              border-color: rgba($secondary, 0.2);
+            }
+          }
+
+          &-modalidad {
+            background: rgba($gray-200, 0.5);
+            color: $gray-700;
+            border: 1px solid $gray-300;
+          }
+        }
+      }
+
+      .card-fecha-hora {
+        @include flex-center;
+        gap: 0.5rem;
+        color: $gray-600;
+        font-size: 0.875rem;
+
+        .fecha-icono {
+          width: 1rem;
+          height: 1rem;
+          color: $gray-500;
+          stroke-width: 2;
+        }
+
+        .fecha-contenido {
+          @include flex-column;
+          gap: 0.125rem;
+
+          .fecha {
+            font-weight: 500;
+            color: $gray-700;
+          }
+
+          .hora {
+            color: $gray-500;
+          }
+        }
+      }
+    }
+
+    .card-info-principal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+
+      .info-paciente,
+      .info-psicologo {
+        .info-titulo {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          color: $gray-500;
+          font-weight: 600;
+          letter-spacing: 0.025em;
+          margin-bottom: 0.375rem;
+        }
+
+        .info-nombre {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: $gray-900;
+          margin-bottom: 0.25rem;
+        }
+
+        .info-detalle {
+          font-size: 0.875rem;
+          color: $gray-600;
+        }
+      }
+    }
+
+    .card-motivo {
+      .info-titulo {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: $gray-500;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        margin-bottom: 0.375rem;
+      }
+
+      .motivo-texto {
+        color: $gray-700;
+        line-height: 1.6;
+        @include line-clamp(2);
+      }
+    }
+
+    .card-diagnosticos {
+      .info-titulo {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: $gray-500;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        margin-bottom: 0.5rem;
+      }
+
+      .diagnosticos-lista {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        .diagnostico-badge {
+          @include flex-center;
+          gap: 0.375rem;
+          padding: 0.375rem 0.625rem;
+          background: rgba($primary, 0.1);
+          border: 1px solid rgba($primary, 0.2);
+          border-radius: $border-radius-sm;
+          font-size: 0.75rem;
+
+          .diagnostico-codigo {
+            font-weight: 600;
+            color: darken($primary, 20%);
+          }
+
+          .diagnostico-nombre {
+            color: $gray-700;
+            @include truncate;
+            max-width: 200px;
+          }
+        }
+      }
+    }
+
+    .card-info-adicional {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      .info-item {
+        @include flex-center;
+        gap: 0.5rem;
+
+        .info-icono {
+          width: 1rem;
+          height: 1rem;
+          color: $gray-400;
+          stroke-width: 2;
+        }
+
+        .info-contenido {
+          @include flex-column;
+          gap: 0.125rem;
+
+          .info-label {
+            font-size: 0.75rem;
+            color: $gray-500;
+          }
+
+          .info-valor {
+            font-size: 0.875rem;
+            color: $gray-700;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+
+  .card-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-left: 1px solid $gray-200;
+    min-width: 200px;
+
+    .acciones-principales,
+    .acciones-estado {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .accion-eliminar {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid $gray-200;
+    }
+
+    .btn-accion {
+      @include flex-center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: $border-radius-sm;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: $transition;
+      background: transparent;
+
+      &:hover:not(:disabled) {
+        transform: translateX(2px);
+      }
+
+      .accion-icono {
+        width: 1rem;
+        height: 1rem;
+        stroke-width: 2;
+      }
+
+      &.btn-detalle {
+        color: $primary;
+        border-color: rgba($primary, 0.2);
+
+        &:hover {
+          background: rgba($primary, 0.1);
+        }
+      }
+
+      &.btn-historial {
+        color: $secondary;
+        border-color: rgba($secondary, 0.2);
+
+        &:hover {
+          background: rgba($secondary, 0.1);
+        }
+      }
+
+      &.btn-editar {
+        color: $warning;
+        border-color: rgba($warning, 0.2);
+
+        &:hover {
+          background: rgba($warning, 0.1);
+        }
+      }
+
+      &.btn-reprogramar {
+        color: $info;
+        border-color: rgba($info, 0.2);
+
+        &:hover {
+          background: rgba($info, 0.1);
+        }
+      }
+
+      &.btn-finalizar {
+        color: $success;
+        border-color: rgba($success, 0.2);
+
+        &:hover {
+          background: rgba($success, 0.1);
+        }
+      }
+
+      &.btn-cancelar {
+        color: $danger;
+        border-color: rgba($danger, 0.2);
+
+        &:hover {
+          background: rgba($danger, 0.1);
+        }
+      }
+
+      &.btn-no-asistio {
+        color: $gray-600;
+        border-color: rgba($gray-400, 0.2);
+
+        &:hover {
+          background: rgba($gray-400, 0.1);
+        }
+      }
+
+      &.btn-eliminar {
+        color: $danger;
+        border-color: rgba($danger, 0.2);
+        width: 100%;
+
+        &:hover {
+          background: rgba($danger, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// Paginación
+.paginacion-container {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $gray-200;
+
+  .paginacion {
+    @include flex-center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+
+    .paginacion-btn {
+      @include flex-center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: $border-radius-sm;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid $gray-300;
+      background: white;
+      color: $gray-700;
+      cursor: pointer;
+      transition: $transition;
+      min-width: 2.5rem;
+
+      &:hover:not(:disabled) {
+        background: $gray-50;
+        border-color: $gray-400;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &.paginacion-prev,
+      &.paginacion-next {
+        min-width: 100px;
+      }
+
+      &.paginacion-numero {
+        &.activa {
+          background: $primary;
+          color: white;
+          border-color: $primary;
+        }
+      }
+
+      .paginacion-icono {
+        width: 1rem;
+        height: 1rem;
+        stroke-width: 2;
+      }
+
+      .paginacion-puntos {
+        padding: 0.5rem;
+        color: $gray-500;
+      }
+    }
+  }
+}
+
+// Modales
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+
+  &.historial-modal,
+  &.reprogramar-modal,
+  &.cancelar-modal,
+  &.eliminar-modal,
+  &.atencion-modal {
+    display: none;
+  }
+
+  .modal-container {
+    background: white;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-xl;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+
+    &.modal-sm {
+      width: 400px;
+    }
+
+    &.modal-md {
+      width: 500px;
+    }
+
+    &.modal-lg {
+      width: 700px;
+    }
+
+    .modal-header {
+      @include flex-between;
+      padding: 1.5rem;
+      border-bottom: 1px solid $gray-200;
+
+      .modal-header-contenido {
+        .modal-titulo {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: $gray-900;
+          margin-bottom: 0.25rem;
+        }
+
+        .modal-subtitulo {
+          font-size: 0.875rem;
+          color: $gray-600;
+        }
+      }
+
+      .modal-cerrar {
+        @include flex-center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: $gray-500;
+        cursor: pointer;
+        transition: $transition;
+
+        &:hover {
+          background: $gray-100;
+          color: $gray-700;
+        }
+
+        svg {
+          width: 1.25rem;
+          height: 1.25rem;
+          stroke-width: 2;
+        }
+      }
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      @include scrollbar;
+
+      // Timeline para historial
+      .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+
+        .timeline-linea {
+          position: absolute;
+          left: 0.5rem;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background: $gray-300;
+        }
+
+        .timeline-item {
+          position: relative;
+          margin-bottom: 1.5rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .timeline-punto {
+            position: absolute;
+            left: -1.5rem;
+            top: 0;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            z-index: 1;
+
+            &.punto-programada {
+              background: $info;
+            }
+
+            &.punto-reprogramada {
+              background: $secondary;
+            }
+
+            &.punto-finalizada {
+              background: $success;
+            }
+
+            &.punto-cancelada {
+              background: $danger;
+            }
+
+            &.punto-no_asistio {
+              background: $gray-400;
+            }
+          }
+
+          .timeline-contenido {
+            background: $gray-50;
+            border-radius: $border-radius;
+            padding: 1rem;
+            border: 1px solid $gray-200;
+
+            .timeline-header {
+              @include flex-between;
+              margin-bottom: 0.75rem;
+
+              .timeline-estado {
+                @include flex-center;
+                gap: 0.5rem;
+
+                .estado-icono {
+                  width: 1rem;
+                  height: 1rem;
+                  stroke-width: 2;
+                }
+
+                .estado-label {
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.025em;
+
+                  &.programada {
+                    color: darken($info, 20%);
+                  }
+
+                  &.reprogramada {
+                    color: darken($secondary, 20%);
+                  }
+
+                  &.finalizada {
+                    color: darken($success, 20%);
+                  }
+
+                  &.cancelada {
+                    color: darken($danger, 20%);
+                  }
+
+                  &.no-asistio {
+                    color: $gray-600;
+                  }
+                }
+              }
+
+              .historial-fecha {
+                font-size: 0.75rem;
+                color: $gray-500;
+              }
+            }
+
+            .timeline-metadata {
+              display: flex;
+              flex-direction: column;
+              gap: 0.375rem;
+              margin-bottom: 0.75rem;
+
+              .metadata-item {
+                display: flex;
+                gap: 0.5rem;
+
+                .metadata-label {
+                  font-size: 0.75rem;
+                  color: $gray-600;
+                  font-weight: 500;
+                  min-width: 40px;
+                }
+
+                .metadata-valor {
+                  font-size: 0.875rem;
+                  color: $gray-700;
+                }
+              }
+            }
+
+            .timeline-razon {
+              .razon-label {
+                display: block;
+                font-size: 0.75rem;
+                color: $gray-600;
+                font-weight: 500;
+                margin-bottom: 0.25rem;
+              }
+
+              .razon-texto {
+                font-size: 0.875rem;
+                color: $gray-700;
+                line-height: 1.5;
+              }
+            }
+          }
+        }
+      }
+
+      // Formularios de modales
+      .reprogramar-header,
+      .cancelar-header {
+        background: $gray-50;
+        border-radius: $border-radius;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+
+        .paciente-info {
+          .paciente-nombre {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: $gray-900;
+            margin-bottom: 0.25rem;
+          }
+
+          .paciente-cita {
+            font-size: 0.875rem;
+            color: $gray-600;
+          }
+        }
+      }
+
+      .advertencia-eliminar {
+        @include flex-center;
+        gap: 1rem;
+        background: rgba($warning, 0.1);
+        border: 1px solid rgba($warning, 0.2);
+        border-radius: $border-radius;
+        padding: 1.5rem;
+
+        .advertencia-icono {
+          width: 2rem;
+          height: 2rem;
+          color: $warning;
+          stroke-width: 2;
+          flex-shrink: 0;
+        }
+
+        .advertencia-contenido {
+          h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: darken($warning, 20%);
+            margin-bottom: 0.5rem;
+          }
+
+          p {
+            font-size: 0.875rem;
+            color: darken($warning, 10%);
+            line-height: 1.5;
+          }
+        }
+      }
+
+      .reprogramar-formulario,
+      .cancelar-formulario,
+      .formulario-atencion {
+        .form-seccion {
+          margin-bottom: 1.5rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .seccion-titulo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: $gray-900;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid $gray-200;
+          }
+        }
+
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+
+          .full-width {
+            grid-column: 1 / -1;
+          }
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+
+          .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: $gray-700;
+
+            &.requerido {
+              &::after {
+                content: ' *';
+                color: $danger;
+              }
+            }
+          }
+
+          .form-input,
+          .form-select,
+          .form-textarea {
+            padding: 0.625rem 0.75rem;
+            border: 1px solid $gray-300;
+            border-radius: $border-radius-sm;
+            font-size: 0.875rem;
+            transition: $transition;
+            background: white;
+            font-family: inherit;
+
+            &:focus {
+              outline: none;
+              border-color: $primary;
+              box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            }
+
+            &:hover {
+              border-color: $gray-400;
+            }
+          }
+
+          .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+          }
+
+          .horario-inputs {
+            @include flex-center;
+            gap: 0.5rem;
+
+            .hora-input {
+              flex: 1;
+            }
+
+            .horario-separador {
+              color: $gray-500;
+              font-weight: 500;
+            }
+          }
+
+          .paciente-autocomplete {
+            position: relative;
+
+            .busqueda-input {
+              width: 100%;
+              padding: 0.625rem 0.75rem;
+              border: 1px solid $gray-300;
+              border-radius: $border-radius-sm;
+              font-size: 0.875rem;
+              transition: $transition;
+
+              &:focus {
+                outline: none;
+                border-color: $primary;
+                box-shadow: 0 0 0 3px rgba($primary, 0.1);
+              }
+            }
+
+            .resultados-busqueda {
+              position: absolute;
+              top: 100%;
+              left: 0;
+              right: 0;
+              background: white;
+              border: 1px solid $gray-300;
+              border-radius: $border-radius-sm;
+              margin-top: 0.25rem;
+              box-shadow: $shadow-lg;
+              z-index: 10;
+              max-height: 200px;
+              overflow-y: auto;
+              @include scrollbar;
+
+              .resultado-item {
+                padding: 0.75rem;
+                cursor: pointer;
+                transition: $transition;
+
+                &:hover {
+                  background: $gray-50;
+                }
+
+                .resultado-info {
+                  .resultado-nombre {
+                    display: block;
+                    font-weight: 500;
+                    color: $gray-900;
+                    margin-bottom: 0.125rem;
+                  }
+
+                  .resultado-detalle {
+                    font-size: 0.75rem;
+                    color: $gray-600;
+                  }
+                }
+              }
+
+              .instruccion-busqueda {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+                color: $gray-500;
+                text-align: center;
+              }
+            }
+          }
+
+          .paciente-seleccionado-card {
+            @include flex-center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba($success, 0.1);
+            border: 1px solid rgba($success, 0.2);
+            border-radius: $border-radius-sm;
+            margin-top: 0.5rem;
+
+            .check-icon {
+              width: 1.25rem;
+              height: 1.25rem;
+              color: $success;
+              stroke-width: 2;
+            }
+
+            .paciente-info {
+              .paciente-nombre {
+                display: block;
+                font-weight: 500;
+                color: darken($success, 20%);
+                margin-bottom: 0.125rem;
+              }
+
+              .paciente-datos {
+                font-size: 0.75rem;
+                color: darken($success, 10%);
+              }
+            }
+          }
+        }
+      }
+
+      // Diagnosticos CIE-10
+      .diagnosticos-container {
+        .diagnosticos-busqueda {
+          position: relative;
+          margin-bottom: 1rem;
+
+          .busqueda-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid $gray-300;
+            border-radius: $border-radius-sm;
+            font-size: 0.875rem;
+
+            &:focus {
+              outline: none;
+              border-color: $primary;
+              box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            }
+          }
+
+          .busqueda-resultados {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid $gray-300;
+            border-radius: $border-radius-sm;
+            margin-top: 0.25rem;
+            box-shadow: $shadow-lg;
+            z-index: 10;
+            max-height: 300px;
+            overflow-y: auto;
+            @include scrollbar;
+
+            .diagnostico-opcion {
+              display: flex;
+              align-items: center;
+              gap: 0.75rem;
+              padding: 0.75rem;
+              cursor: pointer;
+              transition: $transition;
+              border-bottom: 1px solid $gray-100;
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              &:hover {
+                background: $gray-50;
+              }
+
+              .checkbox-input {
+                width: 1rem;
+                height: 1rem;
+                border: 2px solid $gray-400;
+                border-radius: 0.25rem;
+                appearance: none;
+                cursor: pointer;
+                position: relative;
+                flex-shrink: 0;
+
+                &:checked {
+                  background-color: $primary;
+                  border-color: $primary;
+
+                  &::after {
+                    content: '';
+                    position: absolute;
+                    top: 2px;
+                    left: 5px;
+                    width: 4px;
+                    height: 8px;
+                    border: solid white;
+                    border-width: 0 2px 2px 0;
+                    transform: rotate(45deg);
+                  }
+                }
+              }
+
+              .diagnostico-info {
+                flex: 1;
+                min-width: 0;
+
+                .diagnostico-codigo {
+                  display: block;
+                  font-weight: 600;
+                  color: $primary;
+                  margin-bottom: 0.125rem;
+                  font-size: 0.875rem;
+                }
+
+                .diagnostico-nombre {
+                  display: block;
+                  font-size: 0.75rem;
+                  color: $gray-600;
+                  @include line-clamp(2);
+                }
+              }
+            }
+
+            .cargando-resultados {
+              @include flex-center;
+              gap: 0.5rem;
+              padding: 1.5rem;
+              color: $gray-500;
+              font-size: 0.875rem;
+
+              .cargando-spinner {
+                width: 1rem;
+                height: 1rem;
+                animation: spin 1s linear infinite;
+                stroke: $gray-500;
+              }
+            }
+
+            .sin-resultados {
+              padding: 1.5rem;
+              text-align: center;
+              color: $gray-500;
+              font-size: 0.875rem;
+            }
+
+            .instruccion-busqueda {
+              padding: 1.5rem;
+              text-align: center;
+              color: $gray-500;
+              font-size: 0.875rem;
+            }
+          }
+        }
+
+        .diagnosticos-seleccionados {
+          .seleccionados-titulo {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: $gray-700;
+            margin-bottom: 0.75rem;
+          }
+
+          .seleccionados-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .diagnostico-seleccionado {
+              @include flex-between;
+              padding: 0.75rem;
+              background: rgba($primary, 0.05);
+              border: 1px solid rgba($primary, 0.1);
+              border-radius: $border-radius-sm;
+
+              .diagnostico-contenido {
+                flex: 1;
+
+                .diagnostico-codigo {
+                  display: block;
+                  font-weight: 600;
+                  color: $primary;
+                  margin-bottom: 0.125rem;
+                  font-size: 0.875rem;
+                }
+
+                .diagnostico-nombre {
+                  display: block;
+                  font-size: 0.75rem;
+                  color: $gray-600;
+                  @include line-clamp(1);
+                }
+              }
+
+              .diagnostico-eliminar {
+                @include flex-center;
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 50%;
+                border: none;
+                background: transparent;
+                color: $gray-500;
+                cursor: pointer;
+                transition: $transition;
+                flex-shrink: 0;
+
+                &:hover {
+                  background: rgba($danger, 0.1);
+                  color: $danger;
+                }
+
+                svg {
+                  width: 0.875rem;
+                  height: 0.875rem;
+                  stroke-width: 2;
+                }
+              }
+            }
+          }
+
+          .sin-seleccionados {
+            padding: 2rem;
+            text-align: center;
+            background: $gray-50;
+            border: 1px dashed $gray-300;
+            border-radius: $border-radius-sm;
+            color: $gray-500;
+            font-size: 0.875rem;
+          }
+        }
+      }
+
+      .form-footer {
+        padding-top: 1.5rem;
+        border-top: 1px solid $gray-200;
+
+        .form-acciones {
+          @include flex-between;
+          gap: 0.75rem;
+        }
+      }
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid $gray-200;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+  }
+}
 
 // Animaciones
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
-  50% {
-    opacity: 0.5;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes spin {
@@ -67,22 +2008,87 @@
   }
 }
 
-// Scrollbar personalizado
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+// Responsive
+@media (max-width: 768px) {
+  .atenciones-psicologicas {
+    padding: 1rem;
+  }
+
+  .atenciones-header {
+    padding: 1.5rem;
+
+    .header-container {
+      flex-direction: column;
+      text-align: center;
+
+      .header-text {
+        .header-title {
+          font-size: 1.5rem;
+        }
+      }
+    }
+  }
+
+  .estadisticas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .atencion-card {
+    flex-direction: column;
+
+    .card-acciones {
+      border-left: none;
+      border-top: 1px solid $gray-200;
+      min-width: auto;
+    }
+  }
+
+  .modal-container {
+    &.modal-sm,
+    &.modal-md,
+    &.modal-lg {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  .paginacion {
+    .paginacion-btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+
+      &.paginacion-prev,
+      &.paginacion-next {
+        min-width: auto;
+      }
+    }
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+@media (max-width: 480px) {
+  .filtros-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-info-principal {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+// Scrollbar global
+body {
+  @include scrollbar;
 }

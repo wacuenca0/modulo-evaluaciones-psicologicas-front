@@ -1,0 +1,71 @@
+<div *ngIf="atenciones.length === 0" class="p-4 text-center text-gray-500">
+  No hay atenciones para mostrar.
+</div>
+<ul *ngIf="atenciones.length > 0" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+  <li *ngFor="let atencion of atenciones" class="atencion-card rounded-xl shadow bg-white p-5 flex flex-row gap-4 border-l-8"
+      [ngClass]="{
+        'border-blue-200 bg-blue-50': atencion.estado === 'PROGRAMADA',
+        'border-yellow-200 bg-yellow-50': atencion.estado === 'EN_CURSO',
+        'border-green-200 bg-green-50': atencion.estado === 'FINALIZADA',
+        'border-red-200 bg-red-50': atencion.estado === 'CANCELADA',
+        'border-gray-200 bg-gray-50': atencion.estado === 'NO_ASISTIO' || atencion.estado === 'REPROGRAMADA'
+      }">
+    <div class="flex-1 flex flex-col gap-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-semibold text-lg text-slate-800">{{ atencion.pacienteNombreCompleto }}</span>
+        <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold"
+          [ngClass]="{
+            'bg-blue-100 text-blue-800': atencion.estado === 'PROGRAMADA',
+            'bg-yellow-100 text-yellow-800': atencion.estado === 'EN_CURSO',
+            'bg-green-100 text-green-800': atencion.estado === 'FINALIZADA',
+            'bg-red-100 text-red-800': atencion.estado === 'CANCELADA',
+            'bg-gray-200 text-gray-700': atencion.estado === 'NO_ASISTIO' || atencion.estado === 'REPROGRAMADA'
+          }">
+          {{ atencion.estado }}
+        </span>
+      </div>
+      <div class="text-xs text-slate-500 mb-1">
+        <b>Psicólogo:</b> {{ atencion.psicologoNombreCompleto }}
+      </div>
+      <div class="text-sm text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
+        <span><b>Fecha:</b> {{ atencion.fechaAtencion }}</span>
+        <span><b>Hora:</b> {{ atencion.horaInicio }} - {{ atencion.horaFin }}</span>
+      </div>
+      <div class="text-sm text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
+        <span><b>Tipo:</b> {{ atencion.tipoConsulta }}</span>
+        <span><b>Modalidad:</b> {{ atencion.tipoAtencion }}</span>
+      </div>
+      <div class="text-sm text-slate-700 mt-1">
+        <b>Motivo:</b> {{ atencion.motivoConsulta || 'No registrado' }}
+      </div>
+      <div class="text-xs text-blue-700 mt-1" *ngIf="atencion.diagnosticos && atencion.diagnosticos.length">
+        <b>Diagnósticos:</b>
+        <span *ngFor="let diag of atencion.diagnosticos; let last = last">
+          {{ diag.codigo }} - {{ diag.nombre }}<span *ngIf="!last">, </span>
+        </span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2 items-end min-w-[180px] ml-4">
+      <button type="button" role="button" aria-label="Ver detalles" class="btn btn-sm w-full flex items-center justify-center gap-3 shadow rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition" (click)="verDetalle.emit(atencion.id)">
+        <span class="material-icons text-base" aria-hidden="true">info</span>
+        <span class="ml-1">Más detalles</span>
+      </button>
+      <button *ngIf="atencion.estado === 'PROGRAMADA' || atencion.estado === 'EN_CURSO' || atencion.estado === 'REPROGRAMADA'" type="button" role="button" aria-label="Finalizar atención" class="btn btn-sm w-full flex items-center justify-center gap-3 shadow rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 transition" (click)="finalizar.emit(atencion)">
+        <span class="material-icons text-base" aria-hidden="true">check_circle</span>
+        <span class="ml-1">Finalizar</span>
+      </button>
+      <button *ngIf="atencion.estado === 'PROGRAMADA' || atencion.estado === 'EN_CURSO' || atencion.estado === 'REPROGRAMADA'" type="button" role="button" aria-label="Cancelar atención" class="btn btn-sm w-full flex items-center justify-center gap-3 shadow rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700 transition" (click)="cancelar.emit(atencion)">
+        <span class="material-icons text-base" aria-hidden="true">cancel</span>
+        <span class="ml-1">Cancelar</span>
+      </button>
+      <button *ngIf="atencion.estado === 'PROGRAMADA' || atencion.estado === 'EN_CURSO' || atencion.estado === 'REPROGRAMADA'" type="button" role="button" aria-label="No asistió" class="btn btn-sm w-full flex items-center justify-center gap-3 shadow rounded-lg font-semibold bg-yellow-500 text-white hover:bg-yellow-600 transition" (click)="noAsistio.emit(atencion)">
+        <span class="material-icons text-base" aria-hidden="true">block</span>
+        <span class="ml-1">No asistió</span>
+      </button>
+      <button *ngIf="atencion.estado === 'PROGRAMADA' || atencion.estado === 'EN_CURSO' || atencion.estado === 'REPROGRAMADA'" type="button" role="button" aria-label="Reprogramar atención" class="btn btn-sm w-full flex items-center justify-center gap-3 shadow rounded-lg font-semibold bg-gray-600 text-white hover:bg-gray-700 transition" (click)="reprogramar.emit(atencion)">
+        <span class="material-icons text-base" aria-hidden="true">event_repeat</span>
+        <span class="ml-1">Reprogramar</span>
+      </button>
+    </div>
+  </li>
+</ul>
