@@ -7,6 +7,7 @@ import {
   PasswordChangeStatus
 } from '../../models/password-change-request.models';
 import { PasswordChangeService } from '../../services/password-change.service';
+import { PsicologosService } from '../../services/psicologos.service';
 
 const STATUS_LABEL: Record<PasswordChangeStatus, string> = {
   PENDIENTE: 'Pendiente',
@@ -14,7 +15,7 @@ const STATUS_LABEL: Record<PasswordChangeStatus, string> = {
   RECHAZADO: 'Rechazado'
 };
 
-type FilterOption = PasswordChangeStatus | 'TODAS';
+type FilterOption = PasswordChangeStatus;
 
 @Component({
   selector: 'app-password-requests',
@@ -68,11 +69,6 @@ type FilterOption = PasswordChangeStatus | 'TODAS';
                   @if (option === 'RECHAZADO') {
                     <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                    </svg>
-                  }
-                  @if (option === 'TODAS') {
-                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
                     </svg>
                   }
                   {{ filterLabel(option) }}
@@ -160,15 +156,6 @@ type FilterOption = PasswordChangeStatus | 'TODAS';
                       </p>
                     </button>
                     <dl class="grid gap-3 text-sm">
-                      <div class="rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-slate-300 hover:shadow-sm">
-                        <dt class="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                          </svg>
-                          Correo de contacto
-                        </dt>
-                        <dd class="text-slate-900">{{ request.contactEmail || 'No especificado' }}</dd>
-                      </div>
                       <div class="rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-slate-300 hover:shadow-sm">
                         <dt class="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,22 +295,6 @@ type FilterOption = PasswordChangeStatus | 'TODAS';
                     </button>
                   </form>
                 </section>
-              } @else {
-                <section class="space-y-4 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6">
-                  <div class="flex items-center gap-3">
-                    <div class="rounded-full bg-emerald-100 p-3">
-                      <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 class="text-sm font-semibold text-emerald-900">Solicitud atendida</h3>
-                      <p class="text-sm text-emerald-700">
-                        Procesada el {{ selected()?.processedAt | date: 'medium' }} por {{ selected()?.processedBy || '—' }}.
-                      </p>
-                    </div>
-                  </div>
-                </section>
               }
   
   `
@@ -353,9 +324,10 @@ export class PasswordRequestsComponent implements OnInit {
 
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(PasswordChangeService);
+  private readonly psicologosService = inject(PsicologosService);
 
   private readonly defaultFilter: FilterOption = 'PENDIENTE';
-  readonly filterOptions: FilterOption[] = ['PENDIENTE', 'APROBADO', 'RECHAZADO', 'TODAS'];
+  readonly filterOptions: FilterOption[] = ['PENDIENTE', 'APROBADO', 'RECHAZADO'];
 
   readonly statusFilter = signal<FilterOption>(this.defaultFilter);
   readonly requests = signal<PasswordChangeRequestDTO[]>([]);
@@ -366,6 +338,8 @@ export class PasswordRequestsComponent implements OnInit {
   readonly creating = signal(false);
   readonly completing = signal(false);
   readonly rejecting = signal(false);
+
+  readonly adminNamesByPsicologoId = signal<Record<number, string>>({});
 
   readonly statusDescription = computed(() => {
     const filter = this.statusFilter();
@@ -399,6 +373,7 @@ export class PasswordRequestsComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    this.loadAdmins();
   }
 
   setFilter(option: FilterOption) {
@@ -409,7 +384,6 @@ export class PasswordRequestsComponent implements OnInit {
   }
 
   filterLabel(option: FilterOption): string {
-    if (option === 'TODAS') return 'Todas';
     return STATUS_LABEL[option];
   }
 
@@ -417,6 +391,18 @@ export class PasswordRequestsComponent implements OnInit {
     this.selected.set(request);
     this.completeForm.reset({ newPassword: '', adminNotes: '', unlockAccount: true });
     this.rejectForm.reset({ adminNotes: '' });
+  }
+
+  getAdminName(request: PasswordChangeRequestDTO | null): string {
+    if (!request || !request.processedBy) {
+      return '—';
+    }
+    const id = Number(request.processedBy);
+    if (!Number.isFinite(id)) {
+      return request.processedBy;
+    }
+    const map = this.adminNamesByPsicologoId();
+    return map[id] || request.processedBy;
   }
 
   create() {
@@ -513,6 +499,32 @@ export class PasswordRequestsComponent implements OnInit {
       this.requests.set([]);
       this.selected.set(null);
     }
+  }
+
+  private loadAdmins() {
+    this.psicologosService.list().subscribe({
+      next: (psicologos: any[]) => {
+        const map: Record<number, string> = {};
+        psicologos.forEach((p: any) => {
+          const rawId = typeof p.id === 'number' ? p.id : Number(p.id);
+          const id = Number.isFinite(rawId) ? Number(rawId) : NaN;
+          if (!Number.isFinite(id)) {
+            return;
+          }
+          const nombre = `${(p.nombres ?? '').toString().trim()} ${(p.apellidos ?? '').toString().trim()}`.trim()
+            || (p.nombre ?? '').toString().trim()
+            || (p.username ?? '').toString().trim()
+            || (p.email ?? '').toString().trim();
+          if (nombre) {
+            map[id] = nombre;
+          }
+        });
+        this.adminNamesByPsicologoId.set(map);
+      },
+      error: () => {
+        this.adminNamesByPsicologoId.set({});
+      }
+    });
   }
 
   private syncSelected(list: PasswordChangeRequestDTO[]) {

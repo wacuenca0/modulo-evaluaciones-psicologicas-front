@@ -89,8 +89,11 @@ export class UserListComponent implements OnInit {
       }
 
       // Filtro de rol
-      if (role !== 'all' && user.roleName?.toLowerCase() !== role.toLowerCase()) {
-        return false;
+      if (role !== 'all') {
+        const userRoleLabel = this.getRoleLabel(user.roleName);
+        if (userRoleLabel !== role) {
+          return false;
+        }
       }
 
       // Filtro de estado
@@ -147,9 +150,11 @@ export class UserListComponent implements OnInit {
     const roles = new Set<string>();
     this.users().forEach(user => {
       if (user.roleName) {
-        roles.add(user.roleName);
+        roles.add(this.getRoleLabel(user.roleName));
       }
     });
+    // Aseguramos que el rol Observador siempre esté disponible en el filtro
+    roles.add('Observador');
     return Array.from(roles).sort();
   });
 

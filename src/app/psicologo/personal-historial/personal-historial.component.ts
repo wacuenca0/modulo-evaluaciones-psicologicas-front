@@ -5,6 +5,7 @@ import { PsicologoNombreService } from '../../services/psicologo-nombre.service'
 import { AuthService } from '../../services/auth.service';
 
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PersonalMilitarService } from '../../services/personal-militar.service';
 import { PersonalMilitarDTO } from '../../models/personal-militar.models';
@@ -21,7 +22,7 @@ type MensajeFlash = {
 
 @Component({
   selector: 'app-personal-historial',
-  imports: [CommonModule, RouterLink, ProgramarSeguimientoModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ProgramarSeguimientoModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="space-y-8 p-4 lg:p-6">
@@ -197,13 +198,69 @@ type MensajeFlash = {
 
           <!-- Historial de fichas -->
           <div>
-            <div class="mb-6 flex items-center justify-between">
+            <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h2 class="text-lg font-bold text-slate-900">Historial de evaluaciones psicológicas</h2>
                 <p class="text-sm text-slate-600">Listado cronológico de valoraciones anuales y especiales</p>
               </div>
-              <div class="text-sm text-slate-500">
-                {{ historial().length }} {{ historial().length === 1 ? 'registro' : 'registros' }}
+              <!-- Filtros -->
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-4 w-full lg:w-auto">
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-slate-600">Cédula del psicólogo</label>
+                  <input
+                    type="text"
+                    class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-300"
+                    [ngModel]="filtroCedulaPsicologo()"
+                    (ngModelChange)="onFiltroCedulaChange($event)"
+                    placeholder="Ej: 0912345678"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-slate-600">Fecha desde</label>
+                  <input
+                    type="date"
+                    class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-300"
+                    [ngModel]="filtroFechaDesde()"
+                    (ngModelChange)="onFiltroFechaDesdeChange($event)"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-slate-600">Fecha hasta</label>
+                  <input
+                    type="date"
+                    class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-300"
+                    [ngModel]="filtroFechaHasta()"
+                    (ngModelChange)="onFiltroFechaHastaChange($event)"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-slate-600">Registros por página</label>
+                  <select
+                    class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-300"
+                    [ngModel]="size()"
+                    (ngModelChange)="onTamanioPaginaChange($event)"
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex gap-2 justify-end mt-2 lg:mt-0">
+                <button
+                  type="button"
+                  class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  (click)="limpiarFiltrosHistorial()"
+                >
+                  Limpiar
+                </button>
+                <button
+                  type="button"
+                  class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+                  (click)="aplicarFiltros()"
+                >
+                  Aplicar filtros
+                </button>
               </div>
             </div>
 
@@ -588,6 +645,12 @@ export class PersonalHistorialComponent {
   readonly mensajeFlash = signal<MensajeFlash | null>(null);
   readonly error = signal<string | null>(null);
   readonly detalleAbiertoId = signal<number | null>(null);
+  // Filtros para historial paginado
+  readonly filtroCedulaPsicologo = signal<string>('');
+  readonly filtroFechaDesde = signal<string>('');
+  readonly filtroFechaHasta = signal<string>('');
+  readonly page = signal<number>(0);
+  readonly size = signal<number>(10);
   // El modal se muestra solo si mostrarModalSeguimiento es true
     // DEBUG visual para mostrar el estado del modal en la UI
     get debugModalState(): string {
@@ -937,6 +1000,50 @@ export class PersonalHistorialComponent {
       this.cargarHistorial(id);
     }
   }
+
+  // Handlers para cambios de filtros desde la plantilla
+  onFiltroCedulaChange(value: any) {
+    this.filtroCedulaPsicologo.set((value ?? '').toString());
+  }
+
+  onFiltroFechaDesdeChange(value: any) {
+    this.filtroFechaDesde.set((value ?? '').toString());
+  }
+
+  onFiltroFechaHastaChange(value: any) {
+    this.filtroFechaHasta.set((value ?? '').toString());
+  }
+
+  onTamanioPaginaChange(value: any) {
+    this.cambiarTamanioPagina(value);
+  }
+
+  // Aplicar filtros desde la UI
+  aplicarFiltros() {
+    const id = this.personalId();
+    if (!id) {
+      return;
+    }
+    this.page.set(0);
+    this.cargarHistorial(id);
+  }
+
+  cambiarTamanioPagina(nuevoSize: string | number) {
+    const sizeNumber = typeof nuevoSize === 'string' ? Number(nuevoSize) : nuevoSize;
+    this.size.set(sizeNumber || 10);
+    this.aplicarFiltros();
+  }
+
+  limpiarFiltrosHistorial() {
+    this.filtroCedulaPsicologo.set('');
+    this.filtroFechaDesde.set('');
+    this.filtroFechaHasta.set('');
+    this.page.set(0);
+    const id = this.personalId();
+    if (id) {
+      this.cargarHistorial(id);
+    }
+  }
   
   // Constructor y métodos de inicialización
   constructor() {
@@ -978,7 +1085,13 @@ export class PersonalHistorialComponent {
     
     forkJoin({
       persona: this.personalService.obtenerPorId(id),
-      historial: this.fichasService.obtenerHistorial(id).pipe(
+      historial: this.fichasService.obtenerHistorial(id, {
+        cedulaPsicologo: this.filtroCedulaPsicologo(),
+        fechaDesde: this.filtroFechaDesde(),
+        fechaHasta: this.filtroFechaHasta(),
+        page: this.page(),
+        size: this.size()
+      }).pipe(
         catchError((err) => {
           if (this.es404(err)) {
             return of([] as FichaPsicologicaHistorialDTO[]);
@@ -1011,7 +1124,13 @@ export class PersonalHistorialComponent {
   }
   
   private cargarHistorial(id: number) {
-    this.fichasService.obtenerHistorial(id)
+    this.fichasService.obtenerHistorial(id, {
+      cedulaPsicologo: this.filtroCedulaPsicologo(),
+      fechaDesde: this.filtroFechaDesde(),
+      fechaHasta: this.filtroFechaHasta(),
+      page: this.page(),
+      size: this.size()
+    })
       .pipe(
         catchError((err) => {
           if (this.es404(err)) {

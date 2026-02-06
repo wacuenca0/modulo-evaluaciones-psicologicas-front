@@ -1,6 +1,6 @@
 // Removed duplicate class and misplaced methods at the top of the file. All methods are now inside the single class definition below.
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
@@ -119,11 +119,46 @@ export class FichasPsicologicasService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = (environment as any).api?.gestionBaseUrl || '/gestion/api';
 
-  obtenerHistorial(personalMilitarId: number): Observable<FichaPsicologicaHistorialDTO[]> {
-    const url = `${this.baseUrl}/fichas-psicologicas/historial/${personalMilitarId}`;
+  obtenerHistorial(
+    personalMilitarId: number,
+    filtros?: {
+      cedulaPsicologo?: string;
+      fechaDesde?: string;
+      fechaHasta?: string;
+      page?: number;
+      size?: number;
+    }
+  ): Observable<FichaPsicologicaHistorialDTO[]> {
+    const url = `${this.baseUrl}/fichas-psicologicas/historial/${personalMilitarId}/page`;
+
+    let params = new HttpParams();
+    const page = filtros?.page ?? 0;
+    const size = filtros?.size ?? 100;
+    params = params.set('page', page).set('size', size);
+
+    if (filtros?.cedulaPsicologo?.trim()) {
+      params = params.set('cedulaPsicologo', filtros.cedulaPsicologo.trim());
+    }
+    if (filtros?.fechaDesde?.trim()) {
+      params = params.set('fechaDesde', filtros.fechaDesde.trim());
+    }
+    if (filtros?.fechaHasta?.trim()) {
+      params = params.set('fechaHasta', filtros.fechaHasta.trim());
+    }
+
     return this.http
-      .get<FichaPsicologicaHistorialDTO[] | null>(url)
-      .pipe(map(res => Array.isArray(res) ? res : []));
+      .get<any>(url, { params })
+      .pipe(
+        map((res) => {
+          if (Array.isArray(res?.content)) {
+            return res.content as FichaPsicologicaHistorialDTO[];
+          }
+          if (Array.isArray(res)) {
+            return res as FichaPsicologicaHistorialDTO[];
+          }
+          return [] as FichaPsicologicaHistorialDTO[];
+        })
+      );
   }
 
   crearFichaInicial(payload: FichaPsicologicaCreacionInicialDTO): Observable<FichaPsicologicaHistorialDTO> {
