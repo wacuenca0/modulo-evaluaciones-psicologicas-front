@@ -629,6 +629,14 @@ export class AtencionesComponent implements OnInit, OnDestroy {
               atencionesFiltradas = atencionesFiltradas.filter(a => a.estado === 'REPROGRAMADA' || a.reprogramada === true);
             }
 
+            // Asegurar que la atención resaltada (seleccionada) aparezca siempre primero en la lista
+            const resaltadaId = this.atencionResaltadaId();
+            if (resaltadaId) {
+              const destacadas = atencionesFiltradas.filter(a => a.id === resaltadaId);
+              const otras = atencionesFiltradas.filter(a => a.id !== resaltadaId);
+              atencionesFiltradas = [...destacadas, ...otras];
+            }
+
             // Establecer mensaje si no hay resultados
             if (atencionesFiltradas.length === 0) {
               if (estado && estado !== 'TODAS') {
