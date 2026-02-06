@@ -26,6 +26,6 @@ function evaluateRoles(roles: unknown, auth: AuthService, router: Router): boole
     ? '/psicologo/personal'
     : auth.hasRole('ROLE_ADMINISTRADOR')
       ? '/admin/catalogos'
-      : '/login';
+      : '/reportes';
   return router.parseUrl(fallback);
 }

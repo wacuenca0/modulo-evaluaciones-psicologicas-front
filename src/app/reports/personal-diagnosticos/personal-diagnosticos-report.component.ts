@@ -45,6 +45,10 @@ export class PersonalDiagnosticosReportComponent {
   readonly resultados = signal<ReportePersonalDiagnosticoDTO[]>([]);
   readonly filtrosAplicados = signal<ReportePersonalDiagnosticosAppliedFilters | null>(null);
   readonly busquedaEjecutada = signal(false);
+  readonly size = signal(10);
+  readonly page = signal(1);
+  readonly total = signal(0);
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.size())));
   readonly diagnosticoSeleccionado = signal<CatalogoCIE10DTO[] | null>(null);
   readonly diagnosticoEtiqueta = computed(() => {
     const seleccionados = this.diagnosticoSeleccionado();
@@ -108,13 +112,15 @@ export class PersonalDiagnosticosReportComponent {
       return;
     }
 
-    const filtros: ReportePersonalDiagnosticosFilters = {
+    const filtros: ReportePersonalDiagnosticosFilters & { size: number; page?: number } = {
       fechaDesde: fechaDesde || undefined,
       fechaHasta: fechaHasta || undefined,
       diagnosticoId: this.parseId(raw.diagnosticoId),
       cedula: raw.cedula.trim().toUpperCase() || undefined,
       grado: raw.grado.trim().toUpperCase() || undefined,
-      unidadMilitar: raw.unidadMilitar.trim() || undefined
+      unidadMilitar: raw.unidadMilitar.trim() || undefined,
+      size: this.size(),
+      page: this.page() - 1
     };
 
     this.loading.set(true);
@@ -137,10 +143,14 @@ export class PersonalDiagnosticosReportComponent {
       if (!respuesta) {
         this.resultados.set([]);
         this.filtrosAplicados.set(this.toAppliedFilters(filtros));
+        this.total.set(0);
         return;
       }
-      this.resultados.set(Array.isArray(respuesta.resultados) ? respuesta.resultados : []);
+      const resultados = Array.isArray(respuesta.resultados) ? respuesta.resultados : [];
+      this.resultados.set(resultados);
       this.filtrosAplicados.set(respuesta.filtros ?? this.toAppliedFilters(filtros));
+      const totalBackend = (respuesta as any).total;
+      this.total.set(Number.isFinite(totalBackend) ? totalBackend : resultados.length);
     });
   }
 
@@ -158,6 +168,7 @@ export class PersonalDiagnosticosReportComponent {
     this.busquedaEjecutada.set(false);
     this.error.set(null);
     this.diagnosticoSeleccionado.set(null);
+    this.page.set(1);
     this.buscar();
   }
 
@@ -250,18 +261,25 @@ export class PersonalDiagnosticosReportComponent {
     }
     this.buscar();
   }
-
-  exportarPDF() {
-    // Implementación básica de exportación a PDF
-    console.log('Exportando a PDF...', this.resultados());
-    // Aquí implementarías la lógica real de exportación a PDF
-    alert('Exportación a PDF: Esta funcionalidad está en desarrollo');
+  cambiarSize(event: Event | string | number) {
+    let value: any = event;
+    if (event && typeof event === 'object' && 'target' in event && (event.target as HTMLSelectElement)?.value !== undefined) {
+      value = (event.target as HTMLSelectElement).value;
+    }
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      return;
+    }
+    this.size.set(parsed);
+    this.page.set(1);
+    this.buscar();
   }
 
-  exportarExcel() {
-    // Implementación básica de exportación a Excel
-    console.log('Exportando a Excel...', this.resultados());
-    // Aquí implementarías la lógica real de exportación a Excel
-    alert('Exportación a Excel: Esta funcionalidad está en desarrollo');
+  cambiarPagina(nueva: number) {
+    if (nueva < 1 || nueva > this.totalPages()) {
+      return;
+    }
+    this.page.set(nueva);
+    this.buscar();
   }
 }

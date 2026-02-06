@@ -72,5 +72,5 @@ export const routes: Routes = [
     data: { roles: ['ROLE_ADMINISTRADOR'] },
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
-  { path: '**', redirectTo: 'admin/catalogos' }
+  { path: '**', redirectTo: 'dashboard' }
 ];

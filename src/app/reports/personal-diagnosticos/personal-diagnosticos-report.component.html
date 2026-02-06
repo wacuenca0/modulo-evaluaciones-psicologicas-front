@@ -42,7 +42,6 @@
           (selectionChange)="onDiagnosticoSelectionChange($event)"
           placeholder="Buscar diagnóstico..."
         />
-        <p class="text-xs text-slate-400 mt-1">Escribe al menos 3 caracteres para buscar en el catálogo</p>
       </label>
       
       <label class="space-y-1.5">
@@ -218,34 +217,44 @@
               </table>
             </div>
             <div class="border-t border-slate-200 px-6 py-3.5">
-              <div class="flex items-center justify-between">
+              <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <p class="text-sm text-slate-600">
-                  Mostrando <span class="font-medium">{{ resultados().length }}</span> fichas
+                  Mostrando <span class="font-medium">{{ resultados().length }}</span> de <span class="font-medium">{{ total() }}</span> fichas
                   @if (filtrosResumen().length) {
                     <span class="ml-2 text-slate-400">para los filtros aplicados</span>
                   }
                 </p>
                 <div class="flex items-center gap-3">
-                  <button type="button" (click)="exportarPDF()" 
-                          class="rounded-lg border border-red-300 bg-white px-3.5 py-2 text-sm font-medium text-red-700 
-                                 hover:bg-red-50 transition-colors">
-                    <span class="flex items-center gap-2">
-                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                      </svg>
-                      Exportar PDF
-                    </span>
-                  </button>
-                  <button type="button" (click)="exportarExcel()" 
-                          class="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 
-                                 hover:bg-slate-50 transition-colors">
-                    <span class="flex items-center gap-2">
-                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                      </svg>
-                      Exportar Excel
-                    </span>
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <button type="button"
+                            (click)="cambiarPagina(page() - 1)"
+                            [disabled]="page() <= 1"
+                            class="rounded px-2 py-1 border border-slate-300 bg-white text-slate-700 disabled:opacity-50 text-xs">
+                      Anterior
+                    </button>
+                    @for (p of [].constructor(totalPages()); track p; let i = $index) {
+                      <button type="button"
+                              class="rounded px-2 py-1 border border-slate-300 bg-white text-slate-700 text-xs"
+                              [class.bg-slate-900]="page() === i + 1"
+                              [class.text-white]="page() === i + 1"
+                              [class.border-slate-900]="page() === i + 1"
+                              (click)="cambiarPagina(i + 1)">
+                        {{ i + 1 }}
+                      </button>
+                    }
+                    <button type="button"
+                            (click)="cambiarPagina(page() + 1)"
+                            [disabled]="page() >= totalPages()"
+                            class="rounded px-2 py-1 border border-slate-300 bg-white text-slate-700 disabled:opacity-50 text-xs">
+                      Siguiente
+                    </button>
+                  </div>
+                  <label class="inline-flex items-center gap-1">
+                    <span class="text-xs">Por página:</span>
+                    <select [value]="size()" (change)="cambiarSize($event)" class="rounded border border-slate-300 px-1 py-0.5 text-xs">
+                      <option *ngFor="let s of [5,10,15,20]" [value]="s">{{ s }}</option>
+                    </select>
+                  </label>
                 </div>
               </div>
             </div>

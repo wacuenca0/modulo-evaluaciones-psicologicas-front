@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -8,7 +8,6 @@ import { of } from 'rxjs';
 import { ReportesService } from '../../services/reportes.service';
 import { ReporteSeguimientoTransferenciaDTO, ReporteSeguimientoFilters } from '../../models/reportes.models';
 import { AuthService } from '../../services/auth.service';
-import { PsicologosLookupService, PsicologoOption } from '../shared/psicologos-lookup.service';
 
 interface FiltroResumenItem {
   etiqueta: string;
@@ -23,11 +22,6 @@ interface FiltroResumenItem {
   styleUrls: ['./condicion-seguimiento-report.component.scss']
 })
 export class CondicionSeguimientoReportComponent {
-  // TrackBy para psicólogos en el select (adaptado para aceptar cualquier objeto)
-  trackPsicologo(index: number, psicologo: any): string | number {
-    return psicologo.id || psicologo.psicologoId || index;
-  }
-
   // TrackBy para filas de resultados (adaptado para aceptar cualquier objeto)
   trackFila(index: number, fila: any): string | number {
     const id = typeof fila.fichaId === 'number' && Number.isFinite(fila.fichaId) ? String(fila.fichaId) : undefined;
@@ -56,8 +50,8 @@ export class CondicionSeguimientoReportComponent {
 
   removerFiltro(filtro: any) {
     const form = this.form as any;
-    if (filtro.etiqueta === 'Psicólogo') {
-      form.controls.psicologoId.setValue('');
+    if (filtro.etiqueta === 'Cédula psicólogo') {
+      form.controls.psicologoCedula.setValue('');
     } else if (filtro.etiqueta === 'Fecha desde') {
       form.controls.fechaDesde.setValue('');
     } else if (filtro.etiqueta === 'Fecha hasta') {
@@ -69,19 +63,13 @@ export class CondicionSeguimientoReportComponent {
     }
     this.buscar();
   }
-
-  exportarExcel() {
-    console.log('Exportando a Excel...', this.resultados());
-    alert('Exportación a Excel: Esta funcionalidad está en desarrollo');
-  }
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly reportes = inject(ReportesService);
   private readonly auth = inject(AuthService);
-  private readonly psicologosLookup = inject(PsicologosLookupService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly form = this.fb.group({
-    psicologoId: this.fb.control(''),
+    psicologoCedula: this.fb.control(''),
     fechaDesde: this.fb.control(''),
     fechaHasta: this.fb.control(''),
     cedula: this.fb.control('', { validators: [Validators.maxLength(20)] }),
@@ -90,12 +78,14 @@ export class CondicionSeguimientoReportComponent {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly info = signal<string | null>(null);
   readonly resultados = signal<ReporteSeguimientoTransferenciaDTO[]>([]);
-  readonly psicologos = signal<PsicologoOption[]>([]);
-  readonly psicologosCargando = signal(false);
   readonly busquedaEjecutada = signal(false);
-  readonly psicologoForzado = signal<string | null>(null);
   readonly filtrosAplicados = signal<ReporteSeguimientoFilters | null>(null);
+  readonly size = signal(10);
+  readonly page = signal(1);
+  readonly total = signal(0);
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.size())));
 
   readonly filtrosResumen = computed<FiltroResumenItem[]>(() => {
     const filtros = this.filtrosAplicados();
@@ -103,9 +93,8 @@ export class CondicionSeguimientoReportComponent {
       return [];
     }
     const resumen: FiltroResumenItem[] = [];
-    if (filtros.psicologoId !== null && filtros.psicologoId !== undefined) {
-      const psicologo = this.psicologos().find(op => op.id === filtros.psicologoId);
-      resumen.push({ etiqueta: 'Psicólogo', valor: psicologo?.nombre ?? String(filtros.psicologoId) });
+    if (filtros.psicologoCedula) {
+      resumen.push({ etiqueta: 'Cédula psicólogo', valor: String(filtros.psicologoCedula) });
     }
     if (filtros.fechaDesde) {
       resumen.push({ etiqueta: 'Fecha desde', valor: filtros.fechaDesde });
@@ -125,64 +114,16 @@ export class CondicionSeguimientoReportComponent {
   readonly sinResultados = computed(() => !this.error() && !this.resultados().length);
 
   private readonly dateFormatter = new Intl.DateTimeFormat('es-EC', { dateStyle: 'medium', timeStyle: 'short' });
-  private readonly isInitialized = signal(false);
 
   constructor() {
-
-    this.cargarPsicologos();
-
-    effect(() => {
-      const esPsicologo = this.auth.isPsicologo();
-      const usuario = this.auth.currentUser();
-      const opciones = this.psicologos();
-      if (!esPsicologo) {
-        // Si no es psicólogo, no forzar valor y dejar el filtro habilitado
-        this.psicologoForzado.set(null);
-        if (this.form.controls.psicologoId.disabled) {
-          this.form.controls.psicologoId.enable({ emitEvent: false });
-        }
-        // Limpia el valor si el usuario no es psicólogo
-        if (this.form.controls.psicologoId.value) {
-          this.form.controls.psicologoId.setValue('', { emitEvent: false });
-        }
-        return;
-      }
-      // Solo forzar si el usuario es psicólogo y existe en la lista de opciones
-      const forcedId = this.resolvePsicologoId(usuario?.id, usuario?.username, opciones);
-      const existe = opciones.some(op => String(op.id) === String(forcedId));
-      if (!existe) {
-        console.warn('[CondicionSeguimientoReport] El usuario psicólogo actual no está en la lista de opciones:', usuario, opciones);
-        this.psicologoForzado.set(null);
-        if (this.form.controls.psicologoId.disabled) {
-          this.form.controls.psicologoId.enable({ emitEvent: false });
-        }
-        if (this.form.controls.psicologoId.value) {
-          this.form.controls.psicologoId.setValue('', { emitEvent: false });
-        }
-        return;
-      }
-      const forcedValue = String(forcedId);
-      this.psicologoForzado.set(forcedValue);
-      if (this.form.controls.psicologoId.value !== forcedValue) {
-        this.form.controls.psicologoId.setValue(forcedValue, { emitEvent: false });
-      }
-      if (!this.form.controls.psicologoId.disabled) {
-        this.form.controls.psicologoId.disable({ emitEvent: false });
-      }
-    });
-
     queueMicrotask(() => {
-      this.isInitialized.set(true);
       this.buscar();
     });
   }
 
   buscar() {
-    if (!this.isInitialized()) {
-      return;
-    }
-
     const raw = this.form.getRawValue();
+    const psicologoCedula = raw.psicologoCedula.trim();
     const fechaDesde = raw.fechaDesde.trim();
     const fechaHasta = raw.fechaHasta.trim();
     if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
@@ -192,20 +133,35 @@ export class CondicionSeguimientoReportComponent {
 
     const cedula = raw.cedula.trim().toUpperCase();
     const unidad = raw.unidadMilitar.trim();
-    const psicologoRaw = raw.psicologoId.trim();
-    const psicologoId = psicologoRaw.length ? Number(psicologoRaw) : undefined;
+    const hayFiltros = (
+      !!psicologoCedula ||
+      !!fechaDesde ||
+      !!fechaHasta ||
+      !!cedula ||
+      !!unidad
+    );
 
-    const filtros: ReporteSeguimientoFilters & { incluirSeguimientos: boolean } = {
-      psicologoId: Number.isFinite(psicologoId) ? psicologoId : undefined,
+    if (!hayFiltros) {
+      this.info.set('Debes ingresar al menos un criterio de búsqueda para consultar el reporte.');
+      this.error.set(null);
+      return;
+    }
+
+    const filtros: ReporteSeguimientoFilters & { incluirSeguimientos: boolean; size: number; page?: number } = {
+      psicologoId: undefined,
+      psicologoCedula: psicologoCedula || undefined,
       fechaDesde: fechaDesde || undefined,
       fechaHasta: fechaHasta || undefined,
       cedula: cedula || undefined,
       unidadMilitar: unidad || undefined,
-      incluirSeguimientos: true
+      incluirSeguimientos: true,
+      size: this.size(),
+      page: this.page() - 1
     };
 
     this.loading.set(true);
     this.error.set(null);
+    this.info.set(null);
 
     this.reportes.obtenerCondicionSeguimiento(filtros).pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -224,32 +180,30 @@ export class CondicionSeguimientoReportComponent {
       if (!respuesta) {
         this.resultados.set([]);
         this.filtrosAplicados.set(this.toAppliedFilters(filtros));
+        this.total.set(0);
         return;
       }
-      this.resultados.set(Array.isArray(respuesta.resultados) ? respuesta.resultados : []);
+      const resultados = Array.isArray(respuesta.resultados) ? respuesta.resultados : [];
+      this.resultados.set(resultados);
       this.filtrosAplicados.set(respuesta.filtros ?? this.toAppliedFilters(filtros));
+      const totalBackend = (respuesta as any).total;
+      this.total.set(Number.isFinite(totalBackend) ? totalBackend : resultados.length);
     });
   }
 
   limpiar() {
-    const forced = this.psicologoForzado();
     this.form.patchValue({
-      psicologoId: forced ?? '',
+      psicologoCedula: '',
       fechaDesde: '',
       fechaHasta: '',
       cedula: '',
       unidadMilitar: ''
     });
-    if (forced === null && this.form.controls.psicologoId.disabled) {
-      this.form.controls.psicologoId.enable({ emitEvent: false });
-    }
-    if (forced !== null && !this.form.controls.psicologoId.disabled) {
-      this.form.controls.psicologoId.disable({ emitEvent: false });
-    }
     this.resultados.set([]);
     this.filtrosAplicados.set(null);
     this.error.set(null);
     this.busquedaEjecutada.set(false);
+    this.page.set(1);
     this.buscar();
   }
 
@@ -264,38 +218,36 @@ export class CondicionSeguimientoReportComponent {
     return this.dateFormatter.format(parsed);
   }
 
-
-  private cargarPsicologos() {
-    this.psicologosCargando.set(true);
-    this.psicologosLookup.obtenerOpciones().pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => this.psicologosCargando.set(false))
-    ).subscribe(list => {
-      this.psicologos.set(list);
-    });
-  }
-
-  private resolvePsicologoId(id?: number | null, username?: string | null | undefined, opciones: PsicologoOption[] = []): number | null {
-    if (typeof id === 'number' && Number.isFinite(id)) {
-      return Number(id);
-    }
-    if (username) {
-      const normalizado = username.trim().toLowerCase();
-      const coincidencia = opciones.find(op => op.username.trim().toLowerCase() === normalizado);
-      if (coincidencia) {
-        return Number(coincidencia.id);
-      }
-    }
-    return null;
-  }
-
   private toAppliedFilters(filtros: ReporteSeguimientoFilters): ReporteSeguimientoFilters {
     return {
       psicologoId: typeof filtros.psicologoId === 'number' && Number.isFinite(filtros.psicologoId) ? filtros.psicologoId : undefined,
+      psicologoCedula: filtros.psicologoCedula || undefined,
       fechaDesde: filtros.fechaDesde || undefined,
       fechaHasta: filtros.fechaHasta || undefined,
       cedula: filtros.cedula || undefined,
       unidadMilitar: filtros.unidadMilitar || undefined
     };
+  }
+
+  cambiarSize(event: Event | string | number) {
+    let value: any = event;
+    if (event && typeof event === 'object' && 'target' in event && (event.target as HTMLSelectElement)?.value !== undefined) {
+      value = (event.target as HTMLSelectElement).value;
+    }
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      return;
+    }
+    this.size.set(parsed);
+    this.page.set(1);
+    this.buscar();
+  }
+
+  cambiarPagina(nueva: number) {
+    if (nueva < 1 || nueva > this.totalPages()) {
+      return;
+    }
+    this.page.set(nueva);
+    this.buscar();
   }
 }

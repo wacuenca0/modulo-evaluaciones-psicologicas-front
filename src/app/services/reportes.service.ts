@@ -25,10 +25,13 @@ import {
 // Interfaces adicionales que no están en el modelo pero son necesarias
 interface ReporteCondicionSeguimientoFilters {
   psicologoId?: number;
+  psicologoCedula?: string;
   fechaDesde?: string;
   fechaHasta?: string;
   cedula?: string;
   unidadMilitar?: string;
+  page?: number;
+  size?: number;
 }
 
 interface ReporteCondicionSeguimientoResponse {
@@ -49,6 +52,11 @@ export class ReportesService {
     const psicologoId = this.normalizeId(filters.psicologoId);
     if (psicologoId !== null) {
       params = params.set('psicologoId', String(psicologoId));
+    }
+
+    const psicologoCedula = this.normalizeString(filters.psicologoCedula);
+    if (psicologoCedula) {
+      params = params.set('psicologoCedula', psicologoCedula);
     }
 
     const diagnosticoId = this.normalizeId(filters.diagnosticoId);
@@ -79,7 +87,7 @@ export class ReportesService {
     );
   }
 
-  obtenerPersonalDiagnosticos(filters: ReportePersonalDiagnosticosFilters): Observable<ReportePersonalDiagnosticosResponse> {
+  obtenerPersonalDiagnosticos(filters: ReportePersonalDiagnosticosFilters & { page?: number; size?: number }): Observable<ReportePersonalDiagnosticosResponse> {
     let params = this.createBaseParams(filters.fechaDesde, filters.fechaHasta);
 
     const diagnosticoId = this.normalizeId(filters.diagnosticoId);
@@ -100,6 +108,13 @@ export class ReportesService {
     const unidadMilitar = this.normalizeString(filters.unidadMilitar);
     if (unidadMilitar) {
       params = params.set('unidadMilitar', unidadMilitar);
+    }
+
+    if (filters.page !== undefined && filters.page !== null) {
+      params = params.set('page', String(filters.page));
+    }
+    if (filters.size !== undefined && filters.size !== null) {
+      params = params.set('size', String(filters.size));
     }
 
     return this.http.get<unknown>(`${this.reportesBase}/personal-diagnosticos`, { params }).pipe(
@@ -144,6 +159,9 @@ export class ReportesService {
     if (filters.psicologoId !== undefined && filters.psicologoId !== null) {
       params = params.set('psicologoId', String(filters.psicologoId));
     }
+    if (filters.psicologoCedula) {
+      params = params.set('psicologoCedula', filters.psicologoCedula);
+    }
     if (filters.cedula) {
       params = params.set('cedula', filters.cedula);
     }
@@ -155,6 +173,12 @@ export class ReportesService {
     }
     if (filters.fechaHasta) {
       params = params.set('fechaHasta', filters.fechaHasta);
+    }
+    if (filters.page !== undefined && filters.page !== null) {
+      params = params.set('page', String(filters.page));
+    }
+    if (filters.size !== undefined && filters.size !== null) {
+      params = params.set('size', String(filters.size));
     }
     // Siempre enviar incluirSeguimientos=true
     params = params.set('incluirSeguimientos', 'true');
@@ -186,7 +210,20 @@ export class ReportesService {
     const totales = this.buildAtencionesTotales(resultados, totalesSource);
     const filtros = this.buildAtencionesFiltros(response, requestFilters);
 
-    return { resultados, totales, filtros };
+    // Detectar total global desde respuestas paginadas (Spring Page) u otros formatos
+    const sources = this.collectFilterSources(response);
+    const totalFromPayload = this.collectNumberValue(sources, ['totalElements', 'total', 'totalRegistros']);
+    const total = totalFromPayload ?? resultados.length;
+
+    // Exponer también data/total para que el componente pueda manejar paginación fácilmente
+    return {
+      resultados,
+      totales,
+      filtros,
+      // Campos extra usados sólo por el componente de atenciones
+      data: resultados,
+      total
+    } as ReporteAtencionesResponse & { data: ReporteAtencionPsicologoDTO[]; total: number };
   }
 
   private toReportePersonalDiagnosticosResponse(response: unknown, requestFilters: ReportePersonalDiagnosticosFilters): ReportePersonalDiagnosticosResponse {
@@ -238,6 +275,7 @@ export class ReportesService {
     const sources = this.collectFilterSources(response);
 
     const psicologoId = this.collectNumberValue(sources, ['psicologoId', 'filtroPsicologoId']);
+    const psicologoCedula = this.collectStringValue(sources, ['psicologoCedula', 'filtroPsicologoCedula']);
     const fechaDesde = this.collectStringValue(sources, ['fechaDesde', 'filtroFechaDesde']);
     const fechaHasta = this.collectStringValue(sources, ['fechaHasta', 'filtroFechaHasta']);
     const cedula = this.collectStringValue(sources, ['cedula', 'filtroCedula']);
@@ -247,6 +285,7 @@ export class ReportesService {
 
         return {
           psicologoId: this.normalizeId(psicologoId) ?? this.normalizeId(request.psicologoId) ?? null,
+          psicologoCedula: this.normalizeString(psicologoCedula) ?? this.normalizeString(request.psicologoCedula) ?? null,
           fechaDesde: this.normalizeDate(fechaDesde) ?? this.normalizeDate(request.fechaDesde) ?? null,
           fechaHasta: this.normalizeDate(fechaHasta) ?? this.normalizeDate(request.fechaHasta) ?? null,
           diagnosticoId: this.normalizeId(diagnosticoId) ?? this.normalizeId(request.diagnosticoId) ?? null,
@@ -312,6 +351,7 @@ export class ReportesService {
 
     return {
       psicologoId: this.normalizeId(this.collectNumberValue(sources, ['psicologoId', 'filtroPsicologoId'])) ?? this.normalizeId(request.psicologoId) ?? undefined,
+      psicologoCedula: this.normalizeString(this.collectStringValue(sources, ['psicologoCedula', 'filtroPsicologoCedula'])) ?? this.normalizeString(request.psicologoCedula) ?? undefined,
       fechaDesde: this.normalizeDate(this.collectStringValue(sources, ['fechaDesde', 'filtroFechaDesde'])) ?? this.normalizeDate(request.fechaDesde) ?? undefined,
       fechaHasta: this.normalizeDate(this.collectStringValue(sources, ['fechaHasta', 'filtroFechaHasta'])) ?? this.normalizeDate(request.fechaHasta) ?? undefined,
       cedula: this.normalizeString(this.collectStringValue(sources, ['cedula', 'filtroCedula'])) ?? this.normalizeString(request.cedula) ?? undefined,

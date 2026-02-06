@@ -3,7 +3,7 @@
     <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Alertas clínicas</p>
     <h1 class="text-3xl font-semibold text-slate-900">Condición Seguimiento o Transferencia</h1>
     <p class="text-sm text-slate-500 max-w-3xl">
-      Monitorea las fichas que permanecen en seguimiento o transferencia, con detalle del psicólogo responsable y el último contacto.
+      Monitorea las fichas que permanecen en seguimiento o transferencia, con detalle del psicólogo responsable.
     </p>
   </header>
 
@@ -17,26 +17,29 @@
       </div>
     </div>
   }
+  
+    @if (info()) {
+      <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 mb-4">
+        <div class="flex items-center gap-2">
+          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 100-2 1 1 0 000 2zm1 2a1 1 0 10-2 0v4a1 1 0 102 0v-4z" clip-rule="evenodd" />
+          </svg>
+          <div>
+            <p class="font-medium">Información</p>
+            <p class="text-sm mt-1">{{ info() }}</p>
+          </div>
+        </div>
+      </div>
+    }
 
   <form [formGroup]="form" (ngSubmit)="buscar()" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <label class="space-y-1.5">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Psicólogo</span>
-        <select formControlName="psicologoId" 
-                class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 
-                       focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
-                [disabled]="form.controls.psicologoId.disabled">
-          <option value="">Todos</option>
-          @for (opcion of psicologos(); track trackPsicologo($index, opcion)) {
-            <option [value]="opcion.id">{{ opcion.nombre }}</option>
-          }
-        </select>
-        @if (psicologosCargando()) {
-          <p class="text-xs text-slate-400">Cargando listado...</p>
-        }
-        @if (!psicologosCargando() && !psicologos().length) {
-          <p class="text-xs text-slate-400">Sin registros disponibles</p>
-        }
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cédula psicólogo</span>
+        <input type="text" maxlength="20" formControlName="psicologoCedula" 
+               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 
+                      focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
+               placeholder="Ej. 0912345678" />
       </label>
       
       <label class="space-y-1.5">
@@ -54,7 +57,7 @@
       </label>
       
       <label class="space-y-1.5">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cédula</span>
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cédula personal</span>
         <input type="text" maxlength="20" formControlName="cedula" 
                class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 
                       focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10" 
@@ -164,9 +167,6 @@
                     <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Evaluación
                     </th>
-                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Último contacto
-                    </th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -179,9 +179,10 @@
                         }
                       </td>
                       <td class="whitespace-nowrap px-6 py-4">
-                        <span class="inline-flex items-center rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-800">
-                          ID {{ fila.personalMilitarId }}
-                        </span>
+                        <p class="text-sm font-medium text-slate-900">{{ fila.personalMilitarNombre || '—' }}</p>
+                        @if (fila.personalMilitarCedula) {
+                          <p class="text-xs text-slate-500">{{ fila.personalMilitarCedula }}</p>
+                        }
                       </td>
                       <td class="whitespace-nowrap px-6 py-4">
                         <p class="text-sm font-medium text-slate-900">{{ fila.numeroEvaluacion || fila.fichaId || '—' }}</p>
@@ -198,29 +199,48 @@
                       <td class="whitespace-nowrap px-6 py-4">
                         <span class="text-sm text-slate-600">{{ formatearFecha(fila.fechaEvaluacion) }}</span>
                       </td>
-                      <td class="whitespace-nowrap px-6 py-4">
-                        <span class="text-sm text-slate-600">{{ formatearFecha(fila.ultimoSeguimiento) }}</span>
-                      </td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
             <div class="border-t border-slate-200 px-6 py-3.5">
-              <div class="flex items-center justify-between">
+              <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <p class="text-sm text-slate-600">
-                  Mostrando <span class="font-medium">{{ resultados().length }}</span> fichas
+                  Mostrando <span class="font-medium">{{ resultados().length }}</span> de <span class="font-medium">{{ total() }}</span> fichas
                 </p>
-                <button type="button" (click)="exportarExcel()" 
-                        class="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 
-                               hover:bg-slate-50 transition-colors">
-                  <span class="flex items-center gap-2">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Exportar Excel
-                  </span>
-                </button>
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
+                    <button type="button"
+                            (click)="cambiarPagina(page() - 1)"
+                            [disabled]="page() <= 1"
+                            class="rounded px-2 py-1 border border-slate-300 bg-white text-slate-700 disabled:opacity-50 text-xs">
+                      Anterior
+                    </button>
+                    @for (p of [].constructor(totalPages()); track p; let i = $index) {
+                      <button type="button"
+                              class="rounded px-2 py-1 border border-slate-300 bg-white text-slate-700 text-xs"
+                              [class.bg-slate-900]="page() === i + 1"
+                              [class.text-white]="page() === i + 1"
+                              [class.border-slate-900]="page() === i + 1"
+                              (click)="cambiarPagina(i + 1)">
+                        {{ i + 1 }}
+                      </button>
+                    }
+                    <button type="button"
+                            (click)="cambiarPagina(page() + 1)"
+                            [disabled]="page() >= totalPages()"
+                            class="rounded px-2 py-1 border border-slate-300 bg-white text-slate-700 disabled:opacity-50 text-xs">
+                      Siguiente
+                    </button>
+                  </div>
+                  <label class="inline-flex items-center gap-1">
+                    <span class="text-xs">Por página:</span>
+                    <select [value]="size()" (change)="cambiarSize($event)" class="rounded border border-slate-300 px-1 py-0.5 text-xs">
+                      <option *ngFor="let s of [5,10,15,20]" [value]="s">{{ s }}</option>
+                    </select>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

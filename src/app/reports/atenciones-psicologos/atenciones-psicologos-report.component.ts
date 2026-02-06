@@ -35,6 +35,7 @@ export class AtencionesPsicologosReportComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly form = this.fb.group({
+    psicologoCedula: this.fb.control('', { validators: [Validators.maxLength(20)] }),
     cedula: this.fb.control('', { validators: [Validators.maxLength(20)] }),
     unidadMilitar: this.fb.control('', { validators: [Validators.maxLength(120)] }),
     fechaDesde: this.fb.control(''),
@@ -68,6 +69,9 @@ export class AtencionesPsicologosReportComponent {
     }
     const resumen: FiltroResumenItem[] = [];
     
+    if (filtros.psicologoCedula) {
+      resumen.push({ etiqueta: 'Cédula psicólogo', valor: filtros.psicologoCedula });
+    }
     if (filtros.cedula) {
       resumen.push({ etiqueta: 'Cédula', valor: filtros.cedula });
     }
@@ -99,6 +103,7 @@ export class AtencionesPsicologosReportComponent {
 
   buscar() {
     const raw = this.form.getRawValue();
+    const psicologoCedula = raw.psicologoCedula.trim();
     const fechaDesde = raw.fechaDesde.trim();
     const fechaHasta = raw.fechaHasta.trim();
     
@@ -108,6 +113,7 @@ export class AtencionesPsicologosReportComponent {
     }
 
     const filtros: ReporteAtencionesFilters = {
+      psicologoCedula: psicologoCedula || undefined,
       cedula: raw.cedula.trim().toUpperCase() || undefined,
       unidadMilitar: raw.unidadMilitar.trim() || undefined,
       fechaDesde: fechaDesde || undefined,
@@ -180,12 +186,13 @@ export class AtencionesPsicologosReportComponent {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 1) return;
     this.size.set(parsed);
-    this.page.set(1);
+    // Sólo cambia el tamaño de página, manteniendo la página actual
     this.buscar();
   }
 
   limpiar() {
     this.form.reset({
+      psicologoCedula: '',
       cedula: '',
       unidadMilitar: '',
       fechaDesde: '',
@@ -233,7 +240,9 @@ export class AtencionesPsicologosReportComponent {
   }
 
   removerFiltro(filtro: FiltroResumenItem) {
-    if (filtro.etiqueta === 'Cédula') {
+    if (filtro.etiqueta === 'Cédula psicólogo') {
+      this.form.controls.psicologoCedula.setValue('');
+    } else if (filtro.etiqueta === 'Cédula') {
       this.form.controls.cedula.setValue('');
     } else if (filtro.etiqueta === 'Unidad Militar') {
       this.form.controls.unidadMilitar.setValue('');
@@ -247,11 +256,6 @@ export class AtencionesPsicologosReportComponent {
     }
     
     this.buscar();
-  }
-
-  exportarExcel() {
-    console.log('Exportando a Excel...', this.resultados());
-    alert('Exportación a Excel: Esta funcionalidad está en desarrollo');
   }
 
   onDiagnosticoSeleccion(opciones: CatalogoCIE10DTO[] | null) {
@@ -269,6 +273,7 @@ export class AtencionesPsicologosReportComponent {
   // MÉTODOS PRIVADOS
   private toAppliedFilters(filtros: ReporteAtencionesFilters): ReporteAtencionesAppliedFilters {
     return {
+      psicologoCedula: filtros.psicologoCedula ?? null,
       cedula: filtros.cedula ?? null,
       unidadMilitar: filtros.unidadMilitar ?? null,
       fechaDesde: filtros.fechaDesde ?? null,

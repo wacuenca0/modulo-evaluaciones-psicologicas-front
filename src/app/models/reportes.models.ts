@@ -10,6 +10,12 @@ export interface ReporteAtencionPsicologoDTO {
     totalSeguimientos: number;
     personasAtendidas: number;
     ultimaAtencion: string;
+    // Nuevos campos de acciones por ficha/atención
+    totalAccionesProgramadas?: number;
+    totalAccionesEnCurso?: number;
+    totalAccionesFinalizadas?: number;
+    totalAccionesCanceladas?: number;
+    totalAccionesNoAsistio?: number;
     // Campos de filtro
     filtroDiagnosticoId?: number;
     filtroDiagnosticoCodigo?: string;
@@ -31,6 +37,7 @@ export interface ReporteAtencionesTotales {
 // ========== INTERFACES PARA ATENCIONES ========== 
 export interface ReporteAtencionesFilters {
     psicologoId?: number;
+    psicologoCedula?: string;
     fechaDesde?: string;
     fechaHasta?: string;
     diagnosticoId?: number;
@@ -40,6 +47,7 @@ export interface ReporteAtencionesFilters {
 
 export interface ReporteAtencionesAppliedFilters {
     psicologoId: number | null;
+    psicologoCedula: string | null;
     fechaDesde: string | null;
     fechaHasta: string | null;
     diagnosticoId: number | null;
@@ -81,6 +89,7 @@ export interface ReporteSeguimientoTransferenciaDTO {
 
 export interface ReporteSeguimientoFilters {
     psicologoId?: number;
+    psicologoCedula?: string;
     fechaDesde?: string;
     fechaHasta?: string;
     cedula?: string;
@@ -89,6 +98,7 @@ export interface ReporteSeguimientoFilters {
 
 export interface ReporteSeguimientoAppliedFilters {
     psicologoId: number | null;
+    psicologoCedula: string | null;
     fechaDesde: string | null;
     fechaHasta: string | null;
     cedula: string | null;

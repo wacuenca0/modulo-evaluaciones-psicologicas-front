@@ -27,14 +27,18 @@ export class DashboardComponent {
   constructor() {
     effect(() => {
       const id = this.userId();
-      if (id) {
-        this.psicologoNombreService.obtenerNombrePorUserId(id).subscribe({
-          next: nombre => this.psicologoNombre.set(nombre),
-          error: () => this.psicologoNombre.set('No registrado')
-        });
-      } else {
-        this.psicologoNombre.set('No registrado');
+      const esPsicologo = this.auth.isPsicologo();
+
+      // Sólo intentamos buscar nombre de psicólogo cuando el usuario tiene ese rol.
+      if (!esPsicologo || !id) {
+        this.psicologoNombre.set('');
+        return;
       }
+
+      this.psicologoNombreService.obtenerNombrePorUserId(id).subscribe({
+        next: nombre => this.psicologoNombre.set(nombre),
+        error: () => this.psicologoNombre.set('No registrado')
+      });
     });
   }
   readonly rol = computed(() => {
@@ -43,6 +47,22 @@ export class DashboardComponent {
     if (roles.includes('ROLE_PSICOLOGO')) return 'psicologo';
     if (roles.includes('ROLE_OBSERVADOR')) return 'observador';
     return 'usuario';
+  });
+
+  readonly displayName = computed(() => {
+    const user = this.user();
+    if (!user) return '';
+    const rol = this.rol();
+
+    if (rol === 'psicologo') {
+      const nombrePsicologo = this.psicologoNombre();
+      if (nombrePsicologo && nombrePsicologo !== 'No registrado') {
+        return nombrePsicologo;
+      }
+      return user.fullName || user.username || '';
+    }
+
+    return user.fullName || user.username || '';
   });
 
   mensajeLogout: string | null = null;
