@@ -228,6 +228,11 @@ export class AuthService {
     );
   }
 
+  // --- CURRENT USER + PSICÓLOGO ---
+  fetchCurrentUserWithPsicologo(): Observable<{ user: any | null; psicologo: any | null }> {
+    return this.http.get<{ user: any | null; psicologo: any | null }>(`${this.authUrl}/current-user-with-psicologo`);
+  }
+
   // --- REFRESH TOKEN ---
   refreshToken(): Observable<RefreshTokenResponseDTO | string> {
     const refresh = this.readLocal(this.refreshKey);
@@ -258,6 +263,11 @@ export class AuthService {
     return this.http.post<void>(`${this.authUrl}/logout`, {}).pipe(
       map(() => { this.clearAllTokens(); })
     );
+  }
+
+  // --- CAMBIO DE CONTRASEÑA PROPIA ---
+  changeOwnPassword(payload: { currentPassword: string; newPassword: string }): Observable<void> {
+    return this.http.post<void>(`${this.authUrl}/change-password`, payload);
   }
 
   // --- VALIDATE TOKEN ---

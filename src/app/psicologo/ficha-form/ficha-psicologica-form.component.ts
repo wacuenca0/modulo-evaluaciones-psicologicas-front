@@ -146,7 +146,7 @@ export class FichaPsicologicaFormComponent implements OnInit {
   readonly documentosError = signal<string | null>(null);
   readonly documentosCargados = signal(false);
   readonly documentoEliminandoId = signal<number | null>(null);
-  private readonly _documentoArchivo = signal<File | null>(null);
+  private readonly _documentoArchivos = signal<File[]>([]);
 
   // ============ VARIABLES DE ESTADO ============
   readonly estadosFicha: string[] = ['Abierta', 'Cerrada', 'Observación'];
@@ -255,8 +255,17 @@ export class FichaPsicologicaFormComponent implements OnInit {
     return match?.label ?? value ?? 'Sin tipo';
   });
 
-  readonly documentoArchivo = (): File | null => this._documentoArchivo();
-  readonly documentoArchivoNombre = computed(() => this.documentoArchivo()?.name ?? null);
+  readonly documentoArchivos = (): readonly File[] => this._documentoArchivos();
+  readonly documentoArchivoNombre = computed(() => {
+    const archivos = this.documentoArchivos();
+    if (!archivos || archivos.length === 0) {
+      return null;
+    }
+    if (archivos.length === 1) {
+      return archivos[0]?.name ?? null;
+    }
+    return `${archivos.length} archivos seleccionados`;
+  });
 
   // ============ LIFECYCLE ============
   ngOnInit(): void {
@@ -1377,10 +1386,21 @@ export class FichaPsicologicaFormComponent implements OnInit {
 
   // ============ MÉTODOS DE DOCUMENTOS ============
   onDocumentoArchivoSeleccionado(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const archivo = input.files?.[0] ?? null;
-    this._documentoArchivo.set(archivo);
-    this.documentoForm.controls.archivo.setValue(archivo);
+    let files: FileList | null = null;
+
+    const dragEvent = event as DragEvent;
+    if (dragEvent.dataTransfer?.files && dragEvent.dataTransfer.files.length > 0) {
+      files = dragEvent.dataTransfer.files;
+      event.preventDefault();
+    } else {
+      const input = event.target as HTMLInputElement | null;
+      files = input?.files ?? null;
+    }
+
+    const archivos = files ? Array.from(files) : [];
+    this._documentoArchivos.set(archivos);
+    // Mantener el control de formulario por compatibilidad (solo valida que haya al menos un archivo)
+    this.documentoForm.controls.archivo.setValue(archivos[0] ?? null);
     this.documentoFormularioError.set(null);
   }
 
@@ -1393,9 +1413,9 @@ export class FichaPsicologicaFormComponent implements OnInit {
       return;
     }
 
-    const archivo = this.documentoArchivo();
-    if (!archivo) {
-      this.documentoFormularioError.set('No se ha seleccionado ningun archivo.');
+    const archivos = this.documentoArchivos();
+    if (!archivos || archivos.length === 0) {
+      this.documentoFormularioError.set('No se ha seleccionado ningún archivo.');
       return;
     }
 
@@ -1405,14 +1425,12 @@ export class FichaPsicologicaFormComponent implements OnInit {
       return;
     }
 
-    const descripcion = this.documentoForm.get('descripcion')?.value || '';
-
     this.documentoSubiendo.set(true);
-    this.service.subirDocumento(fichaId, archivo, descripcion).subscribe({
+    this.service.subirArchivosFichaGestion(fichaId, archivos as File[]).subscribe({
       next: () => {
         this.documentoSubiendo.set(false);
         this.limpiarFormularioDocumento();
-        this.navigationMessage.set('✅ Documento adjuntado correctamente.');
+        this.navigationMessage.set('✅ Archivo(s) adjuntado(s) correctamente.');
         this.cargarDocumentos(); // Recargar la lista
       },
       error: (err) => {
@@ -1445,7 +1463,7 @@ export class FichaPsicologicaFormComponent implements OnInit {
 
   limpiarFormularioDocumento() {
     this.documentoForm.reset();
-    this._documentoArchivo.set(null);
+    this._documentoArchivos.set([]);
     this.documentoFormularioError.set(null);
   }
 }

@@ -109,6 +109,39 @@ export class FichasPsicologicasService {
     }
 
     /**
+     * Sube uno o varios archivos asociados a una ficha psicológica al microservicio de gestión
+     * usando el endpoint /archivos-ficha/{fichaId}/subir (multipart/form-data).
+     * Los parámetros de conexión FTP se obtienen desde environment.ftpArchivosFicha.
+     */
+    subirArchivosFichaGestion(fichaId: number, archivos: File[]): Observable<any[]> {
+      const id = Number(fichaId);
+      const url = `${this.baseUrl}/archivos-ficha/${id}/subir`;
+
+      const formData = new FormData();
+      archivos.forEach((archivo) => {
+        formData.append('archivos', archivo);
+      });
+
+      const ftpConfig = (environment as any).ftpArchivosFicha ?? {};
+
+      const servidor = typeof ftpConfig.servidor === 'string' ? ftpConfig.servidor : '';
+      const puerto = Number.isFinite(Number(ftpConfig.puerto)) ? String(ftpConfig.puerto) : '21';
+      const usuario = typeof ftpConfig.usuario === 'string' ? ftpConfig.usuario : '';
+      const clave = typeof ftpConfig.clave === 'string' ? ftpConfig.clave : '';
+      const rutaBase = typeof ftpConfig.rutaBase === 'string' && ftpConfig.rutaBase.trim().length
+        ? String(ftpConfig.rutaBase).trim()
+        : '/fichas';
+
+      formData.append('servidor', servidor);
+      formData.append('puerto', puerto);
+      formData.append('usuario', usuario);
+      formData.append('clave', clave);
+      formData.append('rutaRemota', `${rutaBase.replace(/\/$/, '')}/${id}`);
+
+      return this.http.post<any[]>(url, formData);
+    }
+
+    /**
      * Elimina un documento de respaldo
      */
     eliminarDocumento(fichaId: number, documentoId: number): Observable<void> {
