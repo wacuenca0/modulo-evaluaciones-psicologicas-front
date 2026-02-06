@@ -18,6 +18,13 @@ export const environment = {
     gestionBaseUrl: `${gatewayBaseUrl}${gestionBasePath}`,
     documentosBaseUrl: `${gatewayBaseUrl}${documentosBasePath}`
   },
+  ftpArchivosFicha: {
+    servidor: 'ftp.ejemplo.com',
+    puerto: 21,
+    usuario: 'usuario-ftp',
+    clave: 'clave-segura',
+    rutaBase: '/fichas'
+  },
   apiBaseUrl: `${gatewayBaseUrl}${catalogosBasePath}`,
   catalogBaseUrl: `${gatewayBaseUrl}${catalogosBasePath}`,
   documentosBaseUrl: `${gatewayBaseUrl}${documentosBasePath}`,

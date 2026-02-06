@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { PsicologoNombreService } from '../../services/psicologo-nombre.service';
+import { UserProfileModalComponent } from './user-profile-modal.component';
 
 interface NavLink {
   label: string;
@@ -16,7 +17,7 @@ interface NavLink {
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, UserProfileModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isLoggedIn()) {
@@ -56,7 +57,7 @@ interface NavLink {
               }
             </div>
 
-            <!-- Usuario y logout -->
+            <!-- Usuario, menú de cuenta y logout -->
             <div class="flex items-center gap-4">
               <div class="hidden md:flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2">
                 <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
@@ -65,15 +66,44 @@ interface NavLink {
                   <p class="text-xs text-slate-500">{{ userRole() }}</p>
                 </div>
               </div>
-              
-              <button (click)="logout()" 
-                      class="flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold 
-                             text-red-700 transition-all hover:bg-red-50 hover:border-red-400 active:scale-[0.98]">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                <span class="hidden md:inline">Cerrar sesión</span>
-              </button>
+
+              <div class="relative">
+                <button (click)="toggleUserMenu()"
+                        class="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold 
+                               text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98]">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span class="hidden sm:inline">Cuenta</span>
+                  <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                @if (userMenuOpen()) {
+                  <div class="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white py-2 text-sm shadow-lg">
+                    <button type="button"
+                            (click)="openProfileModal()"
+                            class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-slate-700 hover:bg-slate-50">
+                      <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Mi información y contraseña
+                    </button>
+
+                    <div class="my-1 border-t border-slate-100"></div>
+
+                    <button type="button"
+                            (click)="logout()"
+                            class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-red-700 hover:bg-red-50">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Cerrar sesión
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
 
             <!-- Menú móvil -->
@@ -111,12 +141,27 @@ interface NavLink {
                       <p class="text-xs text-slate-500">{{ userRole() }}</p>
                     </div>
                   </div>
+                  <div class="mt-2 space-y-1 px-4">
+                    <button type="button" (click)="openProfileModal(); closeMobileMenu()" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Mi información y contraseña
+                    </button>
+                    <button type="button" (click)="logout()" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-50">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Cerrar sesión
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           }
         </div>
       </nav>
+      <app-user-profile-modal [visible]="profileModalOpen()" (closed)="closeProfileModal()"></app-user-profile-modal>
     }
   `
 })
@@ -126,6 +171,8 @@ export class AppNavComponent {
   private readonly router = inject(Router);
 
   readonly mobileMenuOpen = signal(false);
+  readonly userMenuOpen = signal(false);
+  readonly profileModalOpen = signal(false);
   
   readonly isLoggedIn = this.auth.isAuthenticated;
   readonly currentUser = this.auth.currentUser;
@@ -168,7 +215,7 @@ export class AppNavComponent {
     { label: 'Catalogos', route: '/admin/catalogos', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', role: ['ROLE_ADMINISTRADOR'] },
     { label: 'Usuarios', route: '/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0h-15', role: ['ROLE_ADMINISTRADOR'] },
     { label: 'Buscar Personal', route: '/psicologo/personal', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', role: ['ROLE_PSICOLOGO'] },
-    { label: 'Evaluaciones', route: '/psicologo/fichas', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', role: ['ROLE_PSICOLOGO'] },
+    { label: 'Evaluaciones', route: '/psicologo/personal', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', role: ['ROLE_PSICOLOGO'] },
     { label: 'Atenciones', route: '/psicologo/atenciones', icon: 'M12 4v16m8-8H4', role: ['ROLE_PSICOLOGO'] },
     { label: 'Reportes', route: '/reportes', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', role: ['ROLE_OBSERVADOR'] },
   ];
@@ -196,8 +243,23 @@ export class AppNavComponent {
     this.mobileMenuOpen.set(false);
   }
 
+  toggleUserMenu() {
+    this.userMenuOpen.update(open => !open);
+  }
+
+  openProfileModal() {
+    this.userMenuOpen.set(false);
+    this.profileModalOpen.set(true);
+  }
+
+  closeProfileModal() {
+    this.profileModalOpen.set(false);
+  }
+
   logout() {
     this.closeMobileMenu();
+    this.userMenuOpen.set(false);
+    this.profileModalOpen.set(false);
     this.auth.logout().subscribe({
       next: () => {
         this.router.navigate(['/login']).catch(() => {});
