@@ -68,16 +68,16 @@ type PropagateTouchedFn = () => void;
 
       @if (!loading() && query().trim().length >= 3) {
         @if (results().length) {
-          <ul class="space-y-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+          <ul class="mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
             @for (item of results(); track item.id ?? item.codigo) {
-              <li>
+              <li class="border-b border-slate-100 last:border-b-0">
                 <button
                   type="button"
                   (click)="selectOption(item)"
-                  class="flex w-full flex-col gap-1 rounded-xl border border-slate-200 px-4 py-3 text-left text-sm transition hover:border-slate-400"
+                  class="flex w-full cursor-pointer flex-col items-start px-4 py-3 text-left text-sm transition hover:bg-slate-50 focus-visible:bg-slate-100 focus-visible:outline-none"
                 >
-                  <span class="font-semibold text-slate-900">{{ item.codigo }}</span>
-                  <span class="text-slate-600">{{ item.descripcion }}</span>
+                  <span class="text-xs font-semibold uppercase tracking-wide text-sky-600">{{ item.codigo }}</span>
+                  <span class="mt-1 text-[13px] leading-snug text-slate-700">{{ item.descripcion }}</span>
                 </button>
               </li>
             }

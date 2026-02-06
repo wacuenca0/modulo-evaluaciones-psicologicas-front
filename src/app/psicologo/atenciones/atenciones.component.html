@@ -19,7 +19,7 @@
             <svg class="btn-icon-svg" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <span>Programar</span>
+            <span>Programar Atención</span>
           </button>
         </div>
       </div>
@@ -174,7 +174,9 @@
 
                       @if (cambio.razonCambio) {
                         <div class="timeline-razon">
-                          <span class="razon-label">Razón del cambio</span>
+                          <span class="razon-label">
+                            {{ cambio.estado === 'REPROGRAMADA' ? 'Motivo de reprogramación' : 'Razón del cambio' }}
+                          </span>
                           <p class="razon-texto">{{ cambio.razonCambio }}</p>
                         </div>
                       }
@@ -188,7 +190,11 @@
 
         <!-- Footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline" (click)="cerrarHistorialModal()">
+          <button
+            type="button"
+            (click)="cerrarHistorialModal()"
+            class="modal-btn-secondary"
+          >
             Cerrar
           </button>
         </div>
@@ -201,15 +207,109 @@
     <div class="modal-overlay" (click)="cerrarCancelarModal()" (keydown)="onModalKeyDown($event)">
       <div class="modal-container modal-sm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
         <div class="modal-header">
-          <h3>Cancelar atención</h3>
+          <div class="modal-header-contenido">
+            <h3 class="modal-titulo">Cancelar atención</h3>
+            <p class="modal-subtitulo">
+              Ingrese el motivo de cancelación. Esta acción no se puede deshacer.
+            </p>
+          </div>
+          <button class="modal-cerrar" (click)="cerrarCancelarModal()">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
+
         <div class="modal-body">
-          <label for="razonCancelacionModal">Razón de cancelación</label>
-          <input id="razonCancelacionModal" type="text" [(ngModel)]="razonCancelacion" class="form-input" />
+          <div class="form-group">
+            <label for="razonCancelacionModal" class="form-label requerido">Razón de cancelación</label>
+            <textarea
+              id="razonCancelacionModal"
+              rows="3"
+              class="form-textarea"
+              [(ngModel)]="razonCancelacion"
+              placeholder="Explique por qué se cancela la atención..."
+            ></textarea>
+          </div>
         </div>
+
+        <div class="modal-footer border-t border-slate-200 pt-4 flex justify-end gap-3">
+          <button
+            type="button"
+            (click)="cerrarCancelarModal()"
+            class="modal-btn-secondary"
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            (click)="onCancelarAtencion()"
+            class="modal-btn-primary"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Cancelar atención
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Confirmación Acción Peligrosa (Cancelar, Finalizar, No asistió) -->
+  @if (showConfirmAccionModal()) {
+    <div class="modal-overlay" (click)="cancelarAccionPeligrosa()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-sm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
+        <!-- Header -->
+        <div class="modal-header">
+          <div class="modal-header-contenido">
+            <h3 class="modal-titulo">Confirmar acción</h3>
+            <p class="modal-subtitulo">
+              Esta acción no se puede deshacer. ¿Está seguro de continuar?
+            </p>
+          </div>
+          <button class="modal-cerrar" (click)="cancelarAccionPeligrosa()">
+            <svg viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contenido -->
+        <div class="modal-body">
+          <p class="text-sm text-slate-700">
+            Se va a
+            <strong>
+              @if (accionPeligrosa === 'NO_ASISTIO') {
+                marcar la atención como "NO ASISTIÓ".
+              } @else if (accionPeligrosa === 'CANCELAR') {
+                cancelar la atención seleccionada.
+              } @else if (accionPeligrosa === 'FINALIZAR') {
+                finalizar la atención seleccionada.
+              } @else {
+                aplicar la acción seleccionada.
+              }
+            </strong>
+          </p>
+        </div>
+
+        <!-- Footer -->
         <div class="modal-footer">
-          <button class="btn btn-outline" (click)="cerrarCancelarModal()">Cerrar</button>
-          <button class="btn btn-danger" (click)="onCancelarAtencion()">Cancelar atención</button>
+          <button
+            type="button"
+            (click)="cancelarAccionPeligrosa()"
+            class="modal-btn-secondary"
+          >
+            Volver
+          </button>
+
+          <button
+            type="button"
+            (click)="confirmarAccionPeligrosa()"
+            class="modal-btn-primary"
+          >
+            Confirmar
+          </button>
         </div>
       </div>
     </div>
@@ -256,9 +356,26 @@
             <textarea id="reprogramarMotivo" rows="3" class="form-textarea" [(ngModel)]="reprogramarForm.motivoReprogramacion" placeholder="Explique por qué se reprograma la atención..."></textarea>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" (click)="cerrarReprogramarModal()">Cerrar</button>
-          <button class="btn btn-secondary" (click)="onReprogramarAtencion()" [disabled]="cargandoAccion()">Reprogramar</button>
+        <div class="modal-footer border-t border-slate-200 pt-4 flex justify-end gap-3">
+          <button type="button" (click)="cerrarReprogramarModal()"
+                  class="modal-btn-secondary">
+            Cerrar
+          </button>
+          <button type="button" (click)="onReprogramarAtencion()" [disabled]="cargandoAccion()"
+                  [class]="'modal-btn-primary ' + (cargandoAccion() ? 'opacity-60 cursor-not-allowed' : '')">
+            @if (cargandoAccion()) {
+              <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Reprogramando...
+            } @else {
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M5 19a9 9 0 1 0 3-14.197"/>
+              </svg>
+              Reprogramar
+            }
+          </button>
         </div>
       </div>
     </div>
@@ -465,26 +582,60 @@
               </div>
             </div>
             
-            <!-- Footer del Formulario -->
-            <div class="form-footer">
-              <div class="form-acciones">
-                <button type="button" class="btn btn-danger" (click)="cerrarModal()">Cancelar</button>
-                
+            <!-- Footer del Formulario (alineado al modal Programar Atención) -->
+            <div class="border-t border-slate-200 pt-6">
+              <div class="flex justify-end gap-3">
+                <!-- Cancelar -->
+                <button
+                  type="button"
+                  (click)="cerrarModal()"
+                  class="min-w-[11rem] rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  Cancelar
+                </button>
+
+                <!-- Guardar en curso (solo cuando aplica) -->
                 @if (!modoEdicion() && !modoProgramada() && !modoFinalizar()) {
-                  <button type="button" class="btn btn-warning" (click)="guardarEnCurso()" [disabled]="cargandoAccion()">
+                  <button
+                    type="button"
+                    (click)="guardarEnCurso()"
+                    [disabled]="cargandoAccion()"
+                    [class]="'min-w-[11rem] rounded-full px-5 py-2.5 text-base font-semibold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 ' +
+                             (cargandoAccion() ? 'bg-amber-400 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-500')"
+                  >
                     @if (cargandoAccion()) {
-                      <span class="cargando-spinner"></span> Guardando...
+                      <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Guardando...
                     } @else {
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
                       Guardar en curso
                     }
                   </button>
                 }
-                
-                <button type="submit" class="btn btn-success" [disabled]="cargandoAccion()">
+
+                <!-- Crear / Actualizar / Programar / Finalizar atención -->
+                <button
+                  type="submit"
+                  [disabled]="cargandoAccion()"
+                  [class]="'min-w-[11rem] rounded-full px-5 py-2.5 text-base font-semibold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 ' +
+                           (cargandoAccion() ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800')"
+                >
                   @if (cargandoAccion()) {
-                    <span class="cargando-spinner"></span> Procesando...
+                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando...
                   } @else {
-                    {{ modoFinalizar() 
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-4-8v8" />
+                    </svg>
+                    {{ modoFinalizar()
                         ? 'Finalizar atención'
                         : (modoEdicion() ? 'Actualizar' : modoProgramada() ? 'Programar' : 'Crear') + ' Atención' }}
                   }
@@ -530,13 +681,26 @@
         
         <!-- Footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline" (click)="cerrarModalEliminar()">
+          <button
+            type="button"
+            (click)="cerrarModalEliminar()"
+            class="modal-btn-secondary"
+          >
             Cancelar
           </button>
           
-          <button type="button" class="btn btn-danger" (click)="confirmarEliminarAtencion()" [disabled]="cargandoAccion()">
+          <button
+            type="button"
+            (click)="confirmarEliminarAtencion()"
+            [disabled]="cargandoAccion()"
+            class="modal-btn-primary"
+          >
             @if (cargandoAccion()) {
-              <span class="cargando-spinner"></span> Procesando...
+              <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Procesando...
             } @else {
               Eliminar Permanentemente
             }

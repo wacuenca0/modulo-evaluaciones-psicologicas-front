@@ -1,5 +1,5 @@
 <!-- Modal visual igual al de crear/editar atención -->
-<div *ngIf="show" class="fixed inset-0 z-50 overflow-y-auto">
+<div *ngIf="show" class="fixed inset-0 z-50 overflow-y-auto programar-atencion-modal">
   <div class="flex min-h-screen items-center justify-center p-4">
     <!-- Overlay -->
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="cancelar.emit()" (keydown)="cancelar.emit()"></div>
@@ -23,7 +23,7 @@
       </div>
 
       <!-- Formulario -->
-      <div class="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
+      <div class="max-h-[calc(100vh-200px)] overflow-y-auto p-6 modal-body">
         <!-- Mensajes de estado -->
         <div *ngIf="error" class="mb-4 rounded-xl border border-red-300 bg-red-50 p-3 flex items-center gap-2">
           <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -130,11 +130,11 @@
           <div class="border-t border-slate-200 pt-6">
             <div class="flex justify-end gap-3">
               <button type="button" (click)="cancelar.emit()"
-                      class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98]">
+                      class="min-w-[11rem] rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-700 hover:bg-slate-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
                 Cancelar
               </button>
-                    <button type="submit" [disabled]="isCargandoAccion"
-                      [class]="'rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-[0.98] flex items-center gap-2 ' + 
+              <button type="submit" [disabled]="isCargandoAccion"
+                      [class]="'min-w-[11rem] rounded-full px-5 py-3 text-base font-semibold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 ' + 
                          (isCargandoAccion ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800')">
                 <ng-container *ngIf="isCargandoAccion; else programarLabel">
                   <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">

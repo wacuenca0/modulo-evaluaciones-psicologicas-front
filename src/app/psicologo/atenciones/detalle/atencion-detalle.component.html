@@ -41,6 +41,7 @@
                       'bg-yellow-100 text-yellow-800': atencion.estado === 'EN_CURSO',
                       'bg-green-100 text-green-800': atencion.estado === 'FINALIZADA',
                       'bg-red-100 text-red-800': atencion.estado === 'CANCELADA',
+                      'bg-purple-100 text-purple-800': atencion.estado === 'REPROGRAMADA',
                       'bg-gray-200 text-gray-700': atencion.estado === 'NO_ASISTIO'
                     }">
                 {{ atencion.estado }}
@@ -68,6 +69,13 @@
             <div>
               <p class="font-semibold text-green-800">Atención Finalizada</p>
               <p class="text-sm text-green-700">La atención fue completada exitosamente.</p>
+            </div>
+          </div>
+          <div *ngIf="atencion.estado === 'REPROGRAMADA'" class="mb-4 rounded-lg bg-purple-50 border border-purple-200 p-4 flex items-center gap-3">
+            <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M5 19a9 9 0 1 0 3-14.197"/></svg>
+            <div>
+              <p class="font-semibold text-purple-800">Atención Reprogramada</p>
+              <p class="text-sm text-purple-700">La atención fue reprogramada a una nueva fecha y hora.</p>
             </div>
           </div>
           <div *ngIf="atencion.estado === 'EN_CURSO'" class="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 flex items-center gap-3">

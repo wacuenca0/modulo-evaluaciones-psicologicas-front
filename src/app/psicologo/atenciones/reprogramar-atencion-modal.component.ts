@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -6,21 +7,21 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './reprogramar-atencion-modal.component.html',
   styleUrls: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule]
+  imports: [CommonModule, FormsModule]
 })
 export class ReprogramarAtencionModalComponent {
   open = input(false);
   nuevaFecha = signal('');
-  motivo = signal('');
+  motivoReprogramacion = signal('');
 
   @Output() closed = new EventEmitter<void>();
-  @Output() reprogramar = new EventEmitter<{ fecha: string; motivo: string }>();
+  @Output() reprogramar = new EventEmitter<{ fecha: string; motivoReprogramacion: string }>();
 
   onClose() {
     this.closed.emit();
   }
 
   onReprogramar() {
-    this.reprogramar.emit({ fecha: this.nuevaFecha(), motivo: this.motivo() });
+    this.reprogramar.emit({ fecha: this.nuevaFecha(), motivoReprogramacion: this.motivoReprogramacion() });
   }
 }

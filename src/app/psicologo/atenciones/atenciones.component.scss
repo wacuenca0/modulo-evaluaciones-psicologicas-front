@@ -71,11 +71,6 @@
 }
 
 .form-acciones button, .form-footer button {
-  min-width: 140px;
-  height: 44px;
-  font-size: 1rem;
-  border-radius: 8px;
-  padding: 0 20px;
   font-weight: 500;
   border: none;
   cursor: pointer;
@@ -336,6 +331,45 @@ body {
   }
 }
 
+// Botones estándar para modales (mismo tamaño en todas partes)
+.modal-btn-secondary,
+.modal-btn-primary {
+  min-width: 8.75rem; // un poco más angosto que antes
+  border-radius: 9999px;
+  padding: 0.5rem 1.125rem; // más compacto que 0.625rem 1.25rem
+  font-size: 0.875rem; // text-sm
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: $transition;
+}
+
+.modal-btn-secondary {
+  border: 1px solid $gray-300;
+  background-color: #ffffff;
+  color: $gray-700;
+
+  &:hover {
+    background-color: $gray-50;
+  }
+}
+
+.modal-btn-primary {
+  background-color: #dc2626; // rojo de acciones peligrosas
+  color: #ffffff;
+
+  &:hover {
+    background-color: darken(#dc2626, 5%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // Header principal
 .atenciones-header {
   background: linear-gradient(135deg, $primary-dark 0%, $primary 50%, $primary-light 100%);
@@ -373,6 +407,12 @@ body {
         @include flex-center;
         gap: 0.75rem;
         flex-wrap: wrap;
+
+        .btn-primary,
+        .btn-secondary {
+          width: 320px;
+          height: 3rem;
+        }
 
         .btn-primary {
           background: linear-gradient(135deg, $primary-light 0%, $primary-dark 100%);

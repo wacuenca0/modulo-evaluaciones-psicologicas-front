@@ -74,8 +74,10 @@ export class AtencionesComponent implements OnInit, OnDestroy {
     // Estado y datos para modales de acciones
     readonly showCancelarModal = signal(false);
     readonly showReprogramarModal = signal(false);
+  readonly showConfirmAccionModal = signal(false);
     razonCancelacion = '';
     atencionAccion: any = null;
+  accionPeligrosa: 'NO_ASISTIO' | 'CANCELAR' | 'FINALIZAR' | null = null;
 
     // Formulario para reprogramar atención
     reprogramarForm: ReprogramarAtencionRequestDTO = {
@@ -110,55 +112,17 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.cargandoAccion.set(true);
-      this.error.set(null);
-
-      this.atencionService
-        .cancelarAtencionQuery(this.atencionAccion.id, razon)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.mensajeExito.set('✓ Atención cancelada correctamente');
-            this.cerrarCancelarModal();
-            this.cargarAtencionesFiltradas();
-          },
-          error: (err) => {
-            this.error.set(this.obtenerMensajeError(err));
-            this.cargandoAccion.set(false);
-          },
-          complete: () => {
-            this.cargandoAccion.set(false);
-          }
-        });
+      // Mostrar confirmación antes de ejecutar la cancelación definitiva
+      this.accionPeligrosa = 'CANCELAR';
+      this.showConfirmAccionModal.set(true);
     }
 
     marcarNoAsistio(atencion: any): void {
       if (!atencion?.id) return;
 
-      // Confirmar acción antes de marcar como NO_ASISTIO
-      if (!confirm('¿Confirmar que el paciente no asistió a la cita?')) {
-        return;
-      }
-
-      this.cargandoAccion.set(true);
-      this.error.set(null);
-
-      this.atencionService
-        .marcarNoAsistio(atencion.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.mensajeExito.set('✓ Atención marcada como NO ASISTIÓ');
-            this.cargarAtencionesFiltradas();
-          },
-          error: (err) => {
-            this.error.set(this.obtenerMensajeError(err));
-            this.cargandoAccion.set(false);
-          },
-          complete: () => {
-            this.cargandoAccion.set(false);
-          }
-        });
+      this.atencionAccion = atencion;
+      this.accionPeligrosa = 'NO_ASISTIO';
+      this.showConfirmAccionModal.set(true);
     }
 
     reprogramarAtencion(atencion: any): void {
@@ -280,6 +244,8 @@ export class AtencionesComponent implements OnInit, OnDestroy {
       if (event.key === 'Escape') {
         if (this.showModal()) this.cerrarModal();
         if (this.showEliminarModal()) this.cerrarModalEliminar();
+        if (this.showCancelarModal()) this.cerrarCancelarModal();
+        if (this.showConfirmAccionModal()) this.cancelarAccionPeligrosa();
         if (this.showProgramarModal()) this.showProgramarModal.set(false);
         if (this.showProgramarSeguimientoModal()) this.showProgramarSeguimientoModal.set(false);
         if (this.showDetalleModal()) this.showDetalleModal.set(false);
@@ -292,6 +258,32 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         this.toggleDiagnostico(diagnosticoId);
       }
     }
+
+      confirmarAccionPeligrosa(): void {
+        const tipo = this.accionPeligrosa;
+        this.showConfirmAccionModal.set(false);
+
+        switch (tipo) {
+          case 'NO_ASISTIO':
+            this.ejecutarMarcarNoAsistio();
+            break;
+          case 'CANCELAR':
+            this.ejecutarCancelarAtencion();
+            break;
+          case 'FINALIZAR':
+            this.ejecutarFinalizarAtencion();
+            break;
+          default:
+            break;
+        }
+
+        this.accionPeligrosa = null;
+      }
+
+      cancelarAccionPeligrosa(): void {
+        this.showConfirmAccionModal.set(false);
+        this.accionPeligrosa = null;
+      }
   // Inyección de dependencias
   private readonly atencionService = inject(AtencionPsicologicaService);
   private readonly personalService = inject(PersonalMilitarService);
@@ -313,7 +305,7 @@ export class AtencionesComponent implements OnInit, OnDestroy {
   readonly mensajeSinResultados = signal<string>('');
 
   // ========== SEÑALES PARA FILTROS ==========
-  readonly filtroEstado = signal('TODAS');
+  readonly filtroEstado = signal('PROGRAMADA');
   readonly filtroNombrePaciente = signal('');
   readonly filtroFecha = signal('');
   readonly filtroHoy = signal(false);
@@ -631,10 +623,10 @@ export class AtencionesComponent implements OnInit, OnDestroy {
 
             const atencionesAdaptadas = this.adaptarAtencionesBackend(atencionesArray);
 
-            // Aplicar filtro adicional de REPROGRAMADA si es necesario
+            // Filtro adicional en frontend para REPROGRAMADA por si el backend devuelve otros estados
             let atencionesFiltradas = atencionesAdaptadas;
             if (estado === 'REPROGRAMADA') {
-              atencionesFiltradas = atencionesFiltradas.filter(a => a.reprogramada === true);
+              atencionesFiltradas = atencionesFiltradas.filter(a => a.estado === 'REPROGRAMADA' || a.reprogramada === true);
             }
 
             // Establecer mensaje si no hay resultados
@@ -669,8 +661,14 @@ export class AtencionesComponent implements OnInit, OnDestroy {
 
   private adaptarAtencionesBackend(atenciones: any[]): any[] {
     return atenciones.map(a => {
-      const reprogramada = !!a.reprogramada || !!a.reprogramadoPor;
+      const reprogramada = a.estado === 'REPROGRAMADA' || !!a.reprogramada || !!a.reprogramadoPor;
       const tipoEvaluacion = a.tipoEvaluacion ?? null;
+      let estado = a.estado === 'ACTIVO' ? 'EN_CURSO' : (a.estado || 'PROGRAMADA');
+
+      // Si viene marcada como reprogramada, mostrar estado REPROGRAMADA en la UI
+      if (reprogramada && (estado === 'PROGRAMADA' || estado === 'EN_CURSO')) {
+        estado = 'REPROGRAMADA';
+      }
       
       return {
         ...a,
@@ -683,7 +681,7 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         tipoAtencion: a.tipoAtencion || 'PRESENCIAL',
         tipoConsulta: a.tipoConsulta || 'PRIMERA_VEZ',
         motivoConsulta: a.motivoConsulta || '',
-        estado: a.estado === 'ACTIVO' ? 'EN_CURSO' : (a.estado || 'PROGRAMADA'),
+        estado,
         reprogramada: reprogramada,
         motivoReprogramacion: a.motivoReprogramacion || '',
         pacienteNombreCompleto: a.pacienteNombreCompleto || a.pacienteNombre || 
@@ -747,6 +745,146 @@ export class AtencionesComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  private scrollToProgramarError(): void {
+    // Desplaza suavemente el contenido del modal de programar hasta el mensaje de error
+    setTimeout(() => {
+      const container = document.querySelector('.programar-atencion-modal .modal-body') as HTMLElement | null;
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 0);
+  }
+
+  private scrollToAtencion(atencionId: number | null | undefined): void {
+    if (!atencionId) {
+      return;
+    }
+
+    setTimeout(() => {
+      const element = document.getElementById(`atencion-${atencionId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 0);
+  }
+
+  private ejecutarCancelarAtencion(): void {
+    if (!this.atencionAccion?.id) {
+      return;
+    }
+
+    const atencionId = this.atencionAccion.id;
+
+    const razon = this.razonCancelacion?.trim();
+    if (!razon) {
+      this.error.set('Debe ingresar la razón de cancelación.');
+      return;
+    }
+
+    this.cargandoAccion.set(true);
+    this.error.set(null);
+
+    this.atencionService
+      .cancelarAtencionQuery(this.atencionAccion.id, razon)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.mensajeExito.set('✓ Atención cancelada correctamente');
+          this.cerrarCancelarModal();
+          this.filtroEstado.set('CANCELADA');
+          this.page.set(0);
+          this.atencionResaltadaId.set(atencionId);
+          this.cargarAtencionesFiltradas();
+          this.scrollToAtencion(atencionId);
+        },
+        error: (err) => {
+          this.error.set(this.obtenerMensajeError(err));
+          this.cargandoAccion.set(false);
+        },
+        complete: () => {
+          this.cargandoAccion.set(false);
+        }
+      });
+  }
+
+  private ejecutarMarcarNoAsistio(): void {
+    if (!this.atencionAccion?.id) return;
+
+    const atencionId = this.atencionAccion.id;
+
+    this.cargandoAccion.set(true);
+    this.error.set(null);
+
+    this.atencionService
+      .marcarNoAsistio(this.atencionAccion.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.mensajeExito.set('✓ Atención marcada como NO ASISTIÓ');
+          this.filtroEstado.set('NO_ASISTIO');
+          this.page.set(0);
+          this.atencionResaltadaId.set(atencionId);
+          this.cargarAtencionesFiltradas();
+          this.scrollToAtencion(atencionId);
+        },
+        error: (err) => {
+          this.error.set(this.obtenerMensajeError(err));
+          this.cargandoAccion.set(false);
+        },
+        complete: () => {
+          this.cargandoAccion.set(false);
+        }
+      });
+  }
+
+  private ejecutarFinalizarAtencion(): void {
+    if (!(this.modoFinalizar() && this.atencionFinalizar?.id)) {
+      return;
+    }
+
+    const atencionId = this.atencionFinalizar.id;
+
+    this.cargandoAccion.set(true);
+    this.error.set(null);
+    this.mensajeExito.set(null);
+
+    const payload: Partial<AtencionPsicologicaRequestDTO> = {
+      anamnesis: this.formModel.anamnesis,
+      examenMental: this.formModel.examenMental,
+      impresionDiagnostica: this.formModel.impresionDiagnostica,
+      planIntervencion: this.formModel.planIntervencion,
+      recomendaciones: this.formModel.recomendaciones,
+      derivacion: this.formModel.derivacion,
+      diagnosticoIds: this.formModel.diagnosticoIds,
+      motivoConsulta: this.formModel.motivoConsulta,
+      estado: 'FINALIZADA'
+    };
+
+    this.atencionService
+      .finalizarAtencion(this.atencionFinalizar.id, payload as AtencionPsicologicaRequestDTO)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.mensajeExito.set('✓ Atención finalizada correctamente');
+          setTimeout(() => {
+            this.cerrarModal();
+            this.filtroEstado.set('FINALIZADA');
+            this.page.set(0);
+            this.atencionResaltadaId.set(atencionId);
+            this.cargarAtencionesFiltradas();
+            this.scrollToAtencion(atencionId);
+          }, 1200);
+        },
+        error: (err) => {
+          this.error.set(this.obtenerMensajeError(err));
+          this.cargandoAccion.set(false);
+        },
+        complete: () => {
+          this.cargandoAccion.set(false);
+        }
+      });
+  }
+
   guardarAtencion(): void {
     const psicologo = this.psicologoActual();
     if (psicologo) {
@@ -784,46 +922,18 @@ export class AtencionesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.cargandoAccion.set(true);
-    this.error.set(null);
-    this.mensajeExito.set(null);
-
     // Si venimos desde el listado para finalizar una atención programada,
     // reutilizamos este formulario pero llamando al endpoint de finalización.
     if (this.modoFinalizar() && this.atencionFinalizar?.id) {
-      const payload: Partial<AtencionPsicologicaRequestDTO> = {
-        anamnesis: this.formModel.anamnesis,
-        examenMental: this.formModel.examenMental,
-        impresionDiagnostica: this.formModel.impresionDiagnostica,
-        planIntervencion: this.formModel.planIntervencion,
-        recomendaciones: this.formModel.recomendaciones,
-        derivacion: this.formModel.derivacion,
-        diagnosticoIds: this.formModel.diagnosticoIds,
-        motivoConsulta: this.formModel.motivoConsulta,
-        estado: 'FINALIZADA'
-      };
-
-      this.atencionService
-        .finalizarAtencion(this.atencionFinalizar.id, payload as AtencionPsicologicaRequestDTO)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.mensajeExito.set('✓ Atención finalizada correctamente');
-            setTimeout(() => {
-              this.cerrarModal();
-              this.cargarAtencionesFiltradas();
-            }, 1200);
-          },
-          error: (err) => {
-            this.error.set(this.obtenerMensajeError(err));
-            this.cargandoAccion.set(false);
-          },
-          complete: () => {
-            this.cargandoAccion.set(false);
-          }
-        });
+      // Mostrar confirmación antes de finalizar definitivamente la atención
+      this.accionPeligrosa = 'FINALIZAR';
+      this.showConfirmAccionModal.set(true);
       return;
     }
+
+    this.cargandoAccion.set(true);
+    this.error.set(null);
+    this.mensajeExito.set(null);
 
     // Flujo normal de creación
     this.formModel.estado = 'FINALIZADA';
@@ -836,15 +946,20 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         next: (atencionGuardada) => {
           this.mensajeExito.set('✓ Atención creada correctamente');
           this.atenciones.update(list => [atencionGuardada, ...list]);
+          this.atencionResaltadaId.set(atencionGuardada?.id ?? null);
+          this.scrollToAtencion(atencionGuardada?.id);
 
           setTimeout(() => {
             this.cerrarModal();
+            this.filtroEstado.set('PROGRAMADA');
+            this.page.set(0);
             this.cargarAtencionesFiltradas();
           }, 1500);
         },
         error: (err) => {
           this.error.set(this.obtenerMensajeError(err));
           this.cargandoAccion.set(false);
+          this.scrollToModalError();
         },
         complete: () => {
           this.cargandoAccion.set(false);
@@ -945,21 +1060,25 @@ export class AtencionesComponent implements OnInit, OnDestroy {
 
     if (!this.programarFormModel.personalMilitarId) {
       this.programarError.set('Debe seleccionar un paciente.');
+      this.scrollToProgramarError();
       return;
     }
 
     if (!this.programarFormModel.motivoConsulta) {
       this.programarError.set('El motivo de consulta es obligatorio.');
+      this.scrollToProgramarError();
       return;
     }
 
     if (!this.programarFormModel.fechaAtencion || !this.programarFormModel.horaInicio || !this.programarFormModel.horaFin) {
       this.programarError.set('Fecha y hora son obligatorias.');
+      this.scrollToProgramarError();
       return;
     }
 
     if (this.programarFormModel.horaInicio >= this.programarFormModel.horaFin) {
       this.programarError.set('La hora de fin debe ser mayor a la hora de inicio.');
+      this.scrollToProgramarError();
       return;
     }
 
@@ -976,15 +1095,20 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         next: (atencionGuardada) => {
           this.programarMensajeExito.set('✓ Atención programada correctamente');
           this.atenciones.update(list => [atencionGuardada, ...list]);
+          this.atencionResaltadaId.set(atencionGuardada?.id ?? null);
+          this.scrollToAtencion(atencionGuardada?.id);
 
           setTimeout(() => {
             this.showProgramarModal.set(false);
+            this.filtroEstado.set('PROGRAMADA');
+            this.page.set(0);
             this.cargarAtencionesFiltradas();
           }, 1000);
         },
         error: (err) => {
           this.programarError.set(this.obtenerMensajeError(err));
           this.programarCargandoAccion.set(false);
+          this.scrollToProgramarError();
         },
         complete: () => {
           this.programarCargandoAccion.set(false);
