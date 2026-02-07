@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { buildApiUrl } from '../core/config/api.config';
 
 export interface PsicologoGestionDTO {
   id?: number;
@@ -22,8 +23,8 @@ export interface PsicologoGestionDTO {
 @Injectable({ providedIn: 'root' })
 export class PsicologoGestionService {
   private readonly http = inject(HttpClient);
-  private readonly baseGestion = '/api/psicologos';
-  private readonly baseCatalogos = '/catalogos/api/users';
+  private readonly baseGestion = buildApiUrl('gestion', '/psicologos');
+  private readonly baseCatalogos = buildApiUrl('catalogos', '/users');
 
   // Métodos de gestión de psicólogos
   listar(): Observable<PsicologoGestionDTO[]> {

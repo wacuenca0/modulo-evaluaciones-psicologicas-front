@@ -5,6 +5,7 @@ import { PacienteAutocompleteComponent } from '../../shared/paciente-autocomplet
 import { PersonalMilitarDTO } from '../../models/personal-militar.models';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { buildApiUrl } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-programar-seguimiento-modal',
@@ -154,7 +155,8 @@ export class ProgramarSeguimientoModalComponent implements OnInit {
     
     console.log('Enviando payload:', payload);
     
-    this.http.post('/api/atenciones/seguimiento', payload).subscribe({
+      const url = buildApiUrl('gestion', '/atenciones/seguimiento');
+      this.http.post(url, payload).subscribe({
       next: (response: any) => {
         console.log('Respuesta del servidor:', response);
         this.mensajeExito = 'Seguimiento programado correctamente';

@@ -5,13 +5,13 @@
   <li *ngFor="let atencion of atenciones" class="atencion-card rounded-2xl shadow-md bg-white p-5 flex flex-row gap-5 border-l-8" [attr.id]="'atencion-' + atencion.id"
       [ngClass]="{
         'border-purple-300 bg-purple-50': atencion.tipoEvaluacion,
-          'border-blue-200 bg-blue-50': !atencion.tipoEvaluacion && atencion.estado === 'PROGRAMADA',
-          'border-yellow-200 bg-yellow-50': !atencion.tipoEvaluacion && atencion.estado === 'EN_CURSO',
-          'border-green-200 bg-green-50': !atencion.tipoEvaluacion && atencion.estado === 'FINALIZADA',
-          'border-red-200 bg-red-50': !atencion.tipoEvaluacion && atencion.estado === 'CANCELADA',
-          'border-sky-200 bg-sky-50': !atencion.tipoEvaluacion && atencion.estado === 'REPROGRAMADA',
-          'border-gray-200 bg-gray-50': !atencion.tipoEvaluacion && atencion.estado === 'NO_ASISTIO',
-        'ring-2 ring-purple-500 ring-offset-2 shadow-lg': resaltarId === atencion.id
+          'border-blue-200 bg-blue-50 estado-programada': !atencion.tipoEvaluacion && atencion.estado === 'PROGRAMADA',
+          'border-yellow-200 bg-yellow-50 estado-en_curso': !atencion.tipoEvaluacion && atencion.estado === 'EN_CURSO',
+          'border-green-200 bg-green-50 estado-finalizada': !atencion.tipoEvaluacion && atencion.estado === 'FINALIZADA',
+          'border-red-200 bg-red-50 estado-cancelada': !atencion.tipoEvaluacion && atencion.estado === 'CANCELADA',
+          'border-sky-200 bg-sky-50 estado-reprogramada': !atencion.tipoEvaluacion && atencion.estado === 'REPROGRAMADA',
+          'border-gray-200 bg-gray-50 estado-no_asistio': !atencion.tipoEvaluacion && atencion.estado === 'NO_ASISTIO',
+        'ring-2 ring-purple-500 ring-offset-2 shadow-lg atencion-resaltada': resaltarId === atencion.id
       }">
     <div class="flex-1 flex flex-col gap-2">
       <div class="flex items-center gap-2 mb-2">

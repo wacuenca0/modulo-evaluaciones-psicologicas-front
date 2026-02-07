@@ -858,6 +858,139 @@ body {
     background: $danger;
   }
 
+  &.atencion-resaltada {
+    animation: atencion-resaltada-pulse 0.45s ease-out;
+  }
+
+  &.atencion-resaltada.estado-programada {
+    animation: atencion-resaltada-programada 0.45s ease-out;
+  }
+
+  &.atencion-resaltada.estado-en_curso {
+    animation: atencion-resaltada-en_curso 0.45s ease-out;
+  }
+
+  &.atencion-resaltada.estado-finalizada {
+    animation: atencion-resaltada-finalizada 0.45s ease-out;
+  }
+
+  &.atencion-resaltada.estado-cancelada {
+    animation: atencion-resaltada-cancelada 0.45s ease-out;
+  }
+
+  &.atencion-resaltada.estado-reprogramada {
+    animation: atencion-resaltada-reprogramada 0.45s ease-out;
+  }
+
+  &.atencion-resaltada.estado-no_asistio {
+    animation: atencion-resaltada-no_asistio 0.45s ease-out;
+  }
+
+
+@keyframes atencion-resaltada-pulse {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($primary, 0.35);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($primary, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@keyframes atencion-resaltada-programada {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($info, 0.4);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($info, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@keyframes atencion-resaltada-en_curso {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($warning, 0.4);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($warning, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@keyframes atencion-resaltada-finalizada {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($success, 0.45);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($success, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@keyframes atencion-resaltada-cancelada {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($danger, 0.45);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($danger, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@keyframes atencion-resaltada-reprogramada {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($secondary, 0.5);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($secondary, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@keyframes atencion-resaltada-no_asistio {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba($gray-500, 0.5);
+  }
+  60% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 10px rgba($gray-500, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: $shadow-lg;
+  }
+}
   &.estado-no_asistio .card-estado-barra {
     background: $gray-400;
   }
@@ -1356,6 +1489,15 @@ body {
     }
 
       .modal-header {
+
+// Overlay específico para el modal de confirmación de acciones peligrosas
+.modal-overlay-confirm {
+  z-index: 1100;
+
+  .modal-container-confirm {
+    z-index: 1110;
+  }
+}
         @include flex-between;
         padding: 1.5rem;
         border-bottom: 1px solid $gray-200;

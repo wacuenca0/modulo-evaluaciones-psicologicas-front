@@ -1,7 +1,10 @@
-const gatewayBaseUrl = 'https://api.evaluaciones.mops.gob.ec';
+// Para entorno Docker local, el gateway corre en http://localhost:8080
+// Si despliegas en un dominio real, cambia esta URL.
+const gatewayBaseUrl = 'http://localhost:8080';
 const authBasePath = '/catalogos/api/auth';
 const catalogosBasePath = '/catalogos/api';
-const gestionBasePath = '/gestion/api';
+// Para gestión, el gateway expone rutas bajo /api/**
+const gestionBasePath = '/api';
 const documentosBasePath = '/documentos/api';
 const passwordRequestsBasePath = `${catalogosBasePath}/password-requests`;
 

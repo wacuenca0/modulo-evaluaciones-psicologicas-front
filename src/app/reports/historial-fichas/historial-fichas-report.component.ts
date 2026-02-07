@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ReportesService } from '../../services/reportes.service';
+import { buildApiUrl } from '../../core/config/api.config';
 import {
   ReporteHistorialFichaDTO,
   ReporteHistorialSeguimientoDTO,
@@ -66,7 +67,8 @@ export class HistorialFichasReportComponent {
       proximaCita: '',
       observacionesProximaCita: ''
     };
-    fetch('http://localhost:8080/api/atenciones/seguimiento', {
+      const endpoint = buildApiUrl('gestion', '/atenciones/seguimiento');
+    fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, computed, effect, inject, input, output, signal, ViewChild } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { buildApiUrl } from '../../core/config/api.config';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -263,7 +264,7 @@ export class SeguimientoModalComponent {
     // 5. Enviar al backend
     try {
       const token = this.authService.getToken?.() || localStorage.getItem('access_token') || '';
-      const endpoint = `http://localhost:8080/api/fichas-psicologicas/${fichaId}/condicion`;
+      const endpoint = buildApiUrl('gestion', `/fichas-psicologicas/${fichaId}/condicion`);
       
       console.log('[MODAL] Enviando a:', endpoint);
       console.log('[MODAL] Payload:', payload);

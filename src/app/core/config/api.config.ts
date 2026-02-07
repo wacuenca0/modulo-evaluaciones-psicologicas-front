@@ -10,7 +10,7 @@ const ABSOLUTE_URL_REGEX = /^https?:\/\//i;
 const configuredBaseUrl = stripTrailingSlash(environment.api?.baseUrl ?? 'http://127.0.0.1:8080');
 const authPath = environment.api?.authBasePath ?? '/api/auth';
 const catalogosPath = environment.api?.catalogosBasePath ?? '/catalogos/api';
-const gestionPath = environment.api?.gestionBasePath ?? '/gestion/api';
+const gestionPath = environment.api?.gestionBasePath ?? '/api';
 const documentosPath = environment.api?.documentosBasePath ?? '/documentos/api';
 
 const normalizeOverride = (value?: string | null | undefined): string | null => {

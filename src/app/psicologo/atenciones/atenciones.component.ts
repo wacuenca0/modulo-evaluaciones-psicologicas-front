@@ -875,11 +875,22 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         next: () => {
           this.mensajeExito.set('✓ Atención finalizada correctamente');
           setTimeout(() => {
+            // Cerrar modal y actualizar el estado en el listado actual
             this.cerrarModal();
+
+            // Actualizar localmente la atención en la lista para evitar que "desaparezca" bruscamente
+            const actuales = this.atenciones();
+            const actualizadas = actuales.map(a =>
+              a.id === atencionId
+                ? { ...a, estado: 'FINALIZADA' as any }
+                : a
+            );
+            this.atenciones.set(actualizadas);
+
+            // Cambiar el filtro visualmente al nuevo estado y resaltar la tarjeta
             this.filtroEstado.set('FINALIZADA');
             this.page.set(0);
             this.atencionResaltadaId.set(atencionId);
-            this.cargarAtencionesFiltradas();
             this.scrollToAtencion(atencionId);
           }, 1200);
         },

@@ -11,8 +11,8 @@ export class PersonalMilitarService {
   private readonly apiUrl: string;
 
   constructor(private readonly http: HttpClient) {
-    // Preferir gestionBaseUrl si existe, si no usar '/gestion/api'
-    const base = (environment.api?.gestionBaseUrl || environment.gestionBaseUrl || '/gestion/api').replace(/\/$/, '');
+    // Preferir gestionBaseUrl si existe, si no usar '/api'
+    const base = (environment.api?.gestionBaseUrl || environment.gestionBaseUrl || '/api').replace(/\/$/, '');
     this.apiUrl = `${base}/personal-militar`;
   }
 

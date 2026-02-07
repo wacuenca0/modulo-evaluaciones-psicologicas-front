@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, timeout, of } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { buildApiUrl } from '../core/config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class PsicologoNombreService {
   constructor(private readonly http: HttpClient) {}
 
   obtenerNombrePorUserId(userId: number): Observable<string> {
-    const url = `${environment.api.baseUrl}/api/psicologos/nombre-por-usuario?userId=${userId}`;
-    return this.http.get(url, { responseType: 'text' }).pipe(
+    const url = buildApiUrl('gestion', `/psicologos/nombre-por-usuario?userId=${userId}`);
+    return this.http.get(url, { responseType: 'text' as 'text' }).pipe(
       timeout(4000),
       map(res => {
         const nombre = (res || '').trim();

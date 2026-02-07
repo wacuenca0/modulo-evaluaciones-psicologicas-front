@@ -150,7 +150,7 @@ export class FichasPsicologicasService {
       return this.http.delete<void>(url);
     }
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = (environment as any).api?.gestionBaseUrl || '/gestion/api';
+  private readonly baseUrl = (environment as any).api?.gestionBaseUrl || '/api';
 
   obtenerHistorial(
     personalMilitarId: number,

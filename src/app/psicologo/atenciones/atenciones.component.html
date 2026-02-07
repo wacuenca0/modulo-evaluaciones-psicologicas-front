@@ -258,8 +258,8 @@
 
   <!-- Modal Confirmación Acción Peligrosa (Cancelar, Finalizar, No asistió) -->
   @if (showConfirmAccionModal()) {
-    <div class="modal-overlay" (click)="cancelarAccionPeligrosa()" (keydown)="onModalKeyDown($event)">
-      <div class="modal-container modal-sm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
+    <div class="modal-overlay modal-overlay-confirm" (click)="cancelarAccionPeligrosa()" (keydown)="onModalKeyDown($event)">
+      <div class="modal-container modal-sm modal-container-confirm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
         <!-- Header -->
         <div class="modal-header">
           <div class="modal-header-contenido">

@@ -7,6 +7,7 @@ import {
   ReprogramarAtencionRequestDTO
 } from '../models/atenciones-psicologicas.models';
 import { AuthService } from './auth.service';
+import { buildApiUrl } from '../core/config/api.config';
 
 @Injectable({
   providedIn: 'root'
@@ -15,9 +16,8 @@ export class AtencionPsicologicaService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   
-  // Usar la URL correcta para el backend
-  private readonly apiUrl = 'http://localhost:8080/api/atenciones';
-  private readonly baseUrl = 'http://localhost:8080/api';
+  // Base para todos los endpoints de atenciones: http://<gateway>/api/atenciones
+  private readonly apiUrl = buildApiUrl('gestion', '/atenciones');
 
   /**
    * Obtener headers con información del usuario autenticado
@@ -50,7 +50,7 @@ export class AtencionPsicologicaService {
    * Crea un seguimiento psicológico
    */
   crearSeguimiento(request: any): Observable<AtencionPsicologicaResponseDTO> {
-    const url = `${this.baseUrl}/seguimiento`;
+    const url = `${this.apiUrl}/seguimiento`;
     const requestConUsuario = this.agregarUsuarioAlRequest(request);
     return this.http.post<AtencionPsicologicaResponseDTO>(
       url, 
@@ -63,7 +63,7 @@ export class AtencionPsicologicaService {
    * Lista los seguimientos por ficha psicológica
    */
   listarSeguimientosPorFicha(fichaId: number): Observable<AtencionPsicologicaResponseDTO[]> {
-    const url = `${this.baseUrl}/seguimiento/ficha/${fichaId}`;
+    const url = `${this.apiUrl}/seguimiento/ficha/${fichaId}`;
     return this.http.get<AtencionPsicologicaResponseDTO[]>(
       url,
       { headers: this.getHeaders() }
