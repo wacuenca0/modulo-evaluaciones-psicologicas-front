@@ -256,65 +256,6 @@
     </div>
   }
 
-  <!-- Modal Confirmación Acción Peligrosa (Cancelar, Finalizar, No asistió) -->
-  @if (showConfirmAccionModal()) {
-    <div class="modal-overlay modal-overlay-confirm" (click)="cancelarAccionPeligrosa()" (keydown)="onModalKeyDown($event)">
-      <div class="modal-container modal-sm modal-container-confirm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
-        <!-- Header -->
-        <div class="modal-header">
-          <div class="modal-header-contenido">
-            <h3 class="modal-titulo">Confirmar acción</h3>
-            <p class="modal-subtitulo">
-              Esta acción no se puede deshacer. ¿Está seguro de continuar?
-            </p>
-          </div>
-          <button class="modal-cerrar" (click)="cancelarAccionPeligrosa()">
-            <svg viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Contenido -->
-        <div class="modal-body">
-          <p class="text-sm text-slate-700">
-            Se va a
-            <strong>
-              @if (accionPeligrosa === 'NO_ASISTIO') {
-                marcar la atención como "NO ASISTIÓ".
-              } @else if (accionPeligrosa === 'CANCELAR') {
-                cancelar la atención seleccionada.
-              } @else if (accionPeligrosa === 'FINALIZAR') {
-                finalizar la atención seleccionada.
-              } @else {
-                aplicar la acción seleccionada.
-              }
-            </strong>
-          </p>
-        </div>
-
-        <!-- Footer -->
-        <div class="modal-footer">
-          <button
-            type="button"
-            (click)="cancelarAccionPeligrosa()"
-            class="modal-btn-secondary"
-          >
-            Volver
-          </button>
-
-          <button
-            type="button"
-            (click)="confirmarAccionPeligrosa()"
-            class="modal-btn-primary"
-          >
-            Confirmar
-          </button>
-        </div>
-      </div>
-    </div>
-  }
-
   <!-- Modal No Asistió eliminado: acción directa desde el botón de la tarjeta -->
 
   <!-- Modal Reprogramar Atención -->
@@ -647,6 +588,65 @@
       </div>
     </div>
   }
+
+    <!-- Modal Confirmación Acción Peligrosa (Cancelar, Finalizar, No asistió) -->
+    @if (showConfirmAccionModal()) {
+      <div class="modal-overlay modal-overlay-confirm" (click)="cancelarAccionPeligrosa()" (keydown)="onModalKeyDown($event)">
+        <div class="modal-container modal-sm modal-container-confirm" (click)="$event.stopPropagation()" (keydown)="onModalKeyDown($event)">
+          <!-- Header -->
+          <div class="modal-header">
+            <div class="modal-header-contenido">
+              <h3 class="modal-titulo">Confirmar acción</h3>
+              <p class="modal-subtitulo">
+                Esta acción no se puede deshacer. ¿Está seguro de continuar?
+              </p>
+            </div>
+            <button class="modal-cerrar" (click)="cancelarAccionPeligrosa()">
+              <svg viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Contenido -->
+          <div class="modal-body">
+            <p class="text-sm text-slate-700">
+              Se va a
+              <strong>
+                @if (accionPeligrosa === 'NO_ASISTIO') {
+                  marcar la atención como "NO ASISTIÓ".
+                } @else if (accionPeligrosa === 'CANCELAR') {
+                  cancelar la atención seleccionada.
+                } @else if (accionPeligrosa === 'FINALIZAR') {
+                  finalizar la atención seleccionada.
+                } @else {
+                  aplicar la acción seleccionada.
+                }
+              </strong>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button
+              type="button"
+              (click)="cancelarAccionPeligrosa()"
+              class="modal-btn-secondary"
+            >
+              Volver
+            </button>
+
+            <button
+              type="button"
+              (click)="confirmarAccionPeligrosa()"
+              class="modal-btn-primary"
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
 
   <!-- Modal Eliminar -->
   @if (showEliminarModal()) {

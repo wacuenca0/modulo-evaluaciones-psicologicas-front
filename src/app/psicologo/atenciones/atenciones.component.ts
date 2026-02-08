@@ -155,6 +155,8 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         return;
       }
 
+      const atencionId = this.atencionAccion.id;
+
       const { fechaAtencion, horaInicio, horaFin, tipoAtencion, motivoReprogramacion } = this.reprogramarForm;
 
       if (!fechaAtencion || !horaInicio || !horaFin) {
@@ -191,7 +193,12 @@ export class AtencionesComponent implements OnInit, OnDestroy {
           next: () => {
             this.mensajeExito.set('✓ Atención reprogramada correctamente');
             this.cerrarReprogramarModal();
+            // Cambiar filtro al nuevo estado visible y seguir la ficha
+            this.filtroEstado.set('REPROGRAMADA');
+            this.page.set(0);
+            this.marcarAtencionResaltada(atencionId);
             this.cargarAtencionesFiltradas();
+            this.scrollToAtencion(atencionId);
           },
           error: (err) => {
             this.error.set(this.obtenerMensajeError(err));
@@ -534,7 +541,7 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         if (resaltarParam) {
           const id = Number(resaltarParam);
           if (!Number.isNaN(id)) {
-            this.atencionResaltadaId.set(id);
+            this.marcarAtencionResaltada(id);
             // Refrescar listado para asegurar que la nueva atención esté presente
             this.cargarAtencionesFiltradas();
           } else {
@@ -744,10 +751,17 @@ export class AtencionesComponent implements OnInit, OnDestroy {
   }
 
   private scrollToModalError(): void {
-    // Desplaza suavemente el contenido del modal hasta el mensaje de error
     setTimeout(() => {
+      // Intentar desplazar directamente hasta el mensaje de error, si existe
+      const errorElement = document.querySelector('.atencion-modal .mensaje-error-modal') as HTMLElement | null;
+      if (errorElement?.scrollIntoView) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      // Fallback: desplazar el contenedor del cuerpo del modal hacia arriba
       const container = document.querySelector('.atencion-modal .modal-body') as HTMLElement | null;
-      if (container) {
+      if (container?.scrollTo) {
         container.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }, 0);
@@ -776,6 +790,21 @@ export class AtencionesComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  private marcarAtencionResaltada(atencionId: number | null | undefined): void {
+    if (!atencionId) {
+      return;
+    }
+
+    this.atencionResaltadaId.set(atencionId);
+
+    // Quitar el resaltado automáticamente después de ~0.6s
+    setTimeout(() => {
+      if (this.atencionResaltadaId() === atencionId) {
+        this.atencionResaltadaId.set(null);
+      }
+    }, 600);
+  }
+
   private ejecutarCancelarAtencion(): void {
     if (!this.atencionAccion?.id) {
       return;
@@ -801,7 +830,7 @@ export class AtencionesComponent implements OnInit, OnDestroy {
           this.cerrarCancelarModal();
           this.filtroEstado.set('CANCELADA');
           this.page.set(0);
-          this.atencionResaltadaId.set(atencionId);
+          this.marcarAtencionResaltada(atencionId);
           this.cargarAtencionesFiltradas();
           this.scrollToAtencion(atencionId);
         },
@@ -831,7 +860,7 @@ export class AtencionesComponent implements OnInit, OnDestroy {
           this.mensajeExito.set('✓ Atención marcada como NO ASISTIÓ');
           this.filtroEstado.set('NO_ASISTIO');
           this.page.set(0);
-          this.atencionResaltadaId.set(atencionId);
+          this.marcarAtencionResaltada(atencionId);
           this.cargarAtencionesFiltradas();
           this.scrollToAtencion(atencionId);
         },
@@ -874,29 +903,30 @@ export class AtencionesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.mensajeExito.set('✓ Atención finalizada correctamente');
-          setTimeout(() => {
-            // Cerrar modal y actualizar el estado en el listado actual
-            this.cerrarModal();
+          // Cerrar el modal inmediatamente y actualizar el estado en el listado actual
+          this.cerrarModal();
 
-            // Actualizar localmente la atención en la lista para evitar que "desaparezca" bruscamente
-            const actuales = this.atenciones();
-            const actualizadas = actuales.map(a =>
-              a.id === atencionId
-                ? { ...a, estado: 'FINALIZADA' as any }
-                : a
-            );
-            this.atenciones.set(actualizadas);
+          // Actualizar localmente la atención en la lista para evitar que "desaparezca" bruscamente
+          const actuales = this.atenciones();
+          const actualizadas = actuales.map(a =>
+            a.id === atencionId
+              ? { ...a, estado: 'FINALIZADA' as any }
+              : a
+          );
+          this.atenciones.set(actualizadas);
 
-            // Cambiar el filtro visualmente al nuevo estado y resaltar la tarjeta
-            this.filtroEstado.set('FINALIZADA');
-            this.page.set(0);
-            this.atencionResaltadaId.set(atencionId);
-            this.scrollToAtencion(atencionId);
-          }, 1200);
+          // Cambiar el filtro visualmente al nuevo estado y resaltar la tarjeta
+          this.filtroEstado.set('FINALIZADA');
+          this.page.set(0);
+          this.marcarAtencionResaltada(atencionId);
+          this.scrollToAtencion(atencionId);
+          // Refrescar la lista desde el backend para mantenerla consistente
+          this.cargarAtencionesFiltradas();
         },
         error: (err) => {
           this.error.set(this.obtenerMensajeError(err));
           this.cargandoAccion.set(false);
+          this.scrollToModalError();
         },
         complete: () => {
           this.cargandoAccion.set(false);
@@ -965,15 +995,15 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         next: (atencionGuardada) => {
           this.mensajeExito.set('✓ Atención creada correctamente');
           this.atenciones.update(list => [atencionGuardada, ...list]);
-          this.atencionResaltadaId.set(atencionGuardada?.id ?? null);
-          this.scrollToAtencion(atencionGuardada?.id);
+          const nuevoId = atencionGuardada?.id ?? null;
 
-          setTimeout(() => {
-            this.cerrarModal();
-            this.filtroEstado.set('PROGRAMADA');
-            this.page.set(0);
-            this.cargarAtencionesFiltradas();
-          }, 1500);
+          // Cerrar el modal rápidamente y luego resaltar la nueva atención
+          this.cerrarModal();
+          this.filtroEstado.set('PROGRAMADA');
+          this.page.set(0);
+          this.cargarAtencionesFiltradas();
+          this.marcarAtencionResaltada(nuevoId);
+          this.scrollToAtencion(nuevoId);
         },
         error: (err) => {
           this.error.set(this.obtenerMensajeError(err));
@@ -994,11 +1024,13 @@ export class AtencionesComponent implements OnInit, OnDestroy {
 
     if (!this.formModel.personalMilitarId) {
       this.error.set('Debe seleccionar un paciente.');
+      this.scrollToModalError();
       return;
     }
 
     if (!this.formModel.motivoConsulta) {
       this.error.set('El motivo de consulta es obligatorio.');
+      this.scrollToModalError();
       return;
     }
 
@@ -1015,15 +1047,21 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         next: (atencionGuardada) => {
           this.mensajeExito.set('✓ Atención guardada en curso');
           this.atenciones.update(list => [atencionGuardada, ...list]);
-          
-          setTimeout(() => {
-            this.cerrarModal();
-            this.cargarAtencionesFiltradas();
-          }, 1500);
+
+          const nuevoId = atencionGuardada?.id ?? null;
+
+          // Cerrar el modal rápidamente y luego resaltar la atención en curso
+          this.cerrarModal();
+          this.filtroEstado.set('EN_CURSO');
+          this.page.set(0);
+          this.cargarAtencionesFiltradas();
+          this.marcarAtencionResaltada(nuevoId);
+          this.scrollToAtencion(nuevoId);
         },
         error: (err) => {
           this.error.set(this.obtenerMensajeError(err));
           this.cargandoAccion.set(false);
+          this.scrollToModalError();
         },
         complete: () => {
           this.cargandoAccion.set(false);
@@ -1114,15 +1152,15 @@ export class AtencionesComponent implements OnInit, OnDestroy {
         next: (atencionGuardada) => {
           this.programarMensajeExito.set('✓ Atención programada correctamente');
           this.atenciones.update(list => [atencionGuardada, ...list]);
-          this.atencionResaltadaId.set(atencionGuardada?.id ?? null);
-          this.scrollToAtencion(atencionGuardada?.id);
+          const nuevoId = atencionGuardada?.id ?? null;
 
-          setTimeout(() => {
-            this.showProgramarModal.set(false);
-            this.filtroEstado.set('PROGRAMADA');
-            this.page.set(0);
-            this.cargarAtencionesFiltradas();
-          }, 1000);
+          // Cerrar el modal rápidamente y luego resaltar la atención programada
+          this.showProgramarModal.set(false);
+          this.filtroEstado.set('PROGRAMADA');
+          this.page.set(0);
+          this.cargarAtencionesFiltradas();
+          this.marcarAtencionResaltada(nuevoId);
+          this.scrollToAtencion(nuevoId);
         },
         error: (err) => {
           this.programarError.set(this.obtenerMensajeError(err));
