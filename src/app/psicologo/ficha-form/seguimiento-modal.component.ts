@@ -136,12 +136,6 @@ export class SeguimientoModalComponent {
     this.condicionSignal.set(condicion);
     // Refuerza la actualización del control y la señal
     this.form.controls.condicion.setValue(condicion, { emitEvent: true });
-    // Forzar update y log para depuración
-    setTimeout(() => {
-      console.log('[DEBUG] Condición seleccionada:', condicion);
-      console.log('[DEBUG] Valor en form.controls.condicion:', this.form.controls.condicion.value);
-      console.log('[DEBUG] Valor en condicionSignal:', this.condicionSignal());
-    });
     this.cdr.markForCheck();
   }
 
@@ -217,7 +211,6 @@ export class SeguimientoModalComponent {
 
     // 3. Validación específica por condición
     const condicion = this.form.controls.condicion.value;
-    console.log('[DEBUG] handleSubmit - condicion en form:', condicion);
     if (!condicion || !['ALTA', 'SEGUIMIENTO', 'TRANSFERENCIA'].includes(condicion)) {
       this.submitError.set('Debes seleccionar una condición válida.');
       return;

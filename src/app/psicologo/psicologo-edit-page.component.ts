@@ -14,13 +14,7 @@ import { PsicologoGestionService, PsicologoGestionDTO } from '../services/psicol
       <h2 class="text-xl font-bold mb-4">
         {{ psicologo() ? 'Editar perfil profesional del psicólogo' : 'Crear perfil profesional del psicólogo' }}
       </h2>
-      <div style="background:#f3f3f3;padding:8px;margin-bottom:8px;">
-        <strong>Debug:</strong>
-        <div>usuarioId: {{ usuarioId() }}</div>
-        <div>loading: {{ loading() }}</div>
-        <div>error: {{ error() }}</div>
-        <div>psicologoData: {{ psicologoData() | json }}</div>
-      </div>
+      
       <ng-container *ngIf="usuarioId() > 0; else invalidIdBlock">
         <app-psicologo-edit-form 
           [usuarioId]="usuarioId()"

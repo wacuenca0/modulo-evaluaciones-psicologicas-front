@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PersonalMilitarDTO } from '../../models/personal-militar.models';
+import { PersonalMilitarService } from '../../services/personal-militar.service';
 import {
   FICHA_ESTADOS_CANONICOS,
   FICHA_TIPOS_EVALUACION_CANONICOS,
@@ -86,6 +87,7 @@ export class FichaPsicologicaFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly personalService = inject(PersonalMilitarService);
 
   // ============ SEÑALES DE ESTADO ============
   readonly currentStep = signal<StepId>('generales');
@@ -290,40 +292,39 @@ export class FichaPsicologicaFormComponent implements OnInit {
   private inicializarDatosPersona(): void {
     const nav = this.router.getCurrentNavigation();
     const state = nav?.extras?.state as { persona?: PersonalMilitarDTO } | undefined;
-    const routeId = this.route.snapshot.paramMap.get('personalId');
+    const routeIdParam = this.route.snapshot.paramMap.get('personalId');
+    const routeId = routeIdParam && Number.isFinite(Number(routeIdParam)) ? Number(routeIdParam) : null;
 
-    let persona: PersonalMilitarDTO | null = null;
-    let idNum: number | null = null;
+    const statePersona = state?.persona ? { ...state.persona } : null;
 
-    if (state?.persona) {
-      persona = { ...state.persona };
-      if (routeId && !persona.id && Number.isFinite(Number(routeId))) {
-        persona.id = Number(routeId);
+    if (statePersona) {
+      if (routeId && !statePersona.id) {
+        statePersona.id = routeId;
       }
       // Si apellidosNombres existe pero apellidos o nombres no, intentamos separar por coma o por el primer espacio
-      if (persona.apellidosNombres && (!persona.apellidos || !persona.nombres)) {
-        let partes = persona.apellidosNombres.split(',');
+      if (statePersona.apellidosNombres && (!statePersona.apellidos || !statePersona.nombres)) {
+        let partes = statePersona.apellidosNombres.split(',');
         if (partes.length === 2) {
-          persona.apellidos = partes[0].trim();
-          persona.nombres = partes[1].trim();
+          statePersona.apellidos = partes[0].trim();
+          statePersona.nombres = partes[1].trim();
         } else {
-          // Si no hay coma, intentamos por el primer espacio (caso: "Apellido Nombre")
-          const idx = persona.apellidosNombres.indexOf(' ');
+          const idx = statePersona.apellidosNombres.indexOf(' ');
           if (idx > 0) {
-            persona.apellidos = persona.apellidosNombres.substring(0, idx).trim();
-            persona.nombres = persona.apellidosNombres.substring(idx + 1).trim();
+            statePersona.apellidos = statePersona.apellidosNombres.substring(0, idx).trim();
+            statePersona.nombres = statePersona.apellidosNombres.substring(idx + 1).trim();
           }
         }
       }
-      this.persona.set(persona);
-      if (persona.id) {
-        this.personalId.set(persona.id);
+      this.persona.set(statePersona);
+      if (statePersona.id) {
+        this.personalId.set(statePersona.id);
+        if (!this.tieneNombreCompleto(statePersona)) {
+          this.cargarPersonaDesdeServicio(statePersona.id);
+        }
       }
-    } else if (routeId && Number.isFinite(Number(routeId))) {
-      idNum = Number(routeId);
-      this.personalId.set(idNum);
-      persona = { id: idNum } as PersonalMilitarDTO;
-      this.persona.set(persona);
+    } else if (routeId) {
+      this.personalId.set(routeId);
+      this.cargarPersonaDesdeServicio(routeId);
     }
 
     if (!this.persona() || !this.personalId()) {
@@ -331,13 +332,44 @@ export class FichaPsicologicaFormComponent implements OnInit {
     }
   }
 
+  private tieneNombreCompleto(data: PersonalMilitarDTO | null | undefined): boolean {
+    if (!data) {
+      return false;
+    }
+    const apellidosNombres = data.apellidosNombres?.trim();
+    if (apellidosNombres?.length) {
+      return true;
+    }
+    const partes = [data.apellidos, data.nombres]
+      .filter((parte): parte is string => !!parte && parte.trim().length > 0)
+      .map(parte => parte.trim());
+    return partes.length > 0;
+  }
+
+  private cargarPersonaDesdeServicio(id: number): void {
+    this.personalService.obtenerPorId(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (info) => {
+          if (!info) {
+            return;
+          }
+          this.persona.set(info);
+          if (!this.personalId()) {
+            this.personalId.set(info.id ?? id);
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          // Si falla, dejamos el estado actual y el mensaje de navegación informativo
+        }
+      });
+  }
+
   // ============ MÉTODOS DEL MODAL ============
   abrirAsignarCondicionModal() {
     const fichaId = this.fichaCreada()?.id;
     const personalId = this.personalId();
-    
-    console.log('[DEBUG] Abriendo modal con:', { fichaId, personalId });
-    
     if (!fichaId || !personalId) {
       this.navigationMessage.set(`
         ⚠️ No se puede abrir el modal de condición porque:
@@ -365,7 +397,6 @@ export class FichaPsicologicaFormComponent implements OnInit {
   }
 
   onAsignarCondicionSubmit(result: any) {
-    console.log('[DEBUG] Resultado del modal recibido:', result);
     this.cerrarAsignarCondicionModal();
     this.navigationMessage.set('✅ Condición asignada correctamente.');
     // Redirigir al historial de fichas después de éxito

@@ -585,14 +585,12 @@ export class PersonalHistorialComponent {
     if (!ficha) {
       this.seguimientoError = 'Ficha no encontrada';
       this.mostrarModalSeguimiento = false;
-      // Mostrar debug visual
-      this.seguimientoMensajeExito = 'DEBUG: No se encontró la ficha para el id ' + fichaId;
-      console.error('DEBUG abrirSeguimientoModal: ficha no encontrada', fichaId);
+      this.seguimientoMensajeExito = null;
+      console.error('abrirSeguimientoModal: ficha no encontrada', fichaId);
       return;
     }
-    // Debug visual y consola
-    this.seguimientoMensajeExito = `DEBUG: Abrir modal seguimiento para fichaId=${fichaId}, fichaPsicologicaId=${ficha.id}`;
-    console.log('DEBUG abrirSeguimientoModal', fichaId, ficha);
+    this.seguimientoMensajeExito = null;
+    console.log('abrirSeguimientoModal', fichaId, ficha);
     this.seguimientoFicha = {
       fichaId: ficha.id,
       fichaPsicologicaId: ficha.id,
@@ -606,18 +604,17 @@ export class PersonalHistorialComponent {
     this.mostrarModalSeguimiento = true;
     this.seguimientoCargando = false;
     this.seguimientoError = null;
-    // Forzar visibilidad del modal y debug visual
+    // Forzar visibilidad del modal (sin mensajes de debug en UI)
     setTimeout(() => {
       this.mostrarModalSeguimiento = true;
-      console.log('DEBUG setTimeout mostrarModalSeguimiento', this.mostrarModalSeguimiento, this.seguimientoFicha);
-      this.seguimientoMensajeExito = 'DEBUG: Modal debe estar visible. mostrarModalSeguimiento=' + this.mostrarModalSeguimiento;
+      console.log('setTimeout mostrarModalSeguimiento', this.mostrarModalSeguimiento, this.seguimientoFicha);
     }, 10);
   }
 
   cerrarModalSeguimiento() {
     this.mostrarModalSeguimiento = false;
     this.seguimientoFicha = null;
-    this.seguimientoMensajeExito = 'DEBUG: Modal cerrado.';
+    this.seguimientoMensajeExito = null;
   }
 
   guardarSeguimiento() {
@@ -652,10 +649,6 @@ export class PersonalHistorialComponent {
   readonly page = signal<number>(0);
   readonly size = signal<number>(10);
   // El modal se muestra solo si mostrarModalSeguimiento es true
-    // DEBUG visual para mostrar el estado del modal en la UI
-    get debugModalState(): string {
-      return `DEBUG: mostrarModalSeguimiento=${this.mostrarModalSeguimiento}, seguimientoFicha=${JSON.stringify(this.seguimientoFicha)}, seguimientoError=${this.seguimientoError}`;
-    }
   
   // Computed properties
   readonly personaNombre = computed(() => {

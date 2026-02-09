@@ -137,8 +137,6 @@ export class RegisterComponent {
     };
 
 
-    console.debug('Intentando crear usuario', payload);
-
     // Siempre usar el servicio de usuarios y enviar el JSON con psicologo anidado
     this.userService.create(payload)
       .pipe(
