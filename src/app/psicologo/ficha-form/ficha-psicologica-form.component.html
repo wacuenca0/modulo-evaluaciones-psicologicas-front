@@ -1145,6 +1145,6 @@
   [fichaId]="fichaCreada()?.id ?? null"
   [personalMilitarId]="personalId()"
   [guardando]="loadingGenerales() || observacionLoading() || psicoanamnesisLoading()"
-  (cancel)="cerrarAsignarCondicionModal()"
-  (submit)="onAsignarCondicionSubmit($event)">
+  (seguimientoCancel)="cerrarAsignarCondicionModal()"
+  (seguimientoSubmit)="onAsignarCondicionSubmit($event)">
 </app-seguimiento-modal>

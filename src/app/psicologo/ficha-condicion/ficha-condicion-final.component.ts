@@ -193,7 +193,7 @@ export class FichaCondicionFinalComponent {
   private readonly fichaId = signal<number | null>(null);
 
   readonly form = this.fb.group({
-    condicion: ['ALTA', Validators.required],
+    condicion: ['', Validators.required],
     cie10Codigo: ['', []],
     cie10Nombre: ['', []],
     cie10Descripcion: ['', []],
@@ -201,7 +201,7 @@ export class FichaCondicionFinalComponent {
     cie10Nivel: ['', []]
   });
 
-  private readonly condicionSeleccionada = signal<FichaCondicionFinal>('ALTA');
+  private readonly condicionSeleccionada = signal<FichaCondicionFinal | null>(null);
   readonly requiereDiagnostico = computed(() => {
     const condicion = this.condicionSeleccionada();
     return condicion === 'SEGUIMIENTO' || condicion === 'TRANSFERENCIA';
@@ -224,7 +224,10 @@ export class FichaCondicionFinalComponent {
       { titulo: 'Verificacion de traslado', detalle: 'Confirmar seguimiento en la unidad receptora despues de 60 dias.' }
     ]
   };
-  readonly agendaRecomendada = computed(() => this.agendaConfig[this.condicionSeleccionada()] ?? []);
+  readonly agendaRecomendada = computed(() => {
+    const cond = this.condicionSeleccionada();
+    return cond ? this.agendaConfig[cond] ?? [] : [];
+  });
   private cie10SearchHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
@@ -241,16 +244,16 @@ export class FichaCondicionFinalComponent {
       this.error.set('No se recibio un identificador valido de ficha psicologica.');
     }
 
-    const initialCondicion = this.normalizeCondicion(this.form.controls.condicion.value) ?? 'ALTA';
+    const initialCondicion = this.normalizeCondicion(this.form.controls.condicion.value);
     this.condicionSeleccionada.set(initialCondicion);
 
     this.form.controls.condicion.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
-      const condicion = this.normalizeCondicion(value) ?? 'ALTA';
+      const condicion = this.normalizeCondicion(value);
       this.condicionSeleccionada.set(condicion);
-      this.applyConditionalValidators(condicion);
+      this.applyConditionalValidators(condicion ?? '');
     });
 
-    this.applyConditionalValidators(initialCondicion);
+    this.applyConditionalValidators(initialCondicion ?? '');
 
     this.destroyRef.onDestroy(() => {
       if (this.cie10SearchHandle) {
@@ -656,12 +659,12 @@ export class FichaCondicionFinalComponent {
 
   private buildConfirmacion(condicion: FichaCondicionFinal): string {
     if (condicion === 'ALTA') {
-      return 'Confirmas registrar "No presenta psicopatologia (Alta)"? Se limpiara cualquier diagnostico asociado.';
+      return 'Confirmas registrar "No presenta psicopatologia (Alta)"? Esta accion no se podra alterar. Se limpiara cualquier diagnostico asociado.';
     }
     if (condicion === 'SEGUIMIENTO') {
-      return 'Confirmas registrar "Seguimiento"? Se almacenara el diagnostico CIE-10 y se habilitara la agenda de controles.';
+      return 'Confirmas registrar "Seguimiento"? Esta accion no se podra alterar. Se almacenara el diagnostico CIE-10 y se habilitara la agenda de controles.';
     }
-    return 'Confirmas registrar "Transferencia"? Se compartira el diagnostico CIE-10 para la unidad receptora.';
+    return 'Confirmas registrar "Transferencia"? Esta accion no se podra alterar. Se compartira el diagnostico CIE-10 para la unidad receptora.';
   }
 
   private inicializarDesdeEstado(navigationState: Record<string, unknown>) {
@@ -739,6 +742,15 @@ export class FichaCondicionFinalComponent {
   }
 
   private resolveError(err: unknown): string {
+    // Priorizar mensaje del backend si existe (p.ej. “Diagnóstico CIE-10 no encontrado”).
+    if (err && typeof err === 'object' && 'error' in err) {
+      const anyErr = err as { error?: any };
+      const message = typeof anyErr.error === 'string' ? anyErr.error : anyErr.error?.message;
+      if (typeof message === 'string' && message.trim().length) {
+        return message;
+      }
+    }
+
     if (err && typeof err === 'object' && 'status' in err) {
       const status = (err as { status?: number }).status;
       if (status === 404) {
@@ -749,13 +761,6 @@ export class FichaCondicionFinalComponent {
       }
       if (status === 400) {
         return 'Los datos proporcionados para la condicion final son invalidos.';
-      }
-    }
-    if (err && typeof err === 'object' && 'error' in err) {
-      const anyErr = err as { error?: any };
-      const message = typeof anyErr.error === 'string' ? anyErr.error : anyErr.error?.message;
-      if (typeof message === 'string' && message.trim().length) {
-        return message;
       }
     }
     return 'No fue posible registrar la condicion final. Intenta nuevamente.';

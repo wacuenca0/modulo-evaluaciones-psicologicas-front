@@ -1,16 +1,18 @@
-import { Component, EventEmitter, Output, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-cancelar-atencion-modal',
+  standalone: true,
   templateUrl: './cancelar-atencion-modal.component.html',
   styleUrls: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule]
+  imports: [CommonModule, FormsModule]
 })
 export class CancelarAtencionModalComponent {
   open = input(false);
-  motivo = signal('');
+  motivo = '';
 
   @Output() closed = new EventEmitter<void>();
   @Output() cancelar = new EventEmitter<string>();
@@ -20,6 +22,6 @@ export class CancelarAtencionModalComponent {
   }
 
   onCancelar() {
-    this.cancelar.emit(this.motivo());
+    this.cancelar.emit(this.motivo);
   }
 }

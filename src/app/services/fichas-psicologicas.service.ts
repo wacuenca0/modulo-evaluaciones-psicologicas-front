@@ -326,34 +326,22 @@ export class FichasPsicologicasService {
     const condicion = this.normalizedRequired(payload.condicion);
     const body: Record<string, unknown> = { condicion };
 
+    // Compatibilidad: antes se enviaba un diagnóstico único; ahora el backend espera una lista `diagnosticos_cie10`.
     const diagnosticoId = this.normalizeOptionalId(payload.diagnosticoCie10Id);
-    if (diagnosticoId !== undefined) {
-      body['diagnostico_cie10_id'] = diagnosticoId;
-    }
-
-    const diagnosticoCodigo = this.normalizedOrNull(payload.diagnosticoCie10Codigo);
-    if (diagnosticoCodigo !== undefined) {
-      body['diagnostico_cie10_codigo'] = diagnosticoCodigo;
-    }
-
-    const diagnosticoNombre = this.normalizedOrNull(payload.diagnosticoCie10Nombre);
-    if (diagnosticoNombre !== undefined) {
-      body['diagnostico_cie10_nombre'] = diagnosticoNombre;
-    }
-
-    const diagnosticoDescripcion = this.normalizedOrNull(payload.diagnosticoCie10Descripcion);
-    if (diagnosticoDescripcion !== undefined) {
-      body['diagnostico_cie10_descripcion'] = diagnosticoDescripcion;
-    }
-
-    const diagnosticoCategoriaPadre = this.normalizedOrNull(payload.diagnosticoCie10CategoriaPadre);
-    if (diagnosticoCategoriaPadre !== undefined) {
-      body['diagnostico_cie10_categoria_padre'] = diagnosticoCategoriaPadre;
-    }
-
-    const diagnosticoNivel = this.normalizedNumberOrNull(payload.diagnosticoCie10Nivel);
-    if (diagnosticoNivel !== undefined) {
-      body['diagnostico_cie10_nivel'] = diagnosticoNivel;
+    if (diagnosticoId !== undefined && diagnosticoId !== null) {
+      body['diagnosticos_cie10'] = [
+        {
+          id: diagnosticoId,
+          codigo: this.normalizedOrNull(payload.diagnosticoCie10Codigo) ?? null,
+          nombre: this.normalizedOrNull(payload.diagnosticoCie10Nombre) ?? null,
+          descripcion: this.normalizedOrNull(payload.diagnosticoCie10Descripcion) ?? null,
+          categoriaPadre: this.normalizedOrNull(payload.diagnosticoCie10CategoriaPadre) ?? null,
+          nivel: this.normalizedNumberOrNull(payload.diagnosticoCie10Nivel) ?? null
+        }
+      ];
+    } else {
+      // Enviar siempre un array (nunca null) para que el backend valide bien.
+      body['diagnosticos_cie10'] = [];
     }
 
     const frecuencia = this.normalizeOptionalEnum(payload.planFrecuencia);

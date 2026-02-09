@@ -1,12 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-finalizar-atencion-modal',
+  standalone: true,
   templateUrl: './finalizar-atencion-modal.component.html',
   styleUrls: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule]
+  imports: [CommonModule, FormsModule]
 })
 export class FinalizarAtencionModalComponent {
   open = input(false);

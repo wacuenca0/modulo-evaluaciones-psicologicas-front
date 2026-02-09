@@ -17,6 +17,8 @@ FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
+RUN apk add --no-cache curl
+
 # Solo dependencias necesarias en runtime
 COPY package.json .
 RUN npm install --omit=dev

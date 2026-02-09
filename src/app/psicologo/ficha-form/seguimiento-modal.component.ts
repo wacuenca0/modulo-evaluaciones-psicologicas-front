@@ -56,6 +56,9 @@ export class SeguimientoModalComponent {
   readonly diagnosticosSeleccionados = signal<any[]>([]);
   // No hay condición seleccionada por defecto
   readonly condicionSignal = signal<FichaCondicionFinal | null>(null);
+  // Confirmación antes de enviar al backend
+  readonly confirmVisible = signal(false);
+  readonly pendingRequest = signal<{ fichaId: number; payload: any } | null>(null);
 
   // ============ DATOS CONSTANTES ============
   readonly condicionOpciones = FICHA_CONDICION_CLINICA_OPCIONES.filter(opcion =>
@@ -67,7 +70,7 @@ export class SeguimientoModalComponent {
   // ============ FORMULARIO ============
   readonly form = this.fb.group({
     condicion: this.fb.control<FichaCondicionFinal | null>(null, { validators: [Validators.required] }),
-    observaciones: this.fb.nonNullable.control('', { validators: [Validators.required, Validators.minLength(5), Validators.maxLength(4000)] }),
+    observaciones: this.fb.nonNullable.control('', { validators: [Validators.required, Validators.minLength(50), Validators.maxLength(4000)] }),
     diagnosticoId: this.fb.control<string | null>(null),
     planFrecuencia: this.fb.control<FichaPlanFrecuencia | null>(null),
     planTipoSesion: this.fb.control<FichaPlanTipoSesion | null>(null),
@@ -86,6 +89,12 @@ export class SeguimientoModalComponent {
   readonly mostrarPlan = computed(() => this.condicionSeleccionada() === 'SEGUIMIENTO');
   readonly mostrarTransferencia = computed(() => this.condicionSeleccionada() === 'TRANSFERENCIA');
   readonly requiereProximo = computed(() => (this.form.controls.planFrecuencia.value ?? null) === 'PERSONALIZADA');
+  readonly condicionLabel = computed(() => {
+    const cond = this.condicionSeleccionada();
+    if (!cond) return '';
+    const opcion = this.condicionOpciones.find(o => o.value === cond);
+    return opcion?.label || cond;
+  });
 
   readonly titulo = computed(() => 'Asignar Condición y Diagnóstico');
 
@@ -147,7 +156,11 @@ export class SeguimientoModalComponent {
       return;
     }
     // Solo tomamos el último diagnóstico seleccionado
-    const nuevo = this.toDiagnosticoSnapshot(items[items.length - 1]);
+    const last = items.at(-1);
+    if (!last) {
+      return;
+    }
+    const nuevo = this.toDiagnosticoSnapshot(last);
     const actuales = this.diagnosticosSeleccionados();
     // Evitar duplicados por id
     if (!actuales.some(dx => dx.id === nuevo.id)) {
@@ -181,17 +194,46 @@ export class SeguimientoModalComponent {
 
   async handleSubmit(event?: Event) {
     if (event) event.preventDefault();
-    
+
     this.intentoEnvio.set(true);
     this.submitError.set(null);
     this.form.markAllAsTouched();
 
-    // 1. Validación de IDs
+    const ids = this.resolveRequiredIds();
+    if (!ids) {
+      return;
+    }
+
+    if (!this.validateFormBase()) {
+      return;
+    }
+
+    const condicion = this.resolveCondicionSeleccionada();
+    if (!condicion) {
+      return;
+    }
+
+    if (!this.validateByCondicion(condicion)) {
+      return;
+    }
+
+    const payload = this.buildPayload();
+    if (!payload) {
+      this.submitError.set('Error al construir los datos para enviar.');
+      return;
+    }
+
+    this.pendingRequest.set({ fichaId: ids.fichaId, payload });
+    this.confirmVisible.set(true);
+    this.cdr.markForCheck();
+  }
+
+  private resolveRequiredIds(): { fichaId: number; personalMilitarId: number } | null {
     const fichaId = this.fichaId();
     const personalMilitarId = this.personalMilitarId();
-    
+
     console.log('[MODAL] Validando IDs:', { fichaId, personalMilitarId });
-    
+
     if (!fichaId || !personalMilitarId) {
       const fichaMsg = fichaId ? '' : '• ID de ficha no disponible\n';
       const personalMsg = personalMilitarId ? '' : '• ID de personal no disponible\n';
@@ -200,68 +242,89 @@ export class SeguimientoModalComponent {
         ${fichaMsg}${personalMsg}
         Por favor, guarda la ficha completa antes de asignar condiciones.
       `);
-      return;
+      return null;
     }
 
-    // 2. Validación del formulario
+    return { fichaId, personalMilitarId };
+  }
+
+  private validateFormBase(): boolean {
     if (this.form.invalid) {
       this.submitError.set('Revisa la información del seguimiento.');
-      return;
+      return false;
     }
+    return true;
+  }
 
-    // 3. Validación específica por condición
+  private resolveCondicionSeleccionada(): FichaCondicionFinal | null {
     const condicion = this.form.controls.condicion.value;
     if (!condicion || !['ALTA', 'SEGUIMIENTO', 'TRANSFERENCIA'].includes(condicion)) {
       this.submitError.set('Debes seleccionar una condición válida.');
-      return;
+      return null;
     }
+    return condicion;
+  }
 
-    if (this.requiereDiagnostico() && !(this.diagnosticosSeleccionados()?.length)) {
+  private validateByCondicion(condicion: FichaCondicionFinal): boolean {
+    // Diagnósticos requeridos para SEGUIMIENTO/TRANSFERENCIA
+    if ((condicion === 'SEGUIMIENTO' || condicion === 'TRANSFERENCIA') && !(this.diagnosticosSeleccionados()?.length)) {
       this.submitError.set('Selecciona al menos un diagnóstico válido del catálogo CIE-10.');
-      return;
+      return false;
     }
 
-    if (this.mostrarPlan()) {
+    if (condicion === 'SEGUIMIENTO') {
       if (!this.planFrecuenciaValida()) {
         this.submitError.set('Indica la frecuencia del plan de seguimiento.');
-        return;
+        return false;
       }
       if (!this.planTipoSesionValido()) {
         this.submitError.set('Selecciona el tipo de sesión planificada.');
-        return;
+        return false;
       }
       if (this.requiereProximo() && !this.proximoValido()) {
         this.submitError.set('Ingresa la fecha del próximo seguimiento.');
-        return;
+        return false;
       }
     }
 
-    if (this.mostrarTransferencia()) {
+    if (condicion === 'TRANSFERENCIA') {
       if (!this.transferenciaUnidadValida()) {
         this.submitError.set('Registra la unidad de destino para la transferencia.');
-        return;
+        return false;
       }
       if (!this.transferenciaObservacionValida()) {
         this.submitError.set('Describe las observaciones de la transferencia.');
-        return;
+        return false;
       }
     }
 
-    // 4. Construir payload SOLO si la condición es válida y seleccionada
-    const payload = this.buildPayload();
-    if (!payload) {
-      this.submitError.set('Error al construir los datos para enviar.');
+    return true;
+  }
+
+  cerrarConfirmacion() {
+    if (this.guardando()) return;
+    this.confirmVisible.set(false);
+    this.pendingRequest.set(null);
+    this.cdr.markForCheck();
+  }
+
+  async confirmarAsignacion() {
+    if (this.guardando()) return;
+    const pending = this.pendingRequest();
+    if (!pending) {
+      this.submitError.set('No hay datos preparados para enviar. Intenta nuevamente.');
       return;
     }
 
-    // 5. Enviar al backend
+    const { fichaId, payload } = pending;
+
     try {
       const token = this.authService.getToken?.() || localStorage.getItem('access_token') || '';
       const endpoint = buildApiUrl('gestion', `/fichas-psicologicas/${fichaId}/condicion`);
-      
+
       console.log('[MODAL] Enviando a:', endpoint);
       console.log('[MODAL] Payload:', payload);
-      
+
       const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
@@ -286,8 +349,10 @@ export class SeguimientoModalComponent {
         return;
       }
 
-      // 6. Éxito - emitir resultado
       console.log('[MODAL] Condición asignada exitosamente');
+      this.confirmVisible.set(false);
+      this.pendingRequest.set(null);
+
       // Emitir solo si la condición es válida (nunca null)
       const condicionEmit = this.condicionSeleccionada()!;
       this.seguimientoSubmit.emit({
@@ -344,47 +409,50 @@ export class SeguimientoModalComponent {
 
   private buildPayload(): any {
     const condicion = this.form.controls.condicion.value;
-    // Buscar el label completo de la condición seleccionada
-    const opcion = this.condicionOpciones.find(op => op.value === condicion);
-    const condicionLabel = opcion ? opcion.label : condicion;
+    if (!condicion) {
+      return null;
+    }
+
+    const observaciones = this.form.controls.observaciones.value;
+
+    // Enviar siempre el valor interno de condición (ALTA, SEGUIMIENTO, TRANSFERENCIA)
     if (condicion === 'ALTA') {
       return {
-        condicion: condicionLabel,
-        diagnosticoCie10Codigo: null,
-        diagnosticoCie10Nombre: null,
-        diagnosticoCie10CategoriaPadre: null,
-        diagnosticoCie10Nivel: null,
-        diagnosticoCie10Descripcion: null,
-        planFrecuencia: null,
-        planTipoSesion: null,
-        planDetalle: null,
-        proximoSeguimiento: null,
-        transferenciaUnidad: null,
-        transferenciaObservacion: null
+        condicion: condicion,
+        observaciones,
+        diagnosticos_cie10: [],
+        plan_frecuencia: null,
+        plan_tipo_sesion: null,
+        plan_detalle: null,
+        proximo_seguimiento: null,
+        transferencia_unidad: null,
+        transferencia_observacion: null
       };
     }
     if (condicion === 'SEGUIMIENTO') {
       return {
-        condicion: condicionLabel,
-        diagnosticosCie10: this.diagnosticosSeleccionados(),
-        planFrecuencia: this.form.controls.planFrecuencia.value,
-        planTipoSesion: this.form.controls.planTipoSesion.value,
-        planDetalle: this.form.controls.planDetalle.value,
-        proximoSeguimiento: this.form.controls.proximoSeguimiento.value,
-        transferenciaUnidad: null,
-        transferenciaObservacion: null
+        condicion: condicion,
+        observaciones,
+        diagnosticos_cie10: this.diagnosticosSeleccionados(),
+        plan_frecuencia: this.form.controls.planFrecuencia.value,
+        plan_tipo_sesion: this.form.controls.planTipoSesion.value,
+        plan_detalle: this.form.controls.planDetalle.value,
+        proximo_seguimiento: this.form.controls.proximoSeguimiento.value,
+        transferencia_unidad: null,
+        transferencia_observacion: null
       };
     }
     if (condicion === 'TRANSFERENCIA') {
       return {
-        condicion: condicionLabel,
-        diagnosticosCie10: this.diagnosticosSeleccionados(),
-        planFrecuencia: null,
-        planTipoSesion: null,
-        planDetalle: null,
-        proximoSeguimiento: null,
-        transferenciaUnidad: this.form.controls.transferenciaUnidad.value,
-        transferenciaObservacion: this.form.controls.transferenciaObservacion.value
+        condicion: condicion,
+        observaciones,
+        diagnosticos_cie10: this.diagnosticosSeleccionados(),
+        plan_frecuencia: null,
+        plan_tipo_sesion: null,
+        plan_detalle: null,
+        proximo_seguimiento: null,
+        transferencia_unidad: this.form.controls.transferenciaUnidad.value,
+        transferencia_observacion: this.form.controls.transferenciaObservacion.value
       };
     }
     return null;

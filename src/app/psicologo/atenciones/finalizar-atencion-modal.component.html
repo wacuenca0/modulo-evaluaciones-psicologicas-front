@@ -1,28 +1,28 @@
 <!-- Modal para finalizar atención -->
-<div class="modal" *ngIf="open">
+<div class="modal" *ngIf="open()">
   <div class="modal-content max-w-lg mx-auto">
     <h2 class="text-lg font-bold mb-4">Finalizar atención</h2>
     <form (ngSubmit)="onFinalizar()" class="flex flex-col gap-4">
-      <label class="font-semibold">Anamnesis</label>
-      <textarea [(ngModel)]="anamnesis" name="anamnesis" rows="2" class="border rounded p-2" required></textarea>
+      <label class="font-semibold" for="finalizarAnamnesis">Anamnesis</label>
+      <textarea id="finalizarAnamnesis" [(ngModel)]="anamnesis" name="anamnesis" rows="2" class="border rounded p-2" required></textarea>
 
-      <label class="font-semibold">Examen mental</label>
-      <textarea [(ngModel)]="examenMental" name="examenMental" rows="2" class="border rounded p-2" required></textarea>
+      <label class="font-semibold" for="finalizarExamenMental">Examen mental</label>
+      <textarea id="finalizarExamenMental" [(ngModel)]="examenMental" name="examenMental" rows="2" class="border rounded p-2" required></textarea>
 
-      <label class="font-semibold">Impresión diagnóstica</label>
-      <textarea [(ngModel)]="impresionDiagnostica" name="impresionDiagnostica" rows="2" class="border rounded p-2" required></textarea>
+      <label class="font-semibold" for="finalizarImpresionDiagnostica">Impresión diagnóstica</label>
+      <textarea id="finalizarImpresionDiagnostica" [(ngModel)]="impresionDiagnostica" name="impresionDiagnostica" rows="2" class="border rounded p-2" required></textarea>
 
-      <label class="font-semibold">Plan de intervención</label>
-      <textarea [(ngModel)]="planIntervencion" name="planIntervencion" rows="2" class="border rounded p-2" required></textarea>
+      <label class="font-semibold" for="finalizarPlanIntervencion">Plan de intervención</label>
+      <textarea id="finalizarPlanIntervencion" [(ngModel)]="planIntervencion" name="planIntervencion" rows="2" class="border rounded p-2" required></textarea>
 
-      <label class="font-semibold">Recomendaciones</label>
-      <textarea [(ngModel)]="recomendaciones" name="recomendaciones" rows="2" class="border rounded p-2" required></textarea>
+      <label class="font-semibold" for="finalizarRecomendaciones">Recomendaciones</label>
+      <textarea id="finalizarRecomendaciones" [(ngModel)]="recomendaciones" name="recomendaciones" rows="2" class="border rounded p-2" required></textarea>
 
-      <label class="font-semibold">Derivación</label>
-      <input [(ngModel)]="derivacion" name="derivacion" class="border rounded p-2" required />
+      <label class="font-semibold" for="finalizarDerivacion">Derivación</label>
+      <input id="finalizarDerivacion" [(ngModel)]="derivacion" name="derivacion" class="border rounded p-2" required />
 
-      <label class="font-semibold">Diagnóstico IDs (separados por coma)</label>
-      <input [(ngModel)]="diagnosticoIds" name="diagnosticoIds" class="border rounded p-2" required placeholder="Ej: 1,2,3" />
+      <label class="font-semibold" for="finalizarDiagnosticoIds">Diagnóstico IDs (separados por coma)</label>
+      <input id="finalizarDiagnosticoIds" [(ngModel)]="diagnosticoIds" name="diagnosticoIds" class="border rounded p-2" required placeholder="Ej: 1,2,3" />
 
       <div class="flex gap-2 justify-end mt-2">
         <button type="button" class="btn btn-secondary" (click)="onClose()">
