@@ -3,18 +3,6 @@
     <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Seguimiento clínico</p>
     <div class="flex items-center justify-between">
       <h1 class="text-3xl font-semibold text-slate-900">Historial de valoraciones por persona</h1>
-      <button type="button"
-        class="rounded-lg bg-emerald-600 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all"
-        (click)="crearEvaluacion()"
-        [disabled]="!personalIdDisponible()"
-        title="Crear nueva evaluación para la persona consultada">
-        <span class="flex items-center gap-2">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Nueva evaluación
-        </span>
-      </button>
     </div>
     <p class="text-sm text-slate-500 max-w-3xl">
       Revisa las valoraciones activas e históricas de un mismo personal militar o dependiente, 

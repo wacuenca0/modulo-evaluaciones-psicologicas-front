@@ -147,7 +147,7 @@ interface JerarquiaResumen {
             </label>
             <div class="flex justify-end gap-2">
               <button type="button" (click)="reset()" class="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition">Cancelar</button>
-              <button type="submit" [disabled]="saving()" class="rounded-md bg-militar-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-militar-accent transition disabled:cursor-not-allowed disabled:opacity-60">
+                <button type="submit" [disabled]="saving()" class="rounded-md bg-slate-200 px-4 py-2 text-sm font-semibold text-black shadow hover:bg-slate-300 transition disabled:cursor-not-allowed disabled:opacity-60">
                 {{ saving() ? 'Guardando…' : (modoEdicion() ? 'Actualizar' : 'Crear') }}
               </button>
             </div>
